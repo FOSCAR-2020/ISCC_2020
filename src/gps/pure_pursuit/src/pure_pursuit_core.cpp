@@ -34,6 +34,9 @@ void PurePursuitNode::initForROS()
 
   // setup publisher
   drive_msg_pub = nh_.advertise<race::drive_values>("control_value", 1);
+
+  // for visualization
+  target_point_pub = nh_.advertise<geometry_msgs::PointStamped>("target_point", 1);
 }
 ///////////////////////////////////
 
@@ -63,6 +66,15 @@ void PurePursuitNode::run()
 
     double kappa = 0;
     bool can_get_curvature = pp_.canGetCurvature(&kappa);
+
+    // for target point visualization
+    geometry_msgs::PointStamped target_point_msg;
+    target_point_msg.header.frame_id = "/base_link";
+    target_point_msg.header.stamp = ros::Time::now();
+    target_point_msg.point = pp_.getPoseOfNextTarget();
+    target_point_pub.publish(target_point_msg);
+    ///////////////////////////////////
+
     publishDriveMsg(can_get_curvature, kappa);
 
     is_pose_set_ = false;
@@ -80,7 +92,7 @@ void PurePursuitNode::publishDriveMsg(
   drive_msg.throttle = can_get_curvature ? const_velocity_ : 0;
   
   drive_msg.steering =
-    can_get_curvature ? convertCurvatureToSteeringAngle(wheel_base_, kappa) * 180.0 / M_PI * 71.0 : 0;
+    can_get_curvature ? convertCurvatureToSteeringAngle(wheel_base_, kappa) * 180.0 / M_PI * 71.0 * -1 : 0;
 
   std::cout << "steering : " << drive_msg.steering / 71.0 << "\tkappa : " << kappa <<std::endl;
   drive_msg_pub.publish(drive_msg);

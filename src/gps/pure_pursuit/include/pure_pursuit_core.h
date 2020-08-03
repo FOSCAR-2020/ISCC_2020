@@ -36,6 +36,8 @@ private:
   // publisher
   ros::Publisher drive_msg_pub;
 
+  ros::Publisher target_point_pub;
+
   // subscriber
   ros::Subscriber pose_sub;
 

@@ -26,9 +26,8 @@ static void GNSSCallback(geometry_msgs::Point data)
   tf::Quaternion pose_q;
 
   geometry_msgs::PoseStamped pose;
-  // pose.header = msg->header;
-  // pose.header.stamp = ros::Time::now();
-  // pose.header.frame_id = "map";
+  pose.header.stamp = ros::Time::now();
+  pose.header.frame_id = "/base_link";
   pose.pose.position.x = data.x;
   pose.pose.position.y = data.y;
   pose.pose.position.z = data.z;
