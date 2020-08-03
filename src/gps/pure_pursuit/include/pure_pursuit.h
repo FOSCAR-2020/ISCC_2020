@@ -37,6 +37,12 @@ public:
   // processing
   bool canGetCurvature(double* output_kappa);
 
+  // for target point visualization
+  geometry_msgs::Point getPoseOfNextTarget() const
+  {
+    return next_target_position_;
+  }  
+
 private:
   // variables
   int next_waypoint_number_;
