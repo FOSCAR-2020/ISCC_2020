@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>convert_to_UTMK</name>
+  <name>utmk_coordinate</name>
   <version>0.0.0</version>
-  <description>The convert_to_UTMK package</description>
+  <description>The utmk_coordinate package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

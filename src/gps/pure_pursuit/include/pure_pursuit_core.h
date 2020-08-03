@@ -6,6 +6,7 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
+#include <ros/package.h>
 
 // User defined includes
 #include <race/drive_values.h>
@@ -13,6 +14,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 namespace waypoint_follower
 {
@@ -51,7 +53,7 @@ private:
   double const_velocity_;            // km/h
 
   std::vector<geometry_msgs::Point> global_path;
-
+  std::string ROS_HOME;
 
   // callbacks
   void callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);

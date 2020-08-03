@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+  <include file="$(find rviz_visualization)/launch/rviz.launch" />
+ 
+  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" />
+  <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
+  <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
+  
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(find rviz_visualization)/bag_files/test.bag -r 5"/>
+
+
+</launch>

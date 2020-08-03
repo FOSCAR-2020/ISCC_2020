@@ -28,6 +28,8 @@ void PurePursuitNode::initForROS()
   private_nh_.param("const_velocity", const_velocity_, 3.0);
   nh_.param("vehicle_info/wheel_base", wheel_base_, 1.04);
 
+  ROS_HOME = ros::package::getPath("pure_pursuit");
+
   // setup subscriber
   pose_sub = nh_.subscribe("current_pose", 1,
     &PurePursuitNode::callbackFromCurrentPose, this);
@@ -120,7 +122,7 @@ void PurePursuitNode::callbackFromCurrentPose(
 
 // maybe DONE
 void PurePursuitNode::setPath() {
-  std::ifstream infile("/home/foscar/ISCC_2019/src/pure_pursuit_test/pure_pursuit/src/path.txt");
+  std::ifstream infile(ROS_HOME + "/paths/path.txt");
   geometry_msgs::Point p;
 
   double x, y;

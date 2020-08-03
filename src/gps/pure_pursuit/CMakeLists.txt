@@ -7,6 +7,7 @@ find_package(
     roscpp
     roslint
     rostest
+    roslib
     rosunit
     std_msgs
     tf
