@@ -44,6 +44,11 @@
 - Published Topics
   - /gps_front/fix : gps 위도, 경도 데이터. 이름 바꿔주면 좋을듯
   
+- Launch Files
+  - pure_pursuit.launch : 시각화 없는 pure pursuit 알고리즘 실행
+  - pure_pursuit_with_rviz.launch : 실시간 시각화되는 pure pursuit 알고리즘 실행
+  - path_maker.launch : path 생성, utmk_coordinate/paths에 저장
+  
 ### rviz_visualization
 - 시각화 패키지, 실행 방법은 README에 적혀있습니다.
 - bag 파일을 이용한 시각화와 실시간 시각화 모두 가능합니다.
