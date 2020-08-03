@@ -18,8 +18,8 @@
   </node>
 
   <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" />
-  <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" output="screen"/>
-  <node pkg="convert_to_UTMK" type="main.py" name="convert_to_UTMK" />
+  <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
+  <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
 
   <node pkg="race" type="serial_control_node" name="serial_control_node" />
   

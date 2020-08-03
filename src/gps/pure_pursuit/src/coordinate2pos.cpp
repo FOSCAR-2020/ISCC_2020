@@ -69,7 +69,7 @@ int main(int argc, char **argv)
   ros::NodeHandle nh;
   
   pose_publisher = nh.advertise<geometry_msgs::PoseStamped>("current_pose", 1);
-  ros::Subscriber gnss_pose_subscriber = nh.subscribe("/UTMK_coordinate", 1, GNSSCallback);
+  ros::Subscriber gnss_pose_subscriber = nh.subscribe("/utmk_coordinate", 1, GNSSCallback);
 
   ros::spin();
   return 0;

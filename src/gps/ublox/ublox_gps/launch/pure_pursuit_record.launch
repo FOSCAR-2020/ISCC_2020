@@ -17,10 +17,7 @@
               file="$(find ublox_gps)/config/$(arg param_file_name).yaml" />
   </node>
 
-  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" />
-  <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" output="screen"/>
-  <node pkg="convert_to_UTMK" type="main.py" name="convert_to_UTMK" />
-  <node pkg="convert_to_UTMK" type="path_maker.py" name="path_maker" />
-  
+  <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
+  <node pkg="utmk_coordinate" type="path_maker.py" name="path_maker" />
   
 </launch>
