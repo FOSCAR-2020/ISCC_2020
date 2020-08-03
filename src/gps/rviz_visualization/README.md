@@ -1,7 +1,8 @@
 ## 실행 방법 
-`roslaunch rviz_visualization rviz.launch`
+`roslaunch rviz_visualization pure_pursuit_bag.launch`
+위 명령어를 입력하면 gps 데이터를 rosbag으로 받아 waypoints, current pose, target point를 시각해 해줍니다.
 
-### roslaunch가 아래와 같은 일을 함.
+### 위 명령어는 아래와 같은 일을 합니다.
 1. roscore
 2. base-link 파일 안의 명령어 실행
 3. rviz 실행
