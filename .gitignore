@@ -1,0 +1,16 @@
+
+/devel
+/build
+
+# model file
+src/race/src/result
+
+# test movies
+*.avi
+*.mov
+*.mkv
+
+# test image
+*.jpg
+
+

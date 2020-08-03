@@ -1,0 +1,7 @@
+<!-- -->
+<launch>
+  <!-- rosrun waypoint_follower pure_pursuit -->
+  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen"> </node>
+  <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos"> </node>
+  <node pkg="convert_to_UTMK" type="main.py" name="convert_to_UTMK" output="screen"> </node>
+</launch>

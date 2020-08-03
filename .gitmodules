@@ -1,0 +1,9 @@
+[submodule "src/serial"]
+	path = src/serial
+	url = https://github.com/wjwwood/serial.git
+[submodule "src/ackermann-drive-teleop"]
+	path = src/ackermann-drive-teleop
+	url = https://github.com/gkouros/ackermann-drive-teleop.git
+[submodule "src/ackermann_msgs"]
+	path = src/ackermann_msgs
+	url = https://github.com/ros-drivers/ackermann_msgs.git

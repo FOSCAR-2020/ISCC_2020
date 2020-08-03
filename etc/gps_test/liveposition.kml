@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gs="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.openis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<NetworkLink>
+ <Link>
+  <href>position.kml</href>
+  <refreshMode>onInterval</refreshMode>
+  <refreshInterval>2</refreshInterval>
+ </Link>
+ <refreshInterval>1</refreshInterval><refreshMode>onInterval</refreshMode>
+</NetworkLink>
+</kml>
