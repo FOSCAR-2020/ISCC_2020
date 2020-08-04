@@ -14,4 +14,5 @@
 8. 안보이면 rviz오른쪽 패널의 Type을 TopDownOrtho로 변경 
 
 만약 visualization-marker-tutorials 가 없으면 아래 명령어 실행
+
 `sudo apt install ros-<ros 버전 eg. melodic>-visualization-marker-tutorials`
