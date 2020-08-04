@@ -30,6 +30,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_compile_options(-std=c++11)
+
 add_executable(
   pure_pursuit
   src/pure_pursuit_node.cpp

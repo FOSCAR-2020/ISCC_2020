@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     now = datetime.now()
       
-    f = open(ROS_HOME + "paths/{}-{}-{}_{}-{}.txt".format(now.year, now.month, now.day, now.hour, now.minute), 'w')
+    f = open(ROS_HOME + "/paths/{}-{}-{}_{}-{}.txt".format(now.year, now.month, now.day, now.hour, now.minute), 'w')
     rospy.Subscriber('utmk_coordinate', Point, callback)
     
     
