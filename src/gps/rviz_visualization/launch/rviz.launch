@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+  <node pkg="tf" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 0 0 0 map base_link 50" />
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rviz_visualization)/rviz_setting.rviz"/>
+  <node pkg="rviz_visualization" type="global_map_plotter.py" name="global_map_plotter" />
+  
+</launch>
