@@ -31,6 +31,8 @@ with open(ROS_HOME + "/global_path.txt") as f:
     path_len += 1
     print(x, y)
 
+rospy.sleep(1)
+
 while path_len > count:
   marker = Marker()
   marker.header.frame_id = "/base_link"
