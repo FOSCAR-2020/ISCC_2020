@@ -25,6 +25,8 @@ SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 set(ROSLINT_CPP_OPTS "--filter=-build/c++11")
 roslint_cpp()
 
+add_compile_options(-std=c++11)
+
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
