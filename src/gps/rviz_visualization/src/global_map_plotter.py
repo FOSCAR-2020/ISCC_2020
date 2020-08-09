@@ -5,7 +5,7 @@ from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 import rospy
 import rospkg
-import math
+import math, sys
 
 
 rospy.init_node('global_map_plotter')
@@ -22,7 +22,8 @@ path_x = []
 path_y = []
 path_len = 0
 
-with open(ROS_HOME + "/global_path.txt") as f:
+# with open(ROS_HOME + "/straight.txt") as f:
+with open(ROS_HOME + "/paths/" + sys.argv[1]) as f:
   for line in f.readlines():
     x = float(line.strip().split()[0])
     y = float(line.strip().split()[1])
