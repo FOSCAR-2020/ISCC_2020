@@ -9,8 +9,8 @@
   <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
   <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
   
-  <arg name="bags" />
-  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(find rviz_visualization)/bag_files/$(arg bags).bag -r 3"/>
+  <arg name="bag" />
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(find rviz_visualization)/bag_files/$(arg bag).bag -r 3"/>
 
 
 </launch>
