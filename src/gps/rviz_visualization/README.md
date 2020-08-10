@@ -5,7 +5,7 @@ roslaunch rviz_visualization pure_pursuit_bag.launch path:={경로파일이름} 
 
 ### 위 명령어는 아래와 같은 일을 합니다.
 1. roscore
-2. base-link 파일 안의 명령어 실행
+2. rosrun tf static_transform_publisher 0 0 0 0 0 0 map base_link 50
 3. rviz 실행
 4. rviz 왼쪽 패널에서 fixed frame base_link로 변경
 5. 왼쪽패널 아래의 add 눌러서 markerArray 추가하고 Marker Topic 알맞은거로 변경
