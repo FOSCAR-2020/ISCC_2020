@@ -43,7 +43,7 @@ void PurePursuitNode::initForROS()
 ///////////////////////////////////
 
 // DONE
-void PurePursuitNode::run()
+void PurePursuitNode::run(char** argv)
 {
   ROS_INFO_STREAM("pure pursuit start");
   ros::Rate loop_rate(LOOP_RATE_);
@@ -53,7 +53,7 @@ void PurePursuitNode::run()
 
     if (!is_waypoint_set_)
     {
-      setPath();
+      setPath(argv);
       pp_.setWaypoints(global_path);
       int len = global_path.size();
     }    
@@ -121,8 +121,9 @@ void PurePursuitNode::callbackFromCurrentPose(
 ///////////////////////////////////
 
 // maybe DONE
-void PurePursuitNode::setPath() {
-  std::ifstream infile(ROS_HOME + "/paths/path.txt");
+void PurePursuitNode::setPath(char** argv) {
+  std::ifstream infile(ROS_HOME + "/paths/" + argv[1]);
+  //std::cout << ROS_HOME + "/paths/" + argv[1] << std::endl;
   geometry_msgs::Point p;
 
   double x, y;

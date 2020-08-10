@@ -18,8 +18,8 @@
     <rosparam command="load" 
               file="$(find ublox_gps)/config/$(arg param_file_name).yaml" />
   </node>
-
-  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" />
+  <arg name="path" />
+  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path)" />
   <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
   <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
 

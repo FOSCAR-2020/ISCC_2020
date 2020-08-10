@@ -9,7 +9,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "pure_pursuit");
   waypoint_follower::PurePursuitNode ppn;
   
-  ppn.run();
+  ppn.run(argv);
 
   return 0;
 }

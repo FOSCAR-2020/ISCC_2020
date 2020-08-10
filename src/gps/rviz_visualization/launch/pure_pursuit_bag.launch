@@ -2,8 +2,9 @@
 
 <launch>
   <arg name="path" />
-  <include file="$(find rviz_visualization)/launch/rviz.launch"/>
-  <node pkg="rviz_visualization" type="global_map_plotter.py" name="global_map_plotter" args="$(arg path).txt" />
+  <include file="$(find rviz_visualization)/launch/rviz.launch">
+    <arg name="path2" value="$(arg path)" />
+  </include>
 
   <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" />
   <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
