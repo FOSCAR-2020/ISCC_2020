@@ -2,7 +2,7 @@
 
 kinetic 이면
 
-`ln -Tfs /opt/ros/melodic/share/catkin/cmake/toplevel.cmake CMakeLists.txt`
+`ln -Tfs /opt/ros/kinetic/share/catkin/cmake/toplevel.cmake CMakeLists.txt`
 
 
 melodic 이면
