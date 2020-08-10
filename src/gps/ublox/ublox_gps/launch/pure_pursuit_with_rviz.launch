@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <launch>
-  <include file="$(find rviz_visualization)/launch/rviz.launch" />
+  <arg name="path" />
+  <include file="$(find rviz_visualization)/launch/rviz.launch">
+    <arg name="path2" value="$(arg path)" />
+  </include>
 
   <arg name="node_name" default="gps_front"/>
   <arg name="param_file_name" doc="name of param file, e.g. rover" default="nmea1"/>
@@ -18,7 +21,7 @@
     <rosparam command="load" 
               file="$(find ublox_gps)/config/$(arg param_file_name).yaml" />
   </node>
-  <arg name="path" />
+  
   <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path)" />
   <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
   <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
