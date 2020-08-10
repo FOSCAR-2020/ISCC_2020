@@ -17,3 +17,4 @@ src/CMakeLists.txt
 
 .vscode/
 ./src/vscode/
+src/gps/.vscode/
