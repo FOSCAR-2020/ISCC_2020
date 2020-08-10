@@ -5,14 +5,14 @@ from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 import rospy
 import rospkg
-import math
+import math, sys
 
 
 rospy.init_node('global_map_plotter')
 topic = 'visualization_marker_array'
 publisher = rospy.Publisher(topic, MarkerArray, queue_size=100)
 rospack = rospkg.RosPack()
-ROS_HOME = rospack.get_path('rviz_visualization')
+ROS_HOME = rospack.get_path('pure_pursuit')
 markerArray = MarkerArray()
 
 count = 0
@@ -22,7 +22,9 @@ path_x = []
 path_y = []
 path_len = 0
 
-with open(ROS_HOME + "/global_path.txt") as f:
+# with open(ROS_HOME + "/straight.txt") as f:
+with open(ROS_HOME + "/paths/" + sys.argv[1]) as f:
+  print("===========>" + ROS_HOME + "/paths/" + sys.argv[1])
   for line in f.readlines():
     x = float(line.strip().split()[0])
     y = float(line.strip().split()[1])

@@ -14,3 +14,7 @@ src/race/src/result
 *.jpg
 
 src/CMakeLists.txt
+
+.vscode/
+./src/vscode/
+src/gps/.vscode/

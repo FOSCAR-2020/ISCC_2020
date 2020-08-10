@@ -25,7 +25,7 @@ public:
   PurePursuitNode();
   ~PurePursuitNode();
 
-  void run();
+  void run(char** argv);
 
 private:
   // handle
@@ -70,7 +70,7 @@ private:
   double computeLookaheadDistance() const;
   
   // set wayPath
-  void setPath();
+  void setPath(char** argv);
 };
 
 double convertCurvatureToSteeringAngle(

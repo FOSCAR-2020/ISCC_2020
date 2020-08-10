@@ -6,7 +6,7 @@ from datetime import datetime
 from geometry_msgs.msg import Point
 
 rospack = rospkg.RosPack()
-ROS_HOME = rospack.get_path('utmk_coordinate')
+ROS_HOME = rospack.get_path('pure_pursuit')
 
 f = None
 

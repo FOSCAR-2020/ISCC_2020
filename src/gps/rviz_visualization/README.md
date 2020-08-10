@@ -1,5 +1,5 @@
 ## 실행 방법 
-`roslaunch rviz_visualization pure_pursuit_bag.launch`
+roslaunch rviz_visualization pure_pursuit_bag.launch path:={경로파일이름} bag:={bag파일 이름}
 
 위 명령어를 입력하면 gps 데이터를 rosbag으로 받아 waypoints, current pose, target point를 시각해 해줍니다.
 
