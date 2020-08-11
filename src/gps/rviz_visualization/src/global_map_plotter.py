@@ -40,9 +40,9 @@ while path_len > count:
   marker.header.frame_id = "/base_link"
   marker.type = marker.SPHERE
   marker.action = marker.ADD
-  marker.scale.x = 1
-  marker.scale.y = 1
-  marker.scale.z = 1
+  marker.scale.x = 0.3
+  marker.scale.y = 0.3
+  marker.scale.z = 0.3
   marker.color.a = 1.0
   marker.color.r = 1.0
   marker.color.g = 1.0
