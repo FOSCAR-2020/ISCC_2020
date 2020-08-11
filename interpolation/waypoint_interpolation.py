@@ -102,7 +102,7 @@ if __name__ == "__main__":
         for point in path:
             print(point)
             out_str += str(point[0]) + ' ' + str(point[1]) + '\n'
-        f.write(out_str)
+        f.write(out_str[:-1])
         f.close()
 
     if g_trig == True:
