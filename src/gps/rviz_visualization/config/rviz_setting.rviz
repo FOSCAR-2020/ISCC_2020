@@ -93,7 +93,7 @@ Visualization Manager:
       Marker Topic: /line
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
@@ -136,8 +136,8 @@ Visualization Manager:
       Scale: 11.646093368530273
       Target Frame: base_link
       Value: TopDownOrtho (rviz)
-      X: 955534.0625
-      Y: 1956942
+      X: 935555
+      Y: 1915888
     Saved: ~
 Window Geometry:
   Displays:
