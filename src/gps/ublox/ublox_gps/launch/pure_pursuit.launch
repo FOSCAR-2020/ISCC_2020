@@ -21,7 +21,7 @@
               file="$(find ublox_gps)/config/$(arg param_file_name).yaml" />
   </node>
 
-  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path) $(arg ld) $(arg vel)" />
+  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path).txt $(arg ld) $(arg vel)" />
   <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
   <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
 
