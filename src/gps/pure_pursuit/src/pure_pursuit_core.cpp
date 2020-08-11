@@ -1,6 +1,7 @@
 #include <vector>
 #include <pure_pursuit_core.h>
 #include <fstream>
+#include <cstdlib>
 
 namespace waypoint_follower
 {
@@ -46,6 +47,15 @@ void PurePursuitNode::initForROS()
 void PurePursuitNode::run(char** argv)
 {
   ROS_INFO_STREAM("pure pursuit start");
+  
+  // temp
+  const_lookahead_distance_ = atof(argv[2]);
+  const_velocity_ = atof(argv[3]);
+
+  std::cout << "const_lookahead_distance_ : " << const_lookahead_distance_ << std::endl;
+  std::cout << "const_velocity_ : " <<const_velocity_ << std::endl;
+  //////////////////////////
+
   ros::Rate loop_rate(LOOP_RATE_);
   while (ros::ok())
   {
@@ -123,7 +133,7 @@ void PurePursuitNode::callbackFromCurrentPose(
 // maybe DONE
 void PurePursuitNode::setPath(char** argv) {
   std::ifstream infile(ROS_HOME + "/paths/" + argv[1]);
-  //std::cout << ROS_HOME + "/paths/" + argv[1] << std::endl;
+  std::cout << ROS_HOME + "/paths/" + argv[1] << std::endl;
   geometry_msgs::Point p;
 
   double x, y;

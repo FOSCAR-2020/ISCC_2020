@@ -1,4 +1,5 @@
-<!-- -->
+<!-- NOT USED -->
+<!-- TODO : add args(path, ld, velocity) and gps -->
 <launch>
   <!-- rosrun waypoint_follower pure_pursuit -->
   <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen"> </node>
