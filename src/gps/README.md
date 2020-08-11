@@ -18,6 +18,9 @@
   
   - coordinate2pos
     - /current_pose : UTM-K 좌표계로 변환된 현재 위치와 차량의 Yaw 값
+  
+  - Pure Pursuit을 Launch Files
+    roslaunch package_name launchfile_name path:=pathfile_name ld:=ld vel:=vel
     
 ### utmk_coordinate
 
