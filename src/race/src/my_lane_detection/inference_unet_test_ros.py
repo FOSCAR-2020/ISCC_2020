@@ -22,7 +22,8 @@ import rospy
 import time
 from warper import Warper
 #from slidewindow import SlideWindow
-from slidewindow_ver1 import LineDetector
+# from slidewindow_ver1 import LineDetector
+from slidewindow_ver2 import LineDetector
 
 from pidcal import PidCal
 from race.msg import drive_values
@@ -199,7 +200,7 @@ def main():
                 output = output[0]
 
                 output = postprocess_img(output)
-
+                # cv2.imshow("203",output)
                 output *= 255
                 output = np.clip(output, 0, 255)
                 output = np.uint8(output)
@@ -209,20 +210,25 @@ def main():
                 # cv2.imshow('resize',output)
                 # threshold
                 ret, thr_img = cv2.threshold(output, 20, 255, 0)
-                # cv2.imshow('threshold',thr_img)
+                cv2.imshow('threshold',thr_img)
                 # warp
-                output, warp_img = warper.warp(output, thr_img)
-                # cv2.imshow('warped',warp_img)
+                warp_img = warper.warp( thr_img)
+
+                cv2.imshow('warped',warp_img)
+                # cv2.imshow("new output", canny_like_output)
+
                 #canny = cv2.Canny(warp_img, 40, 255)
                 kernel1 = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
                 kernel2 = np.ones((5, 5,), np.uint8)
 
                 #dilate = cv2.dilate(warp_img, kernel1, iterations=2)
                 #closed = cv2.morphologyEx(dilate, cv2.MORPH_OPEN, kernel2)
-                x_start_L, x_start_R=slidewindow.find_sliding_point(warp_img)
-                img, x_location = slidewindow.slide_window(x_start_L,x_start_R,warp_img)
+                # x_start_L, x_start_R=slidewindow.find_sliding_point(warp_img)
+                # img, x_location = slidewindow.slide_window(x_start_L,x_start_R,warp_img)
+                slided_img, x_location = slidewindow.main(warp_img)
+
                 if x_location != None:
-                    cv2.circle(img,(int(x_location),300),5,(0,0,255),3)
+                    # cv2.circle(img,(int(x_location),300),5,(0,0,255),3)
                     pid = round(pidcal.pid_control(int(x_location)), 6)
                     #print("pid rate : ", pid)
                     auto_drive(pid, x_location)
@@ -245,8 +251,9 @@ def main():
                 cv2.imshow("src", frame)
                 # pid_draw.append(pid)
 
-                cv2.imshow("output", output)
-                cv2.imshow("thre", img)
+                # cv2.imshow("th_img", thr_img)
+                # cv2.imshow("output", output)
+                cv2.imshow("ws", slided_img)
                 # print("x_loc :",x_location)
                 key = cv2.waitKey(1) & 0xFF
                 if key == 27: break

@@ -6,7 +6,7 @@ from findpoint import FindPoint
 
 class LineDetector:
     def __init__(self):
-        self.cap = cv2.VideoCapture('/Users/hyunjoon/Desktop/hyunjoon/포스카/국토부 vision/22.avi')
+
         self.frame = None
         self.leftx = None
         self.rightx = None
@@ -103,7 +103,7 @@ class LineDetector:
                 x_location = rx_current - lx_current + 75
                 print('x',x_location)
 
-        if line_flag != 3:
+        if line_flag != 4:
             # it's just for visualization of the valid inds in the region
             for i in range(len(good_left_inds)):
                 cv2.circle(out_img, (nonzerox[good_left_inds[i]], nonzeroy[good_left_inds[i]]), 1, (0, 255, 0), -1)
@@ -283,6 +283,6 @@ class LineDetector:
 
         return wap
     def main(self,img):
-        x_start_l,x_start_r = self.find_sliding_point(img)
+        x_start_l,x_start_r = self.findpoint.findpoint(img)
         output , x_location = self.sliding_window(x_start_l,x_start_r,img)
         return output, x_location
