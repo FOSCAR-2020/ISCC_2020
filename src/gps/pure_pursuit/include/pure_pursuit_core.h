@@ -37,6 +37,7 @@ private:
 
   // publisher
   ros::Publisher drive_msg_pub;
+  ros::Publisher steering_vis_pub;
 
   ros::Publisher target_point_pub;
 

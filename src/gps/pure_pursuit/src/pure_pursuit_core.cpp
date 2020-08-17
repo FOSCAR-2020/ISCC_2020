@@ -3,6 +3,15 @@
 #include <fstream>
 #include <cstdlib>
 
+// temp
+#include <tf/transform_broadcaster.h>
+
+// for steering visualization
+double yaw = 0.0, vis_x = 0.0, vis_y =0.0, vis_z =0.0;
+static geometry_msgs::Quaternion _quat;
+
+///////////////////////////
+
 namespace waypoint_follower
 {
 // Constructor
@@ -37,6 +46,7 @@ void PurePursuitNode::initForROS()
 
   // setup publisher
   drive_msg_pub = nh_.advertise<race::drive_values>("control_value", 1);
+  steering_vis_pub = nh_.advertise<geometry_msgs::PoseStamped>("steering_vis", 1);
 
   // for visualization
   target_point_pub = nh_.advertise<geometry_msgs::PointStamped>("target_point", 1);
@@ -103,11 +113,24 @@ void PurePursuitNode::publishDriveMsg(
   race::drive_values drive_msg;
   drive_msg.throttle = can_get_curvature ? const_velocity_ : 0;
   
+  double steering_radian = convertCurvatureToSteeringAngle(wheel_base_, kappa);
   drive_msg.steering =
-    can_get_curvature ? convertCurvatureToSteeringAngle(wheel_base_, kappa) * 180.0 / M_PI * 71.0 * -1 : 0;
+    can_get_curvature ? steering_radian * 180.0 / M_PI * 71.0 * -1 : 0;
 
   std::cout << "steering : " << drive_msg.steering / 71.0 << "\tkappa : " << kappa <<std::endl;
   drive_msg_pub.publish(drive_msg);
+
+  // for steering visualization
+  double steering_vis = yaw + steering_radian;
+  _quat = tf::createQuaternionMsgFromYaw(steering_vis);
+  geometry_msgs::PoseStamped pose;
+  pose.header.stamp = ros::Time::now();
+  pose.header.frame_id = "/base_link";
+  pose.pose.position.x = vis_x;
+  pose.pose.position.y = vis_y;
+  pose.pose.position.z = vis_z;
+  pose.pose.orientation = _quat;
+  steering_vis_pub.publish(pose);
 }
 ///////////////////////////////////
 
@@ -126,6 +149,18 @@ void PurePursuitNode::callbackFromCurrentPose(
   const geometry_msgs::PoseStampedConstPtr& msg)
 {
   pp_.setCurrentPose(msg);
+
+  // for steering vis
+  // yaw = atan2(2.0*(msg->pose.orientation.y*msg->pose.orientation.z + msg->pose.orientation.w*msg->pose.orientation.x), msg->pose.orientation.w*msg->pose.orientation.w - msg->pose.orientation.x*msg->pose.orientation.x - msg->pose.orientation.y*msg->pose.orientation.y + msg->pose.orientation.z*msg->pose.orientation.z);
+
+  yaw = atan2(2.0 * (msg->pose.orientation.w * msg->pose.orientation.z + msg->pose.orientation.x * msg->pose.orientation.y), 1.0 - 2.0 * (msg->pose.orientation.y * msg->pose.orientation.y + msg->pose.orientation.z * msg->pose.orientation.z));
+  //std::cout << yaw << std::endl;
+
+  vis_x = msg->pose.position.x;
+  vis_y = msg->pose.position.y;
+  vis_z = msg->pose.position.z;
+  /////////////////////
+
   is_pose_set_ = true;
 }
 ///////////////////////////////////
@@ -154,5 +189,4 @@ double convertCurvatureToSteeringAngle(
   return atan(wheel_base * kappa);
 }
 ///////////////////////////////////
-
 }  // namespace waypoint_follower
