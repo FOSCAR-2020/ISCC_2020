@@ -52,6 +52,7 @@ private:
   double wheel_base_;
   double const_lookahead_distance_;  // meter
   double const_velocity_;            // km/h
+  double final_constant;
 
   std::vector<geometry_msgs::Point> global_path;
   std::string ROS_HOME;
@@ -69,7 +70,7 @@ private:
     const bool& can_get_curvature, const double& kappa) const;
 
   double computeLookaheadDistance() const;
-  
+
   // set wayPath
   void setPath(char** argv);
 };

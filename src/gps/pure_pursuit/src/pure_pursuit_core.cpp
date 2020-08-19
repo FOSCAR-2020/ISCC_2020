@@ -23,6 +23,7 @@ PurePursuitNode::PurePursuitNode()
   , is_pose_set_(false)
   , const_lookahead_distance_(4.0)
   , const_velocity_(3.0)
+  , final_constant(1.5)
 {
   initForROS();
 }
@@ -36,6 +37,7 @@ void PurePursuitNode::initForROS()
   // ros parameter settings
   private_nh_.param("const_lookahead_distance", const_lookahead_distance_, 4.0);
   private_nh_.param("const_velocity", const_velocity_, 3.0);
+  private_nh_.param("final_constant", final_constant, 1.5);
   nh_.param("vehicle_info/wheel_base", wheel_base_, 1.04);
 
   ROS_HOME = ros::package::getPath("pure_pursuit");
@@ -57,10 +59,11 @@ void PurePursuitNode::initForROS()
 void PurePursuitNode::run(char** argv)
 {
   ROS_INFO_STREAM("pure pursuit start");
-  
+
   // temp
   const_lookahead_distance_ = atof(argv[2]);
   const_velocity_ = atof(argv[3]);
+  final_constant = atof(argv[4]);
 
   std::cout << "const_lookahead_distance_ : " << const_lookahead_distance_ << std::endl;
   std::cout << "const_velocity_ : " <<const_velocity_ << std::endl;
@@ -76,8 +79,8 @@ void PurePursuitNode::run(char** argv)
       setPath(argv);
       pp_.setWaypoints(global_path);
       int len = global_path.size();
-    }    
-    
+    }
+
     if (!is_pose_set_)
     {
       loop_rate.sleep();
@@ -112,12 +115,12 @@ void PurePursuitNode::publishDriveMsg(
 {
   race::drive_values drive_msg;
   drive_msg.throttle = can_get_curvature ? const_velocity_ : 0;
-  
+
   double steering_radian = convertCurvatureToSteeringAngle(wheel_base_, kappa);
   drive_msg.steering =
-    can_get_curvature ? (steering_radian * 180.0 / M_PI) * -1 * 2.0: 0;
+    can_get_curvature ? (steering_radian * 180.0 / M_PI) * -1 * final_constant: 0;
 
-  std::cout << "steering : " << drive_msg.steering / 71.0 << "\tkappa : " << kappa <<std::endl;
+  std::cout << "steering : " << drive_msg.steering << "\tkappa : " << kappa <<std::endl;
   drive_msg_pub.publish(drive_msg);
 
   // for steering visualization
@@ -177,7 +180,7 @@ void PurePursuitNode::setPath(char** argv) {
     p.y = y;
     global_path.push_back(p);
   }
-  
+
   is_waypoint_set_ = true;
 }
 ///////////////////////////////////
