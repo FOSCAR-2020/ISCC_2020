@@ -7,6 +7,10 @@ import rospy
 import rospkg
 import math, sys
 
+# for test
+from geometry_msgs.msg import PointStamped
+##
+
 
 rospy.init_node('global_map_plotter')
 topic = 'visualization_marker_array'
@@ -14,6 +18,10 @@ publisher = rospy.Publisher(topic, MarkerArray, queue_size=100)
 rospack = rospkg.RosPack()
 ROS_HOME = rospack.get_path('pure_pursuit')
 markerArray = MarkerArray()
+
+# for test
+target_point_pub = rospy.Publisher("target_point", PointStamped, queue_size=100)
+##
 
 count = 0
 MARKERS_MAX = 100
@@ -26,8 +34,8 @@ path_len = 0
 with open(ROS_HOME + "/paths/" + sys.argv[1]) as f:
   print("===========>" + ROS_HOME + "/paths/" + sys.argv[1])
   for line in f.readlines():
-    x = float(line.strip().split()[0])
-    y = float(line.strip().split()[1])
+    x = round(float(line.strip().split()[0]),4)
+    y = round(float(line.strip().split()[1]),4)
     path_x.append(x)
     path_y.append(y)
     path_len += 1
@@ -40,9 +48,11 @@ while path_len > count:
   marker.header.frame_id = "/base_link"
   marker.type = marker.SPHERE
   marker.action = marker.ADD
+
   marker.scale.x = 0.3
   marker.scale.y = 0.3
   marker.scale.z = 0.3
+
   marker.color.a = 1.0
   marker.color.r = 1.0
   marker.color.g = 1.0
@@ -66,3 +76,16 @@ while path_len > count:
   count += 1
 
   rospy.sleep(0.001)
+
+# for test
+while not rospy.is_shutdown():
+  idx = int(input("input index : "))
+  target_point = PointStamped()
+  target_point.header.frame_id = "/base_link"
+  target_point.point.x = path_x[idx]
+  target_point.point.y = path_y[idx]
+
+  target_point_pub.publish(target_point)
+  rospy.sleep(0.01)
+##
+
