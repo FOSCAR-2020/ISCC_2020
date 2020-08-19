@@ -1,8 +1,11 @@
 # Sample NMEA parameter configuration
-rate: 15
+rate: 8
 frame_id: gps_front
 device: /dev/ttyGPS1
 
 gnss:
   gps: true
   glonass: true
+  galileo : true
+  beidou : true
+

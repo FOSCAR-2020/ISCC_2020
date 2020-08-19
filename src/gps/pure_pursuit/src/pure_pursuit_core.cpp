@@ -115,7 +115,7 @@ void PurePursuitNode::publishDriveMsg(
   
   double steering_radian = convertCurvatureToSteeringAngle(wheel_base_, kappa);
   drive_msg.steering =
-    can_get_curvature ? steering_radian * 180.0 / M_PI * 71.0 * -1 : 0;
+    can_get_curvature ? (steering_radian * 180.0 / M_PI) * 71.0 * -1 * 2.0: 0;
 
   std::cout << "steering : " << drive_msg.steering / 71.0 << "\tkappa : " << kappa <<std::endl;
   drive_msg_pub.publish(drive_msg);

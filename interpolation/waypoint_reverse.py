@@ -11,7 +11,7 @@ def parse_txt(path):
     data = f.read()
     f.close()
 
-    data = data.split('\n')
+    data = data.rstrip().split('\n')
     data = [x.split(' ') for x in data]
     print(data)
     data = np.array(data, np.float64)
