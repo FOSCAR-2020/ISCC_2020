@@ -4,53 +4,41 @@ import numpy as np
 
 class Warper:
     def __init__(self):
-        h = 480
-        w = 640
-        print("h : " ,h)
-        print("w : " ,w)
+        self.h = 320
+        self.w = 480
+        print("h : " ,self.h)
+        print("w : " ,self.w)
 
         # distort scr to dst
-        # src = np.float32([
-        #     [w * 1.6, h * 1.3],
-        #     [w * (-0.1), h * 1.3],
-        #     [0, h * 0.62],
-        #     [w, h * 0.62],
-        # ])
-        src = np.float32([
-            [60,355],
-            [10,400],
-            [w-15,405],
-            [w,360],
+        self.src = np.float32([
+            [175, 275],
+            [475, 275],
+            [0, 320],
+            [640, 320],
         ])
-        dst = np.float32([
-            [0,0],
-            [0, h],
-            [w, h],
-            [w+50, 0],
+        self.dst = np.float32([
+            [120, 0],
+            [self.w - 120 , 0],
+            [120, self.h-50],
+            [self.w-120, self.h-50],
         ])
-        # dst = np.float32([
-        #     [0, 0],
-        #     [w, 0],
-        #     [0, h],
-        #     [w , h],
-        # ])
 
 
-        self.M = cv2.getPerspectiveTransform(src, dst)
-        self.Minv = cv2.getPerspectiveTransform(dst, src)
+        self.M = cv2.getPerspectiveTransform(self.src, self.dst)
+        self.Minv = cv2.getPerspectiveTransform(self.dst, self.src)
 
     def warp(self, img):
         return cv2.warpPerspective(
             img,
             self.M,
-            (img.shape[1], img.shape[0]),
+            (self.w, self.h),
             flags=cv2.INTER_LINEAR
-        )
+        ), img
 
     def unwarp(self, img):
         return cv2.warpPersective(
             img,
             self.Minv,
-            (img.shape[1], img.shape[0]),
+            (self.w, self.h),
             flags=cv2.INTER_LINEAR
         )
