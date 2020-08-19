@@ -1,8 +1,9 @@
-import cv2
 import numpy as np
-import matplotlib.pyplot as plt
+import cv2
 from scipy.interpolate import *
 from matplotlib.pyplot import *
+from sklearn.linear_model import LinearRegression
+import math
 
 class SlideWindow:
     def __init__(self):
@@ -11,177 +12,180 @@ class SlideWindow:
         self.leftx = None
         self.rightx = None
 
-    def slidewindow(self, img):
+    def w_slidewindow(self, img):
+        height, width = img.shape
 
-        x_location = None
-        # init out_img, height, width
+        # print("Image Width : {}   Image Height : {}".format(width, height))
 
-        out_img = np.dstack((img, img, img)) * 255
-        height = img.shape[0]
-        width = img.shape[1]
+        roi_img = img[height-150:height-100,:].copy()
 
-        # num of windows and init the height
-        window_height = 10
-        nwindows = 15
+        roi_height, roi_width = roi_img.shape
 
-        # find nonzero location in img, nonzerox, nonzeroy is the array flatted one dimension by x,y
-        nonzero = img.nonzero()
-        #print nonzero
+        # print("ROI Width : {}   ROI Height : {}".format(roi_width, roi_height))
+
+        cf_img = np.dstack((roi_img,roi_img,roi_img))
+
+        window_height = 20
+        window_width = 30
+
+        # minpix : 30% number of total window pixel
+        minpix = window_height*window_width // 3
+        n_windows = roi_width//window_width//2
+        # 480 // 30 // 2 == 8
+        # pts_left = np.array([[roi_width//2, roi_height//2-window_height//2], [roi_width//2, roi_height//2+window_height//2], [roi_width//2-window_width, roi_height//2+window_height//2],[roi_width//2-window_width, roi_height//2-window_height//2]], np.int32)
+        # cv2.polylines(cf_img,[pts_left],False,(0,255,0),1)
+        # pts_right = np.array([[roi_width//2, roi_height//2-window_height//2], [roi_width//2, roi_height//2+window_height//2], [roi_width//2+window_width, roi_height//2+window_height//2],[roi_width//2+window_width, roi_height//2-window_height//2]], np.int32)
+        # cv2.polylines(cf_img,[pts_right],False,(0,0,255),1)
+        pts_center = np.array([[roi_width//2,0],[roi_width//2, roi_height]], np.int32)
+        cv2.polylines(cf_img, [pts_center],False, (0,120,120),1)
+
+        nonzero = roi_img.nonzero()
         nonzeroy = np.array(nonzero[0])
         nonzerox = np.array(nonzero[1])
 
-        # print(nonzerox)
-        # init data need to sliding windows
-        margin = 30
-        minpix = 30
-        # print("hello")
-        left_lane_inds = []
-        right_lane_inds = []
+        x_center = roi_width//2 # 240
+        y_center = roi_height//2 # 160
 
-        # first location and segmenation location finder
-        # draw line
-        # 120 120,60 180,80, 180
-        pts_left = np.array([[width/2 - 120, height], [width/2 - 120, 250], [width/2 - 260, 250], [width/2 - 260, height]], np.int32)
-        cv2.polylines(out_img, [pts_left], False, (0,255,0), 1)
+        left_idx = 0
+        right_idx = 0
 
-        pts_right = np.array([[width/2 + 120, height], [width/2 + 120, 300], [width/2 + 260, 300], [width/2 + 260, height]], np.int32)
-        cv2.polylines(out_img, [pts_right], False, (255,0,0), 1)
-        #pts_center = np.array([[width/2 + 90, height], [width/2 + 90, height - 150], [width/2 - 60, height - 231], [width/2 - 60, height]], np.int32)
-        #cv2.polylines(out_img, [pts_center], False, (0,0,255), 1)
-        pts_catch = np.array([[0, 340], [width, 340]], np.int32)
-        cv2.polylines(out_img, [pts_catch], False, (0,120,120), 1)
+        find_left = False
+        find_right = False
 
-        # indicies before start line(the region of pts_left)
-        # nonzerox * 0.33 +
-        # 130 337 70
-        # good_left_inds = ((nonzerox >= width/2 - 300) & (nonzeroy >=  350 - nonzerox * 0.33 ) & (nonzerox <= width/2 - 110)).nonzero()[0]
-        good_left_inds = ((nonzerox >= 0) & (nonzeroy >= height - 100) & (nonzerox <= 150) & (nonzeroy <= height)).nonzero()[0]
+        left_start_x = None
+        left_start_y = None
 
-        # good_right_inds = ((nonzerox >= width/2 + 110) & (nonzeroy >= 300) & (nonzerox <= width/2 - 110)).nonzero()[0]
-        good_right_inds = ((nonzerox >= width - 50) & (nonzeroy >= height - 50) & (nonzerox <= width)).nonzero()[0]
+        right_start_x = None
+        right_start_y = None
 
-        # print(type(good_left_inds))
-        # print("good_left_inds", good_right_inds)
+        dist_threshold = 120
+        dist = None
 
-        # left line exist, lefty current init
-        line_exist_flag = None
-        y_current = None
-        x_current = None
-        good_center_inds = None
-        p_cut = None
+        for i in range(0,n_windows):
+            if find_left is False:
+                win_left_y_low = y_center - window_height//2
+                win_left_y_high = y_center + window_height//2
+
+                win_left_x_high = x_center - left_idx*window_width
+                win_left_x_low = x_center - (left_idx+1)*window_width
+
+            if find_right is False:
+                win_right_y_low = y_center - window_height//2
+                win_right_y_high = y_center + window_height//2
+
+                win_right_x_low = x_center + right_idx*window_width
+                win_right_x_high = x_center + (right_idx+1)*window_width
+            #print(win_left_y_low, ' ', win_left_x_low, ' ', win_left_y_high, ' ', win_left_x_high )
+
+            cv2.rectangle(cf_img, (win_left_x_low, win_left_y_low), (win_left_x_high, win_left_y_high), (0,255,0), 1)
+            cv2.rectangle(cf_img, (win_right_x_low, win_right_y_low), (win_right_x_high, win_right_y_high), (0,0,255), 1)
+
+            good_left_inds = ((nonzeroy >= win_left_y_low) & (nonzeroy < win_left_y_high) & (nonzerox >= win_left_x_low) & (nonzerox < win_left_x_high)).nonzero()[0]
+            good_right_inds = ((nonzeroy >= win_right_y_low) & (nonzeroy < win_right_y_high) & (nonzerox >= win_right_x_low) & (nonzerox < win_right_x_high)).nonzero()[0]
+
+            if len(good_left_inds) > minpix and find_left is False:
+                find_left = True
+
+                left_start_x = np.int(np.mean(nonzerox[good_left_inds]))
+                left_start_y = roi_height//2
+
+                for i in range(len(good_left_inds)):
+                    cv2.circle(cf_img, (nonzerox[good_left_inds[i]], nonzeroy[good_left_inds[i]]), 1, (0,255,0), -1)
+            else:
+                left_idx += 1
 
 
-        # check the minpix before left start line
-        # if minpix is enough on left, draw left, then draw right depends on left
-        # else draw right, then draw left depends on right
-        if len(good_left_inds) > minpix:
-            line_flag = 1
-            x_current = np.int(np.mean(nonzerox[good_left_inds]))
-            y_current = np.int(np.mean(nonzeroy[good_left_inds]))
-            max_y = y_current
-        elif len(good_right_inds) > minpix:
-            line_flag = 2
-            x_current = nonzerox[good_right_inds[np.argmax(nonzeroy[good_right_inds])]]
-            y_current = np.int(np.max(nonzeroy[good_right_inds]))
-        else:
-            line_flag = 3
-            # indicies before start line(the region of pts_center)
-            # good_center_inds = ((nonzeroy >= nonzerox * 0.45 + 132) & (nonzerox >= width/2 - 60) & (nonzerox <= width/2 + 90)).nonzero()[0]
-            # p_cut is for the multi-demensional function
-            # but curve is mostly always quadratic function so i used polyfit( , ,2)
-        #    if nonzeroy[good_center_inds] != [] and nonzerox[good_center_inds] != []:
-        #        p_cut = np.polyfit(nonzeroy[good_center_inds], nonzerox[good_center_inds], 2)
 
-        print("x_current : ", x_current)
+            if len(good_right_inds) > minpix and find_right is False:
+                find_right = True
 
-        if x_current is None:
-            cv2.waitKey(10)
+                right_start_x = np.int(np.mean(nonzerox[good_right_inds]))
+                right_start_y = roi_height//2
 
-        if line_flag != 3:
-            # it's just for visualization of the valid inds in the region
-            for i in range(len(good_left_inds)):
-                    # img = cv2.circle(out_img, (nonzerox[good_left_inds[i]], nonzeroy[good_left_inds[i]]), 5, (0,255,0), -1)
-                    img = cv2.circle(out_img, (nonzerox[good_left_inds[i]], nonzeroy[good_left_inds[i]]), 5, (0,255,0), -1)
-                    # print(nonzerox[good_left_inds[i]], nonzeroy[good_left_inds[i]])
+                for i in range(len(good_right_inds)):
+                    cv2.circle(cf_img, (nonzerox[good_right_inds[i]], nonzeroy[good_right_inds[i]]), 1, (0,0,255), -1)
+            else:
+                right_idx += 1
+
+
+            if left_start_x is not None and right_start_x is not None:
+                dist = right_start_x - left_start_x
+
+                if dist_threshold < dist and dist < dist_threshold + 80:
+                    cv2.circle(cf_img, (right_start_x, right_start_y),3, (255,0,0),-1)
+                    cv2.circle(cf_img, (left_start_x, left_start_y), 3, (255,0,0),-1)
+
+                    return True, left_start_x, right_start_x, cf_img
+
+        return False, left_start_x, right_start_x, cf_img
+
+
+    def h_slidewindow(self, img, x_left_start, x_right_start):
+        line_fitter = LinearRegression()
+        h, w = img.shape
+        output_img = np.dstack((img,img,img))
+        nonzero = img.nonzero()
+        nonzeroy = np.array(nonzero[0])
+        nonzerox = np.array(nonzero[1])
+        x_left = x_left_start
+        x_right = x_right_start
+        y_start = h/2 + 100
+        window_height = 30
+        window_width = 26
+
+        find_left = False
+        find_right = False
+
+        minpix = window_width * window_height / 30
+        n_windows = 5
+        # print('nwindows',n_windows)
+        left_idx = 0
+        right_idx = 0
+        center_x = np.zeros((5),dtype = 'f')
+        center_y = np.zeros((5),dtype = 'f')
+        center=np.zeros((5,2),dtype='f')
+
+        size_center=0
+        for i in range(n_windows):
+            cv2.rectangle(output_img, (x_left - window_width, y_start - i * window_height), (x_left+ window_width, y_start - (i + 1) * window_height), (0,255,255),1)
+            cv2.rectangle(output_img, (x_right - window_width, y_start - i * window_height), (x_right + window_width, y_start - (i + 1) * window_height), (255,0,255),1)
+            good_left_inds = ((nonzerox >= x_left - window_width) & (nonzerox < x_left+ window_width) & (nonzeroy < y_start - i * window_height) & (nonzeroy >= y_start - (i + 1) * window_height)).nonzero()[0]
+            good_right_inds = ((nonzerox >= x_right -window_width) & (nonzerox <= x_right + window_width) & (nonzeroy < y_start - i * window_height) & (nonzeroy >= y_start - (i + 1) * window_height)).nonzero()[0]
+
+            # for j in range(len(good_left_inds)):
+            #     cv2.circle(output_img, (nonzerox[good_left_inds[j]], nonzeroy[good_left_inds[j]]), 1, (0,255,0), -1)
             #
-            #
-            # for i in range(len(good_right_inds)):
-            #         img = cv2.circle(out_img, (nonzerox[good_right_inds[i]], nonzeroy[good_right_inds[i]]), 1, (0,0,255), -1)            # window sliding and draw
-            for window in range(0, nwindows):
-                if line_flag == 1:
-                    # print("left good")
-                    # rectangle x,y range init
-                    win_y_low = y_current - (window + 1) * window_height
-                    win_y_high = y_current - (window) * window_height
-                    win_x_low = x_current - margin
-                    win_x_high = x_current + margin
-                    # draw rectangle
-                    # 0.33 is for width of the road
-                    cv2.rectangle(out_img, (win_x_low, win_y_low), (win_x_high, win_y_high), (0, 255, 0), 1)
-                    cv2.rectangle(out_img, (win_x_low + int(490), win_y_low), (win_x_high + int(490), win_y_high), (255, 0, 0), 1)
-                    # indicies of dots in nonzerox in one square
-                    good_left_inds = ((nonzeroy >= win_y_low) & (nonzeroy < win_y_high) & (nonzerox >= win_x_low) & (nonzerox < win_x_high)).nonzero()[0]
-                    # check num of indicies in square and put next location to current
-                    if len(good_left_inds) > minpix:
-                        x_current = np.int(np.mean(nonzerox[good_left_inds]))
+            # for j in range(len(good_right_inds)):
+            #     cv2.circle(output_img, (nonzerox[good_right_inds[j]], nonzeroy[good_right_inds[j]]), 1, (0,0,255), -1)
 
-                    elif nonzeroy[left_lane_inds] != [] and nonzerox[left_lane_inds] != []:
-                        p_left = np.polyfit(nonzeroy[left_lane_inds], nonzerox[left_lane_inds], 2)
-                        x_current = np.int(np.polyval(p_left, win_y_high))
-                    # 338~344 is for recognize line which is yellow line in processed image(you can check in imshow)
-                    if win_y_low >= 108 and win_y_low < 504:
-                    # 0.165 is the half of the road(0.33)
-                        x_location = x_current + int(240)
-                else: # change line from left to right above(if)
-                    win_y_low = y_current - (window + 1) * window_height
-                    win_y_high = y_current - (window) * window_height
-                    win_x_low = x_current - margin
-                    win_x_high = x_current + margin
-                    cv2.rectangle(out_img, (win_x_low - int(width * 0.50), win_y_low), (win_x_high - int(width * 0.50), win_y_high), (0, 255, 0), 1)
-                    cv2.rectangle(out_img, (win_x_low, win_y_low), (win_x_high, win_y_high), (255, 0, 0), 1)
-                    good_right_inds = ((nonzeroy >= win_y_low) & (nonzeroy < win_y_high) & (nonzerox >= win_x_low) & (nonzerox < win_x_high)).nonzero()[0]
-                    if len(good_right_inds) > minpix:
-                        x_current = np.int(np.mean(nonzerox[good_right_inds]))
-                    elif nonzeroy[right_lane_inds] != [] and nonzerox[right_lane_inds] != []:
-                        p_right = np.polyfit(nonzeroy[right_lane_inds], nonzerox[right_lane_inds], 2)
-                        x_current = np.int(np.polyval(p_right, win_y_high))
-                    if win_y_low >= 338 and win_y_low < 344:
-                    # 0.165 is the half of the road(0.33)
-                        x_location = x_current - int(240)
+            if len(good_left_inds) > minpix:
+                # find_left = True
+                x_left = np.int(np.mean(nonzerox[good_left_inds]))
 
-                # cv2.circle(out_img, (x_current,y_current), 1, (0,0,255), -1)
-                left_lane_inds.extend(good_left_inds)
-        #        right_lane_inds.extend(good_right_inds)
+            if len(good_right_inds) > minpix:
+                # find_right = True
+                x_right = np.int(np.mean(nonzerox[good_right_inds]))
 
-            #left_lane_inds = np.concatenate(left_lane_inds)
-            #right_lane_inds = np.concatenate(right_lane_inds)
+            center_point = np.int((x_left +x_right)/2)
+            if i < 5:
+                # center[i] = np.array([center_point,y_start - i*window_height - 10])
+                center_x[i] = np.array([center_point])
+                center_y[i] = np.array([y_start - i*window_height - 10])
+                size_center+=1
 
-        #else:
-            """
-            # it's just for visualization of the valid inds in the region
-            # for i in range(len(good_center_inds)):
-            #     img = cv2.circle(out_img, (nonzerox[good_center_inds[i]], nonzeroy[good_center_inds[i]]), 1, (0,0,255), -1)
-            # try:
-            #    for window in range(0, nwindows):
-            #        x_current = int(np.polyval(p_cut, max_y - window * window_height))
-            #        if x_current - margin >= 0:
-            #            win_x_low = x_current - margin
-            #            win_x_high = x_current + margin
-            #            win_y_low = max_y - (window + 1) * window_height
-            #            win_y_high = max_y - (window) * window_height
+            # print('center',center_point)
+            # print('y',y_start - (i*window_height) -3)
+            # cv2.circle(output_img, (center_point,y_start - i*window_height - 10 ),3,(0,0,255),1)
+        fp1 = np.polyfit(center_y,center_x,1)
+        f1 = np.poly1d(fp1)
+        returns_x = f1(center_y)
+        cv2.line(output_img,(returns_x[0],center_y[0]),(returns_x[size_center-1],center_y[size_center-1]),(0,0,255))
+        for i in range(5):
+            cv2.circle(output_img,(returns_x[i],center_y[i]),3,(0,0,255),-1)
+        cv2.circle(output_img,(center_x[0],center_y[0]),9,(255,50,0),-1)
+        steer_theta=math.degrees( math.atan( (center_x[0]-returns_x[size_center-1] )/(center_y[size_center-1]-center_y[0]) ) )
 
-            #            cv2.rectangle(out_img, (win_x_low, win_y_low), (win_x_high, win_y_high), (255, 0, 0), 1)
-            #            cv2.rectangle(out_img, (win_x_low - int(width * 0.23), win_y_low), (win_x_high - int(width * 0.23), win_y_high), (0, 255, 0), 1)
-            #            if win_y_low >= 338 and win_y_low < 344:
-            #                x_location = x_current - int(width * 0.115)
-            #except:
-            #    pass
-            """
-        pts_center = np.array([[width//2,0],[width//2,height]])
-        cv2.polylines(out_img,[pts_center],False,(0,120,120),1)
+        # line_fitter.fit(center.reshape(-1,1),center_y)
+        # y_predicted = line_fitter.predict(center_x)
 
-        if x_location is not None :
-            cv2.circle(out_img,(x_location,340),5,(255,255,255))
-
-
-        return out_img, x_location
+        return x_left_start, x_right_start, output_img ,steer_theta

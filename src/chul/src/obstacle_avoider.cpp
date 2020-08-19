@@ -18,7 +18,7 @@ bool isdetected = false;
 
 void obstacleCB(const sensor_msgs::LaserScan::ConstPtr& laser) {
 
-    int minIndex = 90;
+  int minIndex = 90;
 	int maxIndex = 290;
 
     cout << laser->ranges.size() << endl;
@@ -31,15 +31,15 @@ void obstacleCB(const sensor_msgs::LaserScan::ConstPtr& laser) {
                 break;
 		    }
         }
-       
+
 	}
     else {
         int currIndex;
 
         for(currIndex = minIndex + 1; currIndex < maxIndex; currIndex++){
-		
+
             if(laser->ranges[currIndex] < dist){
-			   
+
                 break;
 		    }
         }
@@ -48,7 +48,7 @@ void obstacleCB(const sensor_msgs::LaserScan::ConstPtr& laser) {
             ROS_INFO_STREAM("Go Sign"   );
         }
     }
-    
+
 
 
 
@@ -57,7 +57,7 @@ void obstacleCB(const sensor_msgs::LaserScan::ConstPtr& laser) {
 int main(int argc, char** argv) {
     ros::init(argc,argv,"dynamic_obstacle");
     ros::NodeHandle nh;
-    
+
     dist = (float)atoi(argv[1]);
 
     obstacle_sub = nh.subscribe("/scan", 10, obstacleCB);

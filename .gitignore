@@ -1,14 +1,15 @@
-
 /devel
 /build
 
 # model file
 src/race/src/result
+src/lane_detect/result
 
 # test movies
 *.avi
 *.mov
 *.mkv
+*.pyc
 
 # test image
 *.jpg
