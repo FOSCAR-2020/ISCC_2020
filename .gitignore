@@ -1,4 +1,4 @@
-
+*/result
 /devel
 /build
 
@@ -9,6 +9,7 @@ src/race/src/result
 *.avi
 *.mov
 *.mkv
+*.pyc
 
 # test image
 *.jpg
