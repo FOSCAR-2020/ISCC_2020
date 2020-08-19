@@ -54,7 +54,7 @@ void serialCallback(const race::drive_values::ConstPtr& msg) {
 		front_brake = 0x33;
 		estop = 0x01;
 	}
-	steer_total = (int)((msg->steering));
+	steer_total = (int)((msg->steering)*71.0);
 	if(steer_total > 2000) steer_total = 2000;
 	if(steer_total < -2000) steer_total = -2000;
 	printf("steer : %d , speed : %u\n", steer_total, speed_total);
