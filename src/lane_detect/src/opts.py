@@ -94,7 +94,7 @@ def parse():
     parser.add_argument('--suffix',           default='',
                         type=str,        help='Suffix for saving the model')
     parser.add_argument('--video_idx',           default=0,
-                        type=str,        help='Video Index')
+                        type=int,        help='Video Index')
 
     opt = parser.parse_args()
 

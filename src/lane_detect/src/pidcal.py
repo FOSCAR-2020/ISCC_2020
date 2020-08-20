@@ -1,7 +1,7 @@
 class PidCal:
     error_sum = 0
     error_old = 0
-    p = [0.005, 0.000005, 0.005] # optimized kp,ki,kd
+    p = [0.5, 0.005, 0.05] # optimized kp,ki,kd
     dp = [p[0]/10, p[1]/10, p[2]/10] # to twiddle kp, ki, kd
 
     def __init__(self):

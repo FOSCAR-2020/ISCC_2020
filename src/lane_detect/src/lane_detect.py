@@ -157,15 +157,16 @@ def main():
     now = datetime.datetime.now()
     # fourcc =cv2.VideoWriter_fourcc(*'MJPG')
     out = cv2.VideoWriter('input_video/' + str(now) + '.avi',fourcc,40.0,(640,360),0)
-
+    pid_list=list()
     steer_list = list()
     lpf_list = list()
 
     pid_old = None
-
+    i=0
     while True:
         ret, frame = cap.read()
-
+        if frame is None:
+            break
         frame_height, frame_width, frame_channels = frame.shape
 
         print("Frame Info : (Height, Width, Channels) : ({}, {}, {})".format(frame_height, frame_width, frame_channels))
@@ -212,6 +213,7 @@ def main():
                 ret, left_start_x, right_start_x, cf_img = slidewindow.w_slidewindow(warper_img)
 
                 if ret:
+                    i+=1
                     left_x_current,right_x_current, sliding_img,steer_theta = slidewindow.h_slidewindow(warper_img, left_start_x, right_start_x)
                     cv2.imshow('sliding_img', sliding_img)
                     steer_list.append(steer_theta)
@@ -227,7 +229,8 @@ def main():
                         auto_drive(pid_old)
                     else:
                         # degree angle
-                        pid = round(pidcal.pid_control(int(50*steer_theta)), 6)
+                        pid = round(pidcal.pid_control(lpf_result),6)
+                        pid_list.append(-1*pid)
                         print("pid :",pid)
                         pid_old = pid
 
@@ -262,7 +265,15 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
+    plt.plot(range(i),steer_list,label='steer')
+    plt.legend()
+    plt.plot(range(i),pid_list,label='pid')
+    plt.legend()
 
+    plt.plot(range(i),lpf_list,label='lpf')
+    plt.legend()
+
+    plt.show()
 
 
 if __name__ == '__main__':
