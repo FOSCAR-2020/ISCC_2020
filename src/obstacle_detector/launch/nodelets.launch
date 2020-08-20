@@ -1,7 +1,7 @@
 <!-- -->
 <launch>
 
-  <node name="map_to_scanner_base" pkg="tf2_ros" type="static_transform_publisher" args="0 0 0 0 0 0 map robot"/>  
+  <node name="map_to_scanner_base" pkg="tf2_ros" type="static_transform_publisher" args="0 0 0 0 0 0 map robot"/>
   <node name="robot_to_laser" pkg="tf2_ros" type="static_transform_publisher" args="0 0 0 0 0 3.14 robot laser"/>
 
   <node name="nodelet_manager" pkg="nodelet" type="nodelet" args="manager" output="screen">
@@ -32,7 +32,7 @@
   </node>
 
   <node name="obstacle_tracker" pkg="nodelet" type="nodelet" args="load obstacle_detector/ObstacleTracker nodelet_manager">
-    <param name="active"                  value="false"/>
+    <param name="active"                  value="true"/>
 
     <param name="loop_rate"               value="100.0"/>
     <param name="tracking_duration"       value="2.0"/>
@@ -61,7 +61,6 @@
   </node>
 
   <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find obstacle_detector)/resources/obstacle_detector.rviz"/>
-
 
 </launch>
 <!-- -->
