@@ -41,9 +41,9 @@ public:
   geometry_msgs::Point getPoseOfNextTarget() const
   {
     return next_target_position_;
-  }  
+  }
 
-private:
+// private:
   // variables
   int next_waypoint_number_;
   geometry_msgs::Point next_target_position_;

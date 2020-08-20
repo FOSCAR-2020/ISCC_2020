@@ -88,6 +88,10 @@ void PurePursuitNode::run(char** argv)
     }
 
     pp_.setLookaheadDistance(computeLookaheadDistance());
+    if (pp_.next_waypoint_number_ >= 300) {
+      const_velocity_ = 6;
+      const_lookahead_distance_ = 5;
+    }
 
     double kappa = 0;
     bool can_get_curvature = pp_.canGetCurvature(&kappa);
