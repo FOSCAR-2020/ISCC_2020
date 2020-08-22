@@ -9,7 +9,6 @@
 // for steering visualization
 double yaw = 0.0, vis_x = 0.0, vis_y =0.0, vis_z =0.0;
 static geometry_msgs::Quaternion _quat;
-
 ///////////////////////////
 
 namespace waypoint_follower
@@ -31,7 +30,6 @@ PurePursuitNode::PurePursuitNode()
 // Destructor
 PurePursuitNode::~PurePursuitNode() {}
 
-// DONE
 void PurePursuitNode::initForROS()
 {
   // ros parameter settings
@@ -53,9 +51,7 @@ void PurePursuitNode::initForROS()
   // for visualization
   target_point_pub = nh_.advertise<geometry_msgs::PointStamped>("target_point", 1);
 }
-///////////////////////////////////
 
-// DONE
 void PurePursuitNode::run(char** argv)
 {
   ROS_INFO_STREAM("pure pursuit start");
@@ -88,10 +84,19 @@ void PurePursuitNode::run(char** argv)
     }
 
     pp_.setLookaheadDistance(computeLookaheadDistance());
-    if (pp_.next_waypoint_number_ >= 300) {
-      const_velocity_ = 6;
-      const_lookahead_distance_ = 5;
-    }
+
+    // interval test
+    // if (pp_.next_waypoint_number_ >= 300) {
+    //   const_velocity_ = 6;
+    //   const_lookahead_distance_ = 5;
+    //   final_constant = 1.5;
+    // }
+    // else if (pp_.next_waypoint_number_ >= 500) {
+    //   const_velocity_ = 6;
+    //   const_lookahead_distance_ = 5;
+    //   final_constant = 2.0;
+    // }
+    /////////////////////////////////////////////
 
     double kappa = 0;
     bool can_get_curvature = pp_.canGetCurvature(&kappa);
@@ -111,9 +116,7 @@ void PurePursuitNode::run(char** argv)
     loop_rate.sleep();
   }
 }
-///////////////////////////////////
 
-// DONE
 void PurePursuitNode::publishDriveMsg(
   const bool& can_get_curvature, const double& kappa) const
 {
@@ -139,9 +142,7 @@ void PurePursuitNode::publishDriveMsg(
   pose.pose.orientation = _quat;
   steering_vis_pub.publish(pose);
 }
-///////////////////////////////////
 
-// DONE
 double PurePursuitNode::computeLookaheadDistance() const
 {
   if (true)
@@ -149,19 +150,14 @@ double PurePursuitNode::computeLookaheadDistance() const
     return const_lookahead_distance_;
   }
 }
-///////////////////////////////////
 
-// DONE
 void PurePursuitNode::callbackFromCurrentPose(
   const geometry_msgs::PoseStampedConstPtr& msg)
 {
   pp_.setCurrentPose(msg);
 
   // for steering vis
-  // yaw = atan2(2.0*(msg->pose.orientation.y*msg->pose.orientation.z + msg->pose.orientation.w*msg->pose.orientation.x), msg->pose.orientation.w*msg->pose.orientation.w - msg->pose.orientation.x*msg->pose.orientation.x - msg->pose.orientation.y*msg->pose.orientation.y + msg->pose.orientation.z*msg->pose.orientation.z);
-
   yaw = atan2(2.0 * (msg->pose.orientation.w * msg->pose.orientation.z + msg->pose.orientation.x * msg->pose.orientation.y), 1.0 - 2.0 * (msg->pose.orientation.y * msg->pose.orientation.y + msg->pose.orientation.z * msg->pose.orientation.z));
-  //std::cout << yaw << std::endl;
 
   vis_x = msg->pose.position.x;
   vis_y = msg->pose.position.y;
@@ -170,9 +166,7 @@ void PurePursuitNode::callbackFromCurrentPose(
 
   is_pose_set_ = true;
 }
-///////////////////////////////////
 
-// maybe DONE
 void PurePursuitNode::setPath(char** argv) {
   std::ifstream infile(ROS_HOME + "/paths/" + argv[1]);
   std::cout << ROS_HOME + "/paths/" + argv[1] << std::endl;
@@ -187,13 +181,10 @@ void PurePursuitNode::setPath(char** argv) {
 
   is_waypoint_set_ = true;
 }
-///////////////////////////////////
 
-// DONE
 double convertCurvatureToSteeringAngle(
   const double& wheel_base, const double& kappa)
 {
   return atan(wheel_base * kappa);
 }
-///////////////////////////////////
 }  // namespace waypoint_follower
