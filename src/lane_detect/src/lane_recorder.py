@@ -168,8 +168,9 @@ def main():
     out = None
 
     if opt.video_idx > 2:
-        fourcc =cv2.VideoWriter_fourcc(*'MJPG')
-        out = cv2.VideoWriter('output_video/' + str(now) + '.avi',fourcc,30.0,(1280,720))
+        # fourcc =cv2.VideoWriter_fourcc(*'MJPG')
+        fourcc =cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter('output_warper_video/' + str(now) + '.avi',fourcc,30.0,(480,320))
 
     pid_list=list()
     steer_list = list()
@@ -188,7 +189,8 @@ def main():
 
         print("Frame Info : (Height, Width, Channels) : ({}, {}, {})".format(frame_height, frame_width, frame_channels))
 
-        record_frame = cv2.resize(frame, (1280,720))
+        # record_frame = cv2.resize(frame, (1280,720))
+        # record_frame = cv2.resize(frame, (1280,720))
 
         if ret:
             cur_time = time.time()
@@ -229,7 +231,11 @@ def main():
                 #warper_img = warper.warp(output)
                 warper_img = warper.warp_test(output)
                 cv2.imshow("warp_img",warper_img)
+                if opt.video_idx > 2 :
+                        # print("frame.shape : {}".format(frame.shape))
+                    print("warper_img.shape : {}".format(warper_img.shape))
 
+                    out.write(warper_img)
                 # warper_img_test = warper.warp_test(output)
                 # cv2.imshow("warp_img_test",warper_img_test)
                 ret, left_start_x, right_start_x, cf_img = slidewindow.w_slidewindow(warper_img, 180)
@@ -283,9 +289,7 @@ def main():
                 cv2.imshow("frame",frame)
 
 
-                if opt.video_idx > 2:
-                    print("frame.shape : {}".format(frame.shape))
-                    out.write(warp_img)
+
                 # cv2.imshow("src", warper_img)
                 # cv2.imshow("out_img", output)
                 cv2.imshow("cf_img", cf_img)
