@@ -20,8 +20,8 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 from PIL import Image
-from warper import Warper
-from slidewindow import SlideWindow
+from test_warper import Warper
+from test_slidewindow import SlideWindow
 
 import datetime
 import time
@@ -30,7 +30,7 @@ from race.msg import drive_values
 
 ack_publisher = None
 car_run_speed = 0
-max_speed = 5
+max_speed = 4
 prevX = 0
 
 #drive_values_publisher = rospy.Publisher('control_value', drive_values, queue_size=1)
@@ -56,9 +56,9 @@ def auto_drive(pid):
 
     drive_value = drive_values()
 
-    drive_value.throttle = int(car_run_speed)
+    drive_value.throttle = int(4)
     #drive_value.throttle = 4
-    drive_value.steering = pid*1.5
+    drive_value.steering = pid
     #drive_value.steering = pid
 
     drive_values_pub.publish(drive_value)
@@ -140,7 +140,7 @@ def main():
     elif opt.video_idx is 3:
         cap = cv2.VideoCapture("input_video/track.avi")
     elif opt.video_idx is 4:
-        cap =cv2.VideoCapture("output_video/field.avi")
+        cap =cv2.VideoCapture("input_video/field.avi")
     else:
         cap = cv2.VideoCapture(0)
         # video test
@@ -175,11 +175,9 @@ def main():
     steer_list = list()
     lpf_list = list()
 
-    pid_old = None
-    steer_theta = 0
+    pid_old = 0
     i=0
-    x_location = 440
-
+    steer_theta=0
     while True:
         ret, frame = cap.read()
         if frame is None:
@@ -224,13 +222,12 @@ def main():
                 output[output<=80] = 0
 
                 cv2.imshow("output_img",output)
-                #warper_img = warper.warp(output)
-                warper_img = warper.warp_test(output)
+                warper_img = warper.warp(output)
                 cv2.imshow("warp_img",warper_img)
 
                 # warper_img_test = warper.warp_test(output)
                 # cv2.imshow("warp_img_test",warper_img_test)
-                ret, left_start_x, right_start_x, cf_img = slidewindow.w_slidewindow(warper_img, 180)
+                ret, left_start_x, right_start_x, cf_img = slidewindow.w_slidewindow(warper_img,140)
 
                 if ret:
                     i+=1
@@ -238,10 +235,8 @@ def main():
                     cv2.imshow('sliding_img', sliding_img)
                     steer_list.append(steer_theta)
 
-                    x_location = (left_x_current+right_x_current)/2
-
                     # low pass filter
-                    lpf_result = lpf(x_location, 0.3)
+                    lpf_result = lpf(steer_theta, 0.3)
                     lpf_list.append(lpf_result)
 
                     # steer theta : Degree
@@ -258,12 +253,10 @@ def main():
                         print("pid :",pid)
                         pid_old = pid
                         auto_drive(steer_theta)
-
                         # auto_drive(pid)
                 else:
                     auto_drive(steer_theta)
-
-                    # auto_drive(pid)
+                    # auto_drive(pid_old)
                     pidcal.error_sum = 0
                     pidcal.error_old = 0
 
@@ -304,7 +297,7 @@ def main():
     plt.plot(range(i),lpf_list,label='lpf')
     plt.legend()
     pid_info=pidcal.info_p()
-    plt.savefig('output_video/video_idx:'+ str(opt.video_idx)+' '+str(pid_info) +'.png', dpi=300)
+    plt.savefig('output_test/video_idx:'+ str(opt.video_idx)+' '+str(pid_info) +'.png', dpi=300)
 
     # plt.show()
 

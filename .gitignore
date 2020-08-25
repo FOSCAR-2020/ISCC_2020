@@ -10,6 +10,7 @@ src/lane_detect/result
 *.mov
 *.mkv
 *.pyc
+*.mp4
 
 # test image
 *.jpg

@@ -22,18 +22,12 @@ class Warper:
             [120, self.h-50],
             [self.w-120, self.h-50],
         ])
-        self.real_dst = np.float32([
-            [120, 0],
-            [self.w - 120 , 0],
-            [120, self.h-50],
-            [self.w-120, self.h-50],
-        ])
 
         self.real_src = np.float32([
-            [200, 162],
-            [438, 162],
-            [20, 320],
-            [620, 320],
+            [125, 275],
+            [550, 275],
+            [-20, 320],
+            [660, 320],
         ])
 
         # self.real_dst = np.float32([
@@ -45,7 +39,7 @@ class Warper:
 
 
         self.M = cv2.getPerspectiveTransform(self.src, self.dst)
-        self.M_real = cv2.getPerspectiveTransform(self.real_src, self.real_dst)
+        self.M_real = cv2.getPerspectiveTransform(self.real_src, self.dst)
         self.Minv = cv2.getPerspectiveTransform(self.dst, self.src)
 
     def warp(self, img):
