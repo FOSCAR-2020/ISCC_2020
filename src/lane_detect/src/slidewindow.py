@@ -186,8 +186,8 @@ class SlideWindow:
         cv2.circle(output_img,(center_x[0],center_y[0]),9,(255,50,0),-1)
 
         # steer_theta=math.degrees(math.atan((center_x[0]-returns_x[size_center-1] )/(center_y[size_center-1]-center_y[0])))
-        steer_theta=math.degrees(math.atan((240-returns_x[size_center-1] )/(center_y[size_center-1]-320)))
-        cv2.line(output_img,(240,320),(returns_x[size_center-1],center_y[size_center-1]),(0,255,255))
+        steer_theta=math.degrees(math.atan((240-returns_x[size_center-1] )/(center_y[size_center-1]-295)))
+        cv2.line(output_img,(240,295),(returns_x[size_center-1],center_y[size_center-1]),(0,255,255))
             # line_fitter.fit(center.reshape(-1,1),center_y)
         # y_predicted = line_fitter.predict(center_x)
 
