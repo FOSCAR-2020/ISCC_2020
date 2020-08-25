@@ -75,7 +75,6 @@ class SlideWindow:
 
                 win_right_x_low = x_center + right_idx*window_width
                 win_right_x_high = x_center + (right_idx+1)*window_width
-            #print(win_left_y_low, ' ', win_left_x_low, ' ', win_left_y_high, ' ', win_left_x_high )
 
             cv2.rectangle(cf_img, (win_left_x_low, win_left_y_low), (win_left_x_high, win_left_y_high), (0,255,0), 1)
             cv2.rectangle(cf_img, (win_right_x_low, win_right_y_low), (win_right_x_high, win_right_y_high), (0,0,255), 1)

@@ -222,8 +222,10 @@ def main():
                 output = cv2.resize(output, (640, 360))
                 output[output>80] = 255
                 output[output<=80] = 0
-
+                cv2.circle(output, (output.shape[1]/2, output.shape[0]), 9, (255,255,0), -1)
                 cv2.imshow("output_img",output)
+                print("shape_info",output.shape)
+                # cv2.circle(output, (output.shape[0]/2, output.shape[1]/2), 9, (0,255,0), -1)
                 #warper_img = warper.warp(output)
                 warper_img = warper.warp_test(output)
                 cv2.imshow("warp_img",warper_img)
