@@ -26,10 +26,10 @@ class SlideWindow:
         cf_img = np.dstack((roi_img,roi_img,roi_img))
 
         window_height = 20
-        window_width = 30
+        window_width = 20
 
         # minpix : 30% number of total window pixel
-        minpix = window_height*window_width // 3
+        minpix = window_height*window_width // 4
         n_windows = roi_width//window_width//2
         # 480 // 30 // 2 == 8
         # pts_left = np.array([[roi_width//2, roi_height//2-window_height//2], [roi_width//2, roi_height//2+window_height//2], [roi_width//2-window_width, roi_height//2+window_height//2],[roi_width//2-window_width, roi_height//2-window_height//2]], np.int32)
@@ -111,7 +111,7 @@ class SlideWindow:
             if left_start_x is not None and right_start_x is not None:
                 dist = right_start_x - left_start_x
 
-                if dist_threshold-100 < dist and dist < dist_threshold + 100:
+                if dist_threshold-100 < dist and dist < dist_threshold + 150:
                     cv2.circle(cf_img, (right_start_x, right_start_y),3, (255,0,0),-1)
                     cv2.circle(cf_img, (left_start_x, left_start_y), 3, (255,0,0),-1)
 
@@ -122,33 +122,41 @@ class SlideWindow:
 
     def h_slidewindow(self, img, x_left_start, x_right_start):
         line_fitter = LinearRegression()
+
         h, w = img.shape
+
         output_img = np.dstack((img,img,img))
+
         nonzero = img.nonzero()
         nonzeroy = np.array(nonzero[0])
         nonzerox = np.array(nonzero[1])
+
         x_left = x_left_start
         x_right = x_right_start
         y_start = h/2 + 100
-        window_height = 30
+
+        window_height = 16
         window_width = 16
 
         find_left = False
         find_right = False
 
         minpix = window_width * window_height / 30
-        n_windows = 5
+        n_windows = 10
         # print('nwindows',n_windows)
         left_idx = 0
         right_idx = 0
-        center_x = np.zeros((5),dtype = 'f')
-        center_y = np.zeros((5),dtype = 'f')
-        center=np.zeros((5,2),dtype='f')
+
+        center_x = np.zeros((n_windows),dtype = 'f')
+        center_y = np.zeros((n_windows),dtype = 'f')
+        center=np.zeros((n_windows,2),dtype='f')
 
         size_center=0
+
         for i in range(n_windows):
             cv2.rectangle(output_img, (x_left - window_width, y_start - i * window_height), (x_left+ window_width, y_start - (i + 1) * window_height), (0,255,255),1)
             cv2.rectangle(output_img, (x_right - window_width, y_start - i * window_height), (x_right + window_width, y_start - (i + 1) * window_height), (255,0,255),1)
+
             good_left_inds = ((nonzerox >= x_left - window_width) & (nonzerox < x_left+ window_width) & (nonzeroy < y_start - i * window_height) & (nonzeroy >= y_start - (i + 1) * window_height)).nonzero()[0]
             good_right_inds = ((nonzerox >= x_right -window_width) & (nonzerox <= x_right + window_width) & (nonzeroy < y_start - i * window_height) & (nonzeroy >= y_start - (i + 1) * window_height)).nonzero()[0]
 
@@ -167,28 +175,37 @@ class SlideWindow:
                 x_right = np.int(np.mean(nonzerox[good_right_inds]))
 
             center_point = np.int((x_left +x_right)/2)
-            if i < 5:
+
+            if i < n_windows:
                 # center[i] = np.array([center_point,y_start - i*window_height - 10])
                 center_x[i] = np.array([center_point])
-                center_y[i] = np.array([y_start - i*window_height - 10])
+                center_y[i] = np.array([y_start - i*window_height - window_height//2])
                 size_center+=1
 
             # print('center',center_point)
             # print('y',y_start - (i*window_height) -3)
             # cv2.circle(output_img, (center_point,y_start - i*window_height - 10 ),3,(0,0,255),1)
+        print("center_y : {}    center_x : {}".format(center_y, center_x))
         fp1 = np.polyfit(center_y,center_x,1)
         f1 = np.poly1d(fp1)
         returns_x = f1(center_y)
+
         cv2.line(output_img,(returns_x[0],center_y[0]),(returns_x[size_center-1],center_y[size_center-1]),(0,0,255))
 
-        for i in range(5):
-            cv2.circle(output_img,(returns_x[i],center_y[i]),3,(0,0,255),-1)
+        for i in range(n_windows):
+            cv2.circle(output_img,(center_x[i],center_y[i]),3,(50,90,55),-1)
         cv2.circle(output_img,(center_x[0],center_y[0]),9,(255,50,0),-1)
 
         # steer_theta=math.degrees(math.atan((center_x[0]-returns_x[size_center-1] )/(center_y[size_center-1]-center_y[0])))
-        steer_theta=math.degrees(math.atan((240-returns_x[size_center-1] )/(center_y[size_center-1]-295)))
-        cv2.line(output_img,(240,295),(returns_x[size_center-1],center_y[size_center-1]),(0,255,255))
+        steer_theta = math.degrees(math.atan((240-returns_x[size_center-1] )/(center_y[size_center-1]-270)))
+        cv2.line(output_img,(240,270),(returns_x[size_center-1],center_y[size_center-1]),(0,255,255))
             # line_fitter.fit(center.reshape(-1,1),center_y)
         # y_predicted = line_fitter.predict(center_x)
+        steer_theta=steer_theta*0.7
 
+        if steer_theta>28:
+            steer_theta=28
+        elif steer_theta<-28:
+            steer_theta=-28
+            
         return x_left_start, x_right_start, output_img ,steer_theta

@@ -168,8 +168,8 @@ def main():
     out = None
 
     if opt.video_idx > 2:
-        # fourcc =cv2.VideoWriter_fourcc(*'MJPG')
-        fourcc =cv2.VideoWriter_fourcc(*'mp4v')
+        fourcc =cv2.VideoWriter_fourcc(*'MJPG')
+        # fourcc =cv2.VideoWriter_fourcc(*'MP4V')
         out = cv2.VideoWriter('output_warper_video/' + str(now) + '.avi',fourcc,30.0,(480,320))
 
     pid_list=list()
@@ -232,10 +232,10 @@ def main():
                 warper_img = warper.warp_test(output)
                 cv2.imshow("warp_img",warper_img)
                 if opt.video_idx > 2 :
-                        # print("frame.shape : {}".format(frame.shape))
-                    print("warper_img.shape : {}".format(warper_img.shape))
-
-                    out.write(warper_img)
+                    print("frame.shape : {}".format(frame.shape))
+                    tmp = cv2.cvtColor(warper_img,cv2.COLOR_GRAY2RGB)
+                    # print("warper_img.shape : {}".format(warper_img.shape))
+                    out.write(tmp)
                 # warper_img_test = warper.warp_test(output)
                 # cv2.imshow("warp_img_test",warper_img_test)
                 ret, left_start_x, right_start_x, cf_img = slidewindow.w_slidewindow(warper_img, 180)

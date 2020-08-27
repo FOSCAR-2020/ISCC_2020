@@ -63,7 +63,8 @@ def auto_drive(pid):
 
     drive_values_pub.publish(drive_value)
 
-    print("steer : ", drive_value.steering)
+    print("real_steer : ", pid)
+    print("return_steer : ", drive_value.steering)
     print("throttle : ", drive_value.throttle)
 
 def normalize(ipt, mean, std):
@@ -141,6 +142,8 @@ def main():
         cap = cv2.VideoCapture("input_video/track.avi")
     elif opt.video_idx is 4:
         cap =cv2.VideoCapture("output_video/field.avi")
+    elif opt.video_idx is 5:
+        cap = cv2.VideoCapture("output_video/2020-08-23 19:20:01.166517.avi")
     else:
         cap = cv2.VideoCapture(0)
         # video test
@@ -178,7 +181,7 @@ def main():
     pid_old = None
     steer_theta = 0
     i=0
-    x_location = 440
+    x_location = 240
 
     while True:
         ret, frame = cap.read()
@@ -222,13 +225,15 @@ def main():
                 output = cv2.resize(output, (640, 360))
                 output[output>80] = 255
                 output[output<=80] = 0
-                cv2.circle(output, (output.shape[1]/2, output.shape[0]), 9, (255,255,0), -1)
-                cv2.imshow("output_img",output)
-                print("shape_info",output.shape)
+
+                # cv2.circle(output, (output.shape[1]/2, output.shape[0]), 9, (255,255,0), -1)
+                cv2.imshow("output_img", output)
+
+                print("shape_info", output.shape)
                 # cv2.circle(output, (output.shape[0]/2, output.shape[1]/2), 9, (0,255,0), -1)
                 #warper_img = warper.warp(output)
                 warper_img = warper.warp_test(output)
-                cv2.imshow("warp_img",warper_img)
+                cv2.imshow("warp_img", warper_img)
 
                 # warper_img_test = warper.warp_test(output)
                 # cv2.imshow("warp_img_test",warper_img_test)
@@ -243,28 +248,29 @@ def main():
                     x_location = (left_x_current+right_x_current)/2
 
                     # low pass filter
-                    lpf_result = lpf(x_location, 0.3)
-                    lpf_list.append(lpf_result)
+                    steer_theta = lpf(steer_theta, 0.3)
+                    lpf_list.append(steer_theta)
 
                     # steer theta : Degree
                     print("steer theta:" ,steer_theta)
+                    #
+                    # if steer_theta<-28.0 or steer_theta >28.0:
+                    #     # auto_drive(pid_old)
+                    #     auto_drive(steer_theta)
 
-                    if steer_theta<-28.0 or steer_theta >28.0:
-                        # auto_drive(pid_old)
-                        auto_drive(steer_theta)
-
-                    else:
+                    # else:
                         # degree angle
-                        pid = round(pidcal.pid_control(lpf_result),6)
-                        pid_list.append(pid)
-                        print("pid :",pid)
-                        pid_old = pid
-                        auto_drive(steer_theta)
+                    pid = round(pidcal.pid_control(steer_theta),6)
+                    pid_list.append(pid)
+
+                    print("pid :",pid)
+
+                    pid_old = pid
+                    auto_drive(steer_theta)
 
                         # auto_drive(pid)
                 else:
                     auto_drive(steer_theta)
-
                     # auto_drive(pid)
                     pidcal.error_sum = 0
                     pidcal.error_old = 0
@@ -283,7 +289,7 @@ def main():
                 cv2.imshow("frame",frame)
 
 
-                if opt.video_idx > 2:
+                if opt.video_idx == -1:
                     print("frame.shape : {}".format(frame.shape))
                     out.write(frame)
                 # cv2.imshow("src", warper_img)
