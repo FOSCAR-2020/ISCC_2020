@@ -52,6 +52,7 @@ add_message_files(
    FILES
    PointObstacles.msg
    DetectedObstacles.msg
+   TrueObstacles.msg
  )
 
 ## Generate services in the 'srv' folder

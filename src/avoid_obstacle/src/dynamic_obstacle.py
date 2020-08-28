@@ -2,17 +2,18 @@
 
 import rospy
 from obstacle_detector.msg import Obstacles
-from avoid_obstacle.msg import PointObstacles, DetectedObstacles
+from avoid_obstacle.msg import PointObstacles, DetectedObstacles, TrueObstacles
+
 from race.msg import lane_info, drive_values
 
 drive_values_pub = rospy.Publisher('control_value', drive_values, queue_size=1)
 obstacles_pub = rospy.Publisher('detected_obs', DetectedObstacles, queue_size=1)
+trueObs_pub = rospy.Publisher('true_obs', TrueObstacles, queue_size=1)
 
 sec = 0
 
 def callback(msg):
       global sec
-      stopCheck = False
       center = []
 
       drive_value = drive_values()
@@ -26,14 +27,15 @@ def callback(msg):
             sec = msg.header.stamp.secs
       """
       detected_obs = DetectedObstacles()
+      true_obs = TrueObstacles()
+      true_obs.detected = False
 
       rospy.loginfo(len(msg.circles))
-
       for i in msg.circles:
         center.append([i.center.x, i.center.y])
         
         if i.center.x < 5 and (i.center.y > - 1.3 and i.center.y < 1.3):
-            stopCheck = True
+            true_obs.detected = True
 
         point_obs = PointObstacles()
         point_obs.x = i.center.x
@@ -48,11 +50,12 @@ def callback(msg):
 
       print("")
 
-      if stopCheck:
+      if true_obs.detected:
         drive_value.throttle = int(0)
         # print("Stop!! \n")
 
       obstacles_pub.publish(detected_obs)
+      trueObs_pub.publish(true_obs)
 
       # drive_values_pub.publish(drive_value)
 
