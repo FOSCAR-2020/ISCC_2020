@@ -27,7 +27,7 @@ void PurePursuit::getNextWaypoint()
   int path_size = static_cast<int>(waypoints.size());
 
   // if waypoints are not given, do nothing.
-  std::cout << path_size << std::endl;
+  // std::cout << path_size << std::endl;
   if (path_size == 0)
   {
     next_waypoint_number_ = -1;
@@ -42,9 +42,9 @@ void PurePursuit::getNextWaypoint()
         next_waypoint_number_ = i;
       }
     }
-    std::cout <<"********FIRST WAYPOINT*********" << std::endl;
-    std::cout << waypoints.at(next_waypoint_number_).x << " " << waypoints.at(next_waypoint_number_).y << std::endl;
-    std::cout <<"*******************************" << std::endl;
+    // std::cout <<"********FIRST WAYPOINT*********" << std::endl;
+    // std::cout << waypoints.at(next_waypoint_number_).x << " " << waypoints.at(next_waypoint_number_).y << std::endl;
+    // std::cout <<"*******************************" << std::endl;
   }
 
   // look for the next waypoint.
@@ -86,7 +86,7 @@ bool PurePursuit::canGetCurvature(double* output_kappa)
   std::cout << std::fixed;
   std::cout.precision(5);
   std::cout << "target_index :" <<next_waypoint_number_ << std::endl;
-  std::cout << "target_coordinate : " << next_target_position_.x << " " << next_target_position_.y << std::endl;
+  // std::cout << "target_coordinate : " << next_target_position_.x << " " << next_target_position_.y << std::endl;
 
   *output_kappa = calcCurvature(next_target_position_);
   return true;
