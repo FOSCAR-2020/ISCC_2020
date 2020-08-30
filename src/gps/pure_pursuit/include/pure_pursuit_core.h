@@ -66,8 +66,9 @@ private:
   void initForROS();
 
   // functions
-  void publishDriveMsg(
-    const bool& can_get_curvature, const double& kappa) const;
+  void publishDriveMsg(const bool& can_get_curvature, const double& kappa) const;
+  void publishTargetPointVisualizationMsg ();
+  void publishSteeringVisualizationMsg (const double& steering_radian) const;
 
   double computeLookaheadDistance() const;
 

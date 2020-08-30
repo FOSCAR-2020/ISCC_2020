@@ -3,13 +3,7 @@
 #include <fstream>
 #include <cstdlib>
 
-// temp
 #include <tf/transform_broadcaster.h>
-
-// for steering visualization
-double yaw = 0.0, vis_x = 0.0, vis_y =0.0, vis_z =0.0;
-static geometry_msgs::Quaternion _quat;
-///////////////////////////
 
 namespace waypoint_follower
 {
@@ -52,118 +46,66 @@ void PurePursuitNode::initForROS()
   target_point_pub = nh_.advertise<geometry_msgs::PointStamped>("target_point", 1);
 }
 
-void PurePursuitNode::run(char** argv)
-{
+void PurePursuitNode::run(char** argv) {
   ROS_INFO_STREAM("pure pursuit start");
 
   // temp
   const_lookahead_distance_ = atof(argv[2]);
   const_velocity_ = atof(argv[3]);
   final_constant = atof(argv[4]);
-
-  std::cout << "const_lookahead_distance_ : " << const_lookahead_distance_ << std::endl;
-  std::cout << "const_velocity_ : " <<const_velocity_ << std::endl;
   //////////////////////////
 
   ros::Rate loop_rate(LOOP_RATE_);
-  while (ros::ok())
-  {
+  while (ros::ok()) {
     ros::spinOnce();
 
-    if (!is_waypoint_set_)
-    {
+    if (!is_waypoint_set_) {
       setPath(argv);
       pp_.setWaypoints(global_path);
-      int len = global_path.size();
     }
 
-    if (!is_pose_set_)
-    {
+    if (!is_pose_set_) {
       loop_rate.sleep();
       continue;
     }
 
     pp_.setLookaheadDistance(computeLookaheadDistance());
 
-    // interval test
-    // if (pp_.next_waypoint_number_ >= 300) {
-    //   const_velocity_ = 6;
-    //   const_lookahead_distance_ = 5;
-    //   final_constant = 1.5;
-    // }
-    // else if (pp_.next_waypoint_number_ >= 500) {
-    //   const_velocity_ = 6;
-    //   const_lookahead_distance_ = 5;
-    //   final_constant = 2.0;
-    // }
-    /////////////////////////////////////////////
-
     double kappa = 0;
     bool can_get_curvature = pp_.canGetCurvature(&kappa);
 
-    // for target point visualization
-    geometry_msgs::PointStamped target_point_msg;
-    target_point_msg.header.frame_id = "/base_link";
-    target_point_msg.header.stamp = ros::Time::now();
-    target_point_msg.point = pp_.getPoseOfNextTarget();
-    target_point_pub.publish(target_point_msg);
-    ///////////////////////////////////
-
     publishDriveMsg(can_get_curvature, kappa);
 
-    is_pose_set_ = false;
+    // target point visualization
+    publishTargetPointVisualizationMsg();
 
+    is_pose_set_ = false;
     loop_rate.sleep();
   }
 }
 
-void PurePursuitNode::publishDriveMsg(
-  const bool& can_get_curvature, const double& kappa) const
-{
+void PurePursuitNode::publishDriveMsg(const bool& can_get_curvature, const double& kappa) const {
   race::drive_values drive_msg;
   drive_msg.throttle = can_get_curvature ? const_velocity_ : 0;
 
   double steering_radian = convertCurvatureToSteeringAngle(wheel_base_, kappa);
-  drive_msg.steering =
-    can_get_curvature ? (steering_radian * 180.0 / M_PI) * -1 * final_constant: 0;
+  drive_msg.steering = can_get_curvature ? (steering_radian * 180.0 / M_PI) * -1 * final_constant: 0;
 
-  std::cout << "steering : " << drive_msg.steering << "\tkappa : " << kappa <<std::endl;
+  // std::cout << "steering : " << drive_msg.steering << "\tkappa : " << kappa <<std::endl;
   drive_msg_pub.publish(drive_msg);
 
   // for steering visualization
-  double steering_vis = yaw + steering_radian;
-  _quat = tf::createQuaternionMsgFromYaw(steering_vis);
-  geometry_msgs::PoseStamped pose;
-  pose.header.stamp = ros::Time::now();
-  pose.header.frame_id = "/base_link";
-  pose.pose.position.x = vis_x;
-  pose.pose.position.y = vis_y;
-  pose.pose.position.z = vis_z;
-  pose.pose.orientation = _quat;
-  steering_vis_pub.publish(pose);
+  publishSteeringVisualizationMsg(steering_radian);
 }
 
-double PurePursuitNode::computeLookaheadDistance() const
-{
-  if (true)
-  {
+double PurePursuitNode::computeLookaheadDistance() const {
+  if (true) {
     return const_lookahead_distance_;
   }
 }
 
-void PurePursuitNode::callbackFromCurrentPose(
-  const geometry_msgs::PoseStampedConstPtr& msg)
-{
+void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg) {
   pp_.setCurrentPose(msg);
-
-  // for steering vis
-  yaw = atan2(2.0 * (msg->pose.orientation.w * msg->pose.orientation.z + msg->pose.orientation.x * msg->pose.orientation.y), 1.0 - 2.0 * (msg->pose.orientation.y * msg->pose.orientation.y + msg->pose.orientation.z * msg->pose.orientation.z));
-
-  vis_x = msg->pose.position.x;
-  vis_y = msg->pose.position.y;
-  vis_z = msg->pose.position.z;
-  /////////////////////
-
   is_pose_set_ = true;
 }
 
@@ -182,9 +124,29 @@ void PurePursuitNode::setPath(char** argv) {
   is_waypoint_set_ = true;
 }
 
-double convertCurvatureToSteeringAngle(
-  const double& wheel_base, const double& kappa)
-{
+void PurePursuitNode::publishTargetPointVisualizationMsg () {
+  geometry_msgs::PointStamped target_point_msg;
+  target_point_msg.header.frame_id = "/base_link";
+  target_point_msg.header.stamp = ros::Time::now();
+  target_point_msg.point = pp_.getPoseOfNextTarget();
+  target_point_pub.publish(target_point_msg);
+}
+
+void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_radian) const {
+  double yaw = atan2(2.0 * (pp_.current_pose_.orientation.w * pp_.current_pose_.orientation.z + pp_.current_pose_.orientation.x * pp_.current_pose_.orientation.y), 1.0 - 2.0 * (pp_.current_pose_.orientation.y * pp_.current_pose_.orientation.y + pp_.current_pose_.orientation.z * pp_.current_pose_.orientation.z));
+
+  double steering_vis = yaw + steering_radian;
+  geometry_msgs::Quaternion _quat = tf::createQuaternionMsgFromYaw(steering_vis);
+  geometry_msgs::PoseStamped pose;
+  pose.header.stamp = ros::Time::now();
+  pose.header.frame_id = "/base_link";
+  pose.pose.position = pp_.current_pose_.position;
+  pose.pose.orientation = _quat;
+  steering_vis_pub.publish(pose);
+}
+
+double convertCurvatureToSteeringAngle(const double& wheel_base, const double& kappa) {
   return atan(wheel_base * kappa);
 }
+
 }  // namespace waypoint_follower

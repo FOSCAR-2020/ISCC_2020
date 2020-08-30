@@ -1,8 +1,12 @@
-<!-- NOT USED -->
-<!-- TODO : add args(path, ld, velocity) and gps -->
 <launch>
-  <!-- rosrun waypoint_follower pure_pursuit -->
-  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen"> </node>
-  <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos"> </node>
-  <node pkg="convert_to_UTMK" type="main.py" name="convert_to_UTMK" output="screen"> </node>
+  <arg name="path" />
+  <arg name="ld" />
+  <arg name="vel" />
+  <arg name="final_constant" />
+
+  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path).txt $(arg ld) $(arg vel) $(arg final_constant)" />
+  <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
+  <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
+
+  <node pkg="race" type="serial_control_node" name="serial_control_node" />
 </launch>

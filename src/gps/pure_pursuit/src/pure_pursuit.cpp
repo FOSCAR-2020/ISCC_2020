@@ -18,7 +18,7 @@ double PurePursuit::calcCurvature(geometry_msgs::Point target) const
   {
     kappa = numerator / denominator;
   }
-  
+
   return kappa;
 }
 
@@ -75,7 +75,7 @@ bool PurePursuit::canGetCurvature(double* output_kappa)
 {
   // search next waypoint
   getNextWaypoint();
- 
+
   if (next_waypoint_number_ == -1)
   {
     ROS_INFO("lost next waypoint");
