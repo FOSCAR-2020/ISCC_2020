@@ -51,6 +51,9 @@ public:
   geometry_msgs::Pose current_pose_;
   std::vector<geometry_msgs::Point> waypoints;
 
+  // for main control
+  bool is_obstacle_detected;
+
   // functions
   double calcCurvature(geometry_msgs::Point target) const;
   void getNextWaypoint();

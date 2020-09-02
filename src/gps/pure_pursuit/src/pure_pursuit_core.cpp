@@ -38,6 +38,15 @@ void PurePursuitNode::initForROS()
   pose_sub = nh_.subscribe("current_pose", 1,
     &PurePursuitNode::callbackFromCurrentPose, this);
 
+  // for main control
+  // obstacle_sub = nh_.subscribe("{obstacle_topic_name}", 1,
+  //   &PurePursuitNode::callbackFromObstacle, this);
+  // obstacle_sub = nh_.subscribe("{traffic_light_topic_name}",1,
+  //   &PurePursuitNode::callbackFromTrafficLight, this);
+  // obstacle_sub = nh_.subscribe("{lane_topic_name}", 1,
+  //   &PurePursuitNode::callbackFromLane, this);
+
+
   // setup publisher
   drive_msg_pub = nh_.advertise<race::drive_values>("control_value", 1);
   steering_vis_pub = nh_.advertise<geometry_msgs::PoseStamped>("steering_vis", 1);
@@ -154,6 +163,11 @@ void PurePursuitNode::run(char** argv) {
     //     final_constant = 1.5;
     //     GO
 
+    // for 2020-09-02 test
+    // if (pp_.is_obstacle_detected) {
+    //   std::cout << "Obstacle Detected" << std::endl;
+    // }
+
     pp_.setLookaheadDistance(computeLookaheadDistance());
 
     double kappa = 0;
@@ -233,5 +247,13 @@ void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_ra
 double convertCurvatureToSteeringAngle(const double& wheel_base, const double& kappa) {
   return atan(wheel_base * kappa);
 }
+
+
+// for main control
+// void callbackFromObstacle(const {msg_type}& msg) {
+//   pp_.is_obstacle_detected =
+// }
+// void callbackFromTrafficLight(const {msg_type}& msg)
+// void callbackFromLane(const {msg_type}& msg)
 
 }  // namespace waypoint_follower

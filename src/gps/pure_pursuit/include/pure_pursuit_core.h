@@ -8,6 +8,9 @@
 #include <std_msgs/Float32.h>
 #include <ros/package.h>
 
+// for main control
+// #include <>
+
 // User defined includes
 #include <race/drive_values.h>
 #include <pure_pursuit.h>
@@ -43,6 +46,9 @@ private:
 
   // subscriber
   ros::Subscriber pose_sub;
+  ros::Subscriber obstacle_sub;
+  ros::Subscriber traffic_light_sub;
+  // ros::Subscriber lane_sub;
 
   // constant
   const int LOOP_RATE_;  // processing frequency
@@ -61,6 +67,12 @@ private:
   void callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
   //void callbackFromCurrentVelocity(
   //  const geometry_msgs::TwistStampedConstPtr& msg);
+
+  // for main control
+  // void callbackFromObstacle(const {msg_type}& msg);
+  // void callbackFromTrafficLight(const {msg_type}& msg);
+  // void callbackFromLane(const {msg_type}& msg);
+
 
   // initializer
   void initForROS();
