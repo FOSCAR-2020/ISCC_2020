@@ -40,7 +40,7 @@ for path_file in sys.argv[1].split(','):
         path_x.append(x)
         path_y.append(y)
         path_len += 1
-        print(x, y)
+        #print(x, y)
 
 rospy.sleep(1)
 
@@ -71,7 +71,7 @@ while path_len > count:
     m.id = id
     id += 1
 
-  print(count)
+  #print(count)
   publisher.publish(markerArray)
 
   count += 1
@@ -80,12 +80,15 @@ while path_len > count:
 
 # for test
 while not rospy.is_shutdown():
-  idx = int(input("input index : "))
-  target_point = PointStamped()
-  target_point.header.frame_id = "/base_link"
-  target_point.point.x = path_x[idx]
-  target_point.point.y = path_y[idx]
+  try :
+    idx = int(input("input index : "))
+    target_point = PointStamped()
+    target_point.header.frame_id = "/base_link"
+    target_point.point.x = path_x[idx]
+    target_point.point.y = path_y[idx]
 
-  target_point_pub.publish(target_point)
-  rospy.sleep(0.01)
+    target_point_pub.publish(target_point)
+  except:
+    pass
+  rospy.sleep(0.5)
 ##

@@ -82,7 +82,9 @@ private:
   void initForROS();
 
   // functions
-  void publishDriveMsg(const bool& can_get_curvature, const double& kappa) const;
+  void publishPurePursuitDriveMsg(const bool& can_get_curvature, const double& kappa) const;
+  void pulishControlMsg(double throttle, double steering) const;
+
   void publishTargetPointVisualizationMsg ();
   void publishSteeringVisualizationMsg (const double& steering_radian) const;
 

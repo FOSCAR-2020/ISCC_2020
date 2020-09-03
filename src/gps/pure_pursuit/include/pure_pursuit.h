@@ -25,10 +25,8 @@ public:
   {
     lookahead_distance_ = ld;
   }
-  void setWaypoints(const std::vector<geometry_msgs::Point>& wps)
-  {
-    waypoints = wps;
-  }
+  void setWaypoints(const std::vector<geometry_msgs::Point>& wps);
+
   void setCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
   {
     current_pose_ = msg->pose;
@@ -50,6 +48,7 @@ public:
   double lookahead_distance_;
   geometry_msgs::Pose current_pose_;
   std::vector<geometry_msgs::Point> waypoints;
+  int mode;
 
   // for main control
   bool is_obstacle_detected;

@@ -2,6 +2,7 @@
 #include <pure_pursuit_core.h>
 #include <fstream>
 #include <cstdlib>
+#include <unistd.h>
 
 #include <tf/transform_broadcaster.h>
 
@@ -96,10 +97,42 @@ void PurePursuitNode::run(char** argv) {
       continue;
     }
 
-    // if (pp_.next_waypoint_number_(300)){
-    //   pp_.setWaypoints(parking_path);
-    // }
-    // if pp_.
+    // for test
+    // Global_Path 주행하다가 특정 점부터는 parkin_path로 스위칭
+    int start_parking_idx = 500;
+    int end_parking_idx = 100;
+    int end_parking_backward_idx = 70;
+    int end_parking_full_steer_backward_idx = 30;
+    int backward_speed = -5;
+
+    if (pp_.mode == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
+      pp_.setWaypoints(parking_path);
+      pp_.mode = 1;
+    }
+    // 주차 끝
+    if (pp_.mode == 1 && pp_.reachMissionIdx(end_parking_idx)){
+      // 5초 멈춤
+      for (int i = 0; i < 50; i++) {
+        pulishControlMsg(0, 0);
+        // 0.1초
+        usleep(100000);
+      }
+
+      // 특정 지점까지는 그냥 후진
+      while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
+        pulishControlMsg(backward_speed, 0);
+      }
+      // 그 다음 지점까지는 풀조향 후진
+      while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
+        pulishControlMsg(backward_speed, 30);
+      }
+      pp_.mode = 2;
+    }
+    // 주차 빠져나오고 다시 global path로
+    if (pp_.mode == 2) {
+      pp_.setWaypoints(global_path);
+    }
+    ////////////////////////////////////////////////////////////
 
     // interval OR Mode 에 따른 상수값 바꿔주기
     // if (pp_.next_waypoint_number_ >= 300) {
@@ -178,7 +211,7 @@ void PurePursuitNode::run(char** argv) {
     double kappa = 0;
     bool can_get_curvature = pp_.canGetCurvature(&kappa);
 
-    publishDriveMsg(can_get_curvature, kappa);
+    publishPurePursuitDriveMsg(can_get_curvature, kappa);
 
     // target point visualization
     publishTargetPointVisualizationMsg();
@@ -188,15 +221,14 @@ void PurePursuitNode::run(char** argv) {
   }
 }
 
-void PurePursuitNode::publishDriveMsg(const bool& can_get_curvature, const double& kappa) const {
-  race::drive_values drive_msg;
-  drive_msg.throttle = can_get_curvature ? const_velocity_ : 0;
+void PurePursuitNode::publishPurePursuitDriveMsg(const bool& can_get_curvature, const double& kappa) const {
+  double throttle_ = can_get_curvature ? const_velocity_ : 0;
 
   double steering_radian = convertCurvatureToSteeringAngle(wheel_base_, kappa);
-  drive_msg.steering = can_get_curvature ? (steering_radian * 180.0 / M_PI) * -1 * final_constant: 0;
+  double steering_ = can_get_curvature ? (steering_radian * 180.0 / M_PI) * -1 * final_constant: 0;
 
-  // std::cout << "steering : " << drive_msg.steering << "\tkappa : " << kappa <<std::endl;
-  drive_msg_pub.publish(drive_msg);
+  // std::cout << "steering : " << steering_ << "\tkappa : " << kappa <<std::endl;
+  pulishControlMsg(throttle_, steering_);
 
   // for steering visualization
   publishSteeringVisualizationMsg(steering_radian);
@@ -207,6 +239,15 @@ double PurePursuitNode::computeLookaheadDistance() const {
     return const_lookahead_distance_;
   }
 }
+
+void PurePursuitNode::pulishControlMsg(double throttle, double steering) const
+{
+  race::drive_values drive_msg;
+  drive_msg.throttle = throttle;
+  drive_msg.steering = steering;
+  drive_msg_pub.publish(drive_msg);
+}
+
 
 void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg) {
   pp_.setCurrentPose(msg);
@@ -280,7 +321,6 @@ void path_split(const std::string& str, std::vector<std::string>& cont,
     }
     while (pos < str.length() && prev < str.length());
 }
-
 
 // for main control
 // void callbackFromObstacle(const {msg_type}& msg) {

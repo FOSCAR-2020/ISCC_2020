@@ -3,10 +3,16 @@
 namespace waypoint_follower
 {
 // Constructor
-PurePursuit::PurePursuit() : next_waypoint_number_(-1), lookahead_distance_(0) {}
+PurePursuit::PurePursuit() : next_waypoint_number_(-1), lookahead_distance_(0), mode(0){}
 
 // Destructor
 PurePursuit::~PurePursuit() {}
+
+void PurePursuit::setWaypoints(const std::vector<geometry_msgs::Point>& wps)
+{
+  waypoints = wps;
+  next_waypoint_number_ = -1;
+}
 
 double PurePursuit::calcCurvature(geometry_msgs::Point target) const
 {
