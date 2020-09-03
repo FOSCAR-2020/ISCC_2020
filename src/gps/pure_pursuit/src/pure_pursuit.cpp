@@ -92,6 +92,15 @@ bool PurePursuit::canGetCurvature(double* output_kappa)
   return true;
 }
 
+bool PurePursuit::reachMissionIdx(int misson_idx) {
+  geometry_msgs::Point mission_position = waypoints.at(misson_idx);
+  double distance = getPlaneDistance(mission_position, current_pose_.position);
+  if (distance < 0.5)
+   return true;
+  else
+   return false;
+}
+
 
 // calculation relative coordinate of point from current_pose frame
 geometry_msgs::Point calcRelativeCoordinate(geometry_msgs::Point point_msg, geometry_msgs::Pose current_pose)

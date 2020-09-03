@@ -31,15 +31,16 @@ path_y = []
 path_len = 0
 
 # with open(ROS_HOME + "/straight.txt") as f:
-with open(ROS_HOME + "/paths/" + sys.argv[1]) as f:
-  print("===========>" + ROS_HOME + "/paths/" + sys.argv[1])
-  for line in f.readlines():
-    x = round(float(line.strip().split()[0]),4)
-    y = round(float(line.strip().split()[1]),4)
-    path_x.append(x)
-    path_y.append(y)
-    path_len += 1
-    print(x, y)
+for path_file in sys.argv[1].split(','):
+    with open(ROS_HOME + "/paths/" + path_file + ".txt") as f:
+      print("===========>" + ROS_HOME + "/paths/" + path_file+ ".txt")
+      for line in f.readlines():
+        x = round(float(line.strip().split()[0]),4)
+        y = round(float(line.strip().split()[1]),4)
+        path_x.append(x)
+        path_y.append(y)
+        path_len += 1
+        print(x, y)
 
 rospy.sleep(1)
 
@@ -88,4 +89,3 @@ while not rospy.is_shutdown():
   target_point_pub.publish(target_point)
   rospy.sleep(0.01)
 ##
-

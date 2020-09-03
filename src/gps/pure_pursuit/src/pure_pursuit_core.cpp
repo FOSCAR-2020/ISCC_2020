@@ -96,6 +96,11 @@ void PurePursuitNode::run(char** argv) {
       continue;
     }
 
+    // if (pp_.next_waypoint_number_(300)){
+    //   pp_.setWaypoints(parking_path);
+    // }
+    // if pp_.
+
     // interval OR Mode 에 따른 상수값 바꿔주기
     // if (pp_.next_waypoint_number_ >= 300) {
     //   const_velocity_ = 6;
@@ -209,15 +214,28 @@ void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedCo
 }
 
 void PurePursuitNode::setPath(char** argv) {
-  std::ifstream infile(ROS_HOME + "/paths/" + argv[1]);
-  std::cout << ROS_HOME + "/paths/" + argv[1] << std::endl;
-  geometry_msgs::Point p;
+  std::vector<std::string> paths;
+  path_split(argv[1], paths, ",");
+  std::ifstream global_path_file(ROS_HOME + "/paths/" + paths[0] + ".txt");
+  //std::cout << ROS_HOME + "/paths/" + argv[1] << std::endl;
 
+  geometry_msgs::Point p;
   double x, y;
-  while(infile >> x >> y) {
+  while(global_path_file >> x >> y) {
     p.x = x;
     p.y = y;
     global_path.push_back(p);
+    std::cout << "global_path : " << global_path.back().x << ", " << global_path.back().y << std::endl;
+  }
+
+  if (paths.size() >= 2) {
+    std::ifstream parking_path_file(ROS_HOME + "/paths/" + paths[1] + ".txt");
+    while(parking_path_file >> x >> y) {
+      p.x = x;
+      p.y = y;
+      parking_path.push_back(p);
+      std::cout << "parking_path : " << parking_path.back().x << ", " << parking_path.back().y << std::endl;
+    }
   }
 
   is_waypoint_set_ = true;
@@ -246,6 +264,21 @@ void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_ra
 
 double convertCurvatureToSteeringAngle(const double& wheel_base, const double& kappa) {
   return atan(wheel_base * kappa);
+}
+
+void path_split(const std::string& str, std::vector<std::string>& cont,
+		const std::string& delim)
+{
+    size_t prev = 0, pos = 0;
+    do
+    {
+        pos = str.find(delim, prev);
+        if (pos == std::string::npos) pos = str.length();
+        std::string token = str.substr(prev, pos-prev);
+        if (!token.empty()) cont.push_back(token);
+        prev = pos + delim.length();
+    }
+    while (pos < str.length() && prev < str.length());
 }
 
 

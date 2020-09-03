@@ -57,9 +57,12 @@ public:
   // functions
   double calcCurvature(geometry_msgs::Point target) const;
   void getNextWaypoint();
+
+
+  bool reachMissionIdx(int target_idx);
 };
 
-// me add
+// also from autoware
 geometry_msgs::Point calcRelativeCoordinate(geometry_msgs::Point point_msg, geometry_msgs::Pose current_pose);
 double getPlaneDistance(geometry_msgs::Point target1, geometry_msgs::Point target2);
 tf::Vector3 point2vector(geometry_msgs::Point point);

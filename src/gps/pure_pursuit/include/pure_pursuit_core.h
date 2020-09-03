@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 
+
 namespace waypoint_follower
 {
 
@@ -61,6 +62,9 @@ private:
   double final_constant;
 
   std::vector<geometry_msgs::Point> global_path;
+  std::vector<geometry_msgs::Point> parking_path;
+  //std::vector<geometry_msgs::Point> global_path;
+
   std::string ROS_HOME;
 
   // callbacks
@@ -90,6 +94,9 @@ private:
 
 double convertCurvatureToSteeringAngle(
   const double& wheel_base, const double& kappa);
+
+void path_split(const std::string& str, std::vector<std::string>& cont,
+		const std::string& delim);
 
 }  // namespace waypoint_follower
 
