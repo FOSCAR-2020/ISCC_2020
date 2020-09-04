@@ -13,6 +13,8 @@
 
 // User defined includes
 #include <race/drive_values.h>
+#include <avoid_obstacle/DetectedObstacles.h>
+#include <avoid_obstacle/TrueObstacles.h>
 #include <pure_pursuit.h>
 
 #include <vector>
@@ -73,7 +75,7 @@ private:
   //  const geometry_msgs::TwistStampedConstPtr& msg);
 
   // for main control
-  // void callbackFromObstacle(const {msg_type}& msg);
+  void callbackFromObstacle(const avoid_obstacle::TrueObstacles& msg);
   // void callbackFromTrafficLight(const {msg_type}& msg);
   // void callbackFromLane(const {msg_type}& msg);
 

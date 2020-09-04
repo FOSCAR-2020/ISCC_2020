@@ -3,7 +3,7 @@
 namespace waypoint_follower
 {
 // Constructor
-PurePursuit::PurePursuit() : next_waypoint_number_(-1), lookahead_distance_(0), mode(0){}
+PurePursuit::PurePursuit() : next_waypoint_number_(-1), lookahead_distance_(0), mode(0), is_obstacle_detected(false){}
 
 // Destructor
 PurePursuit::~PurePursuit() {}

@@ -40,8 +40,8 @@ void PurePursuitNode::initForROS()
     &PurePursuitNode::callbackFromCurrentPose, this);
 
   // for main control
-  // obstacle_sub = nh_.subscribe("{obstacle_topic_name}", 1,
-  //   &PurePursuitNode::callbackFromObstacle, this);
+  obstacle_sub = nh_.subscribe("true_obs", 1,
+    &PurePursuitNode::callbackFromObstacle, this);
   // obstacle_sub = nh_.subscribe("{traffic_light_topic_name}",1,
   //   &PurePursuitNode::callbackFromTrafficLight, this);
   // obstacle_sub = nh_.subscribe("{lane_topic_name}", 1,
@@ -133,6 +133,16 @@ void PurePursuitNode::run(char** argv) {
       pp_.setWaypoints(global_path);
     }
     ////////////////////////////////////////////////////////////
+
+    // 동적 장애물 테스트
+    // if (pp_.mode == 0 && pp_.is_obstacle_detected) {
+    //   while (pp_.is_obstacle_detected) {
+    //     pulishControlMsg(0, 0);
+    //     // 0.1초
+    //     usleep(100000);
+    //   }
+    //   pp_.mode = 1;
+    // }
 
     // interval OR Mode 에 따른 상수값 바꿔주기
     // if (pp_.next_waypoint_number_ >= 300) {
@@ -303,6 +313,13 @@ void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_ra
   steering_vis_pub.publish(pose);
 }
 
+// for main control
+void PurePursuitNode::callbackFromObstacle(const avoid_obstacle::TrueObstacles& msg) {
+  pp_.is_obstacle_detected = msg.detected;
+}
+// void callbackFromTrafficLight(const {msg_type}& msg)
+// void callbackFromLane(const {msg_type}& msg)
+
 double convertCurvatureToSteeringAngle(const double& wheel_base, const double& kappa) {
   return atan(wheel_base * kappa);
 }
@@ -321,12 +338,5 @@ void path_split(const std::string& str, std::vector<std::string>& cont,
     }
     while (pos < str.length() && prev < str.length());
 }
-
-// for main control
-// void callbackFromObstacle(const {msg_type}& msg) {
-//   pp_.is_obstacle_detected =
-// }
-// void callbackFromTrafficLight(const {msg_type}& msg)
-// void callbackFromLane(const {msg_type}& msg)
 
 }  // namespace waypoint_follower
