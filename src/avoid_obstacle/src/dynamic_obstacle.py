@@ -63,7 +63,7 @@ def callback(msg):
       # rospy.loginfo(msg.circles)
 
 def listener():
-      rospy.init_node('static_obstacles',anonymous=True)
+      rospy.init_node('dynamic_obstacles')
       rospy.Subscriber("raw_obstacles", Obstacles, callback)
       rospy.spin()
 

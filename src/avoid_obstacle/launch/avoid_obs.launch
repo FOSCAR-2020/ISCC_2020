@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <include file="$(find sick_scan)/launch/sick_lms_1xx.launch"/>
+    <include file="$(find obstacle_detector)/launch/nodelets.launch"/>
+
+    <node pkg="avoid_obstacle" type="dynamic_obstacle.py" name="dynamic_obstacles"/>
+
+</launch>
