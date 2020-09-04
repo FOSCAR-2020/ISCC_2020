@@ -20,7 +20,7 @@
 
     <param name="min_group_points"     value="5"/>
 
-    <param name="max_group_distance"   value="0.1"/>
+    <param name="max_group_distance"   value="1.0"/>
     <param name="distance_proportion"  value="0.00628"/>
     <param name="max_split_distance"   value="0.2"/>
     <param name="max_merge_separation" value="1.0"/>
@@ -38,9 +38,9 @@
     <param name="tracking_duration"       value="2.0"/>
     <param name="min_correspondence_cost" value="0.6"/>
     <param name="std_correspondence_dev"  value="0.15"/>
-    <param name="process_variance"        value="0.1"/>  
-    <param name="process_rate_variance"   value="0.1"/>  
-    <param name="measurement_variance"    value="1.0"/>  
+    <param name="process_variance"        value="0.1"/>
+    <param name="process_rate_variance"   value="0.1"/>
+    <param name="measurement_variance"    value="1.0"/>
 
     <param name="frame_id"                value="map"/>
 
@@ -60,7 +60,7 @@
     <param name="frame_id"         value="map"/>
   </node>
 
-  <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find obstacle_detector)/resources/obstacle_detector.rviz"/>
+  <node name="rviz2" pkg="rviz" type="rviz" output="screen" args="-d $(find obstacle_detector)/resources/obstacle_detector.rviz"/>
 
 </launch>
 <!-- -->

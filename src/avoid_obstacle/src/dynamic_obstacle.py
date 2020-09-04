@@ -28,14 +28,14 @@ def callback(msg):
       """
       detected_obs = DetectedObstacles()
       true_obs = TrueObstacles()
-      true_obs.detected = False
+      true_obs.detected = 0
 
       rospy.loginfo(len(msg.circles))
       for i in msg.circles:
         center.append([i.center.x, i.center.y])
-        
-        if i.center.x < 5 and (i.center.y > - 1.3 and i.center.y < 1.3):
-            true_obs.detected = True
+
+        if i.center.x < 8 and (i.center.y > - 1.4 and i.center.y < 1.4):
+            true_obs.detected = 1
 
         point_obs = PointObstacles()
         point_obs.x = i.center.x
@@ -69,13 +69,13 @@ def listener():
 
 if __name__=='__main__':
       listener()
-      
+
 """
 Structure of Obstacles.msg
 
 <msgname>.header
 std_msgs/Header header
-  uint32 seq 
+  uint32 seq
   time stamp
   string frame_id
 

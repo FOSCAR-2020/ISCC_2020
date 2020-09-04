@@ -10,6 +10,8 @@
     <arg name="path2" value="$(arg path)" />
   </include>
 
+  <include file="$(find avoid_obstacle)/launch/avoid_obs.launch" />
+
   <arg name="node_name" default="gps_front"/>
   <arg name="param_file_name" doc="name of param file, e.g. rover" default="nmea1"/>
   <arg name="output" default="screen" />

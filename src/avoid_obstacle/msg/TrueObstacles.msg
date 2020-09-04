@@ -1,1 +1,1 @@
-bool detected
+int32 detected

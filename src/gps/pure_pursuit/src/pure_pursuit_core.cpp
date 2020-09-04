@@ -99,14 +99,16 @@ void PurePursuitNode::run(char** argv) {
 
     // for test
     // Global_Path 주행하다가 특정 점부터는 parkin_path로 스위칭
-    int start_parking_idx = 500;
-    int end_parking_idx = 100;
-    int end_parking_backward_idx = 70;
-    int end_parking_full_steer_backward_idx = 30;
+    int start_parking_idx = 140;
+    int end_parking_idx = 130;
+    int end_parking_backward_idx = 115;
+    int end_parking_full_steer_backward_idx = 85;
     int backward_speed = -5;
 
     if (pp_.mode == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
       pp_.setWaypoints(parking_path);
+      const_lookahead_distance_ = 3;
+      const_velocity_ = 3;
       pp_.mode = 1;
     }
     // 주차 끝
@@ -121,28 +123,64 @@ void PurePursuitNode::run(char** argv) {
       // 특정 지점까지는 그냥 후진
       while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
         pulishControlMsg(backward_speed, 0);
+        ros::spinOnce();
       }
       // 그 다음 지점까지는 풀조향 후진
       while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
         pulishControlMsg(backward_speed, 30);
+        ros::spinOnce();
       }
       pp_.mode = 2;
     }
     // 주차 빠져나오고 다시 global path로
     if (pp_.mode == 2) {
+      for (int i = 0; i < 30; i++) {
+        pulishControlMsg(0, 0);
+        // 0.1초
+        usleep(100000);
+      }
+
       pp_.setWaypoints(global_path);
+      const_lookahead_distance_ = 4;
+      const_velocity_ = 6;
+      pp_.mode = 3;
     }
     ////////////////////////////////////////////////////////////
 
     // 동적 장애물 테스트
-    // if (pp_.mode == 0 && pp_.is_obstacle_detected) {
-    //   while (pp_.is_obstacle_detected) {
+    // if (pp_.is_obstacle_detected) {
+    //   while(pp_.is_obstacle_detected) {
+    //
     //     pulishControlMsg(0, 0);
-    //     // 0.1초
-    //     usleep(100000);
+    //
+    //     std::cout << pp_.is_obstacle_detected << std::endl;
+    //     // 1초
+    //
+    //     //usleep(1000000);
+    //     ros::spinOnce();
+    //     loop_rate.sleep();
     //   }
+    // }
+    /////////////////////////////////////////////
+
+    // 정적 장애물 테스트
+    // if (pp_.mode == 0 && pp_.is_obstacle_detected) {
+    //   pp_.setWaypoints(parking_path);
+    //   const_lookahead_distance_ = 3;
+    //   const_velocity_ = 3;
     //   pp_.mode = 1;
     // }
+    // if (pp_.mode == 1 && pp_.reachMissionIdx(60)) {
+    //   pp_.mode = 2;
+    // }
+    //
+    // if (pp_.mode == 2 && pp_.is_obstacle_detected) {
+    //   pp_.setWaypoints(global_path);
+    //   const_lookahead_distance_ = 6;
+    //   const_velocity_ = 3;
+    //   pp_.mode = 3;
+    // }
+    /////////////////////////////////////////////
 
     // interval OR Mode 에 따른 상수값 바꿔주기
     // if (pp_.next_waypoint_number_ >= 300) {
@@ -228,6 +266,7 @@ void PurePursuitNode::run(char** argv) {
 
     is_pose_set_ = false;
     loop_rate.sleep();
+
   }
 }
 
@@ -261,6 +300,7 @@ void PurePursuitNode::pulishControlMsg(double throttle, double steering) const
 
 void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg) {
   pp_.setCurrentPose(msg);
+  std::cout << "i'm live" << std::endl;
   is_pose_set_ = true;
 }
 
@@ -316,6 +356,7 @@ void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_ra
 // for main control
 void PurePursuitNode::callbackFromObstacle(const avoid_obstacle::TrueObstacles& msg) {
   pp_.is_obstacle_detected = msg.detected;
+  std::cout << "msg.detected : " << msg.detected << std::endl;
 }
 // void callbackFromTrafficLight(const {msg_type}& msg)
 // void callbackFromLane(const {msg_type}& msg)

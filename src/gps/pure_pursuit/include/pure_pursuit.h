@@ -51,7 +51,7 @@ public:
   int mode;
 
   // for main control
-  bool is_obstacle_detected;
+  int is_obstacle_detected;
 
   // functions
   double calcCurvature(geometry_msgs::Point target) const;
