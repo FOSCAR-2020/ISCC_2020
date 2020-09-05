@@ -8,7 +8,7 @@ PurePursuit::PurePursuit() : next_waypoint_number_(-1), current_idx(-1), lookahe
 // Destructor
 PurePursuit::~PurePursuit() {}
 
-void PurePursuit::setWaypoints(const std::vector<geometry_msgs::Point>& wps)
+void PurePursuit::setWaypoints(const std::vector<std::pair<geometry_msgs::Point, int>>& wps)
 {
   waypoints = wps;
   next_waypoint_number_ = -1;
@@ -43,7 +43,7 @@ void PurePursuit::getNextWaypoint()
   if (next_waypoint_number_ == -1) {
     float min_distance = 9999999;
     for (int i = 0; i < path_size; i++) {
-      float current_distance = getPlaneDistance(waypoints.at(i), current_pose_.position);
+      float current_distance = getPlaneDistance(waypoints.at(i).first, current_pose_.position);
       if (min_distance > current_distance) {
         min_distance = current_distance;
         next_waypoint_number_ = i;
@@ -69,9 +69,9 @@ void PurePursuit::getNextWaypoint()
       break;
     }
 
-    // if there exists an effective waypoint
-    if (getPlaneDistance(waypoints.at(i), current_pose_.position) > 1) {
+    if (getPlaneDistance(waypoints.at(i).first, current_pose_.position) > 1) {
       current_idx = i;
+      mode = waypoints.at(i).second;
       break;
     }
   }
@@ -88,7 +88,7 @@ void PurePursuit::getNextWaypoint()
     }
 
     // if there exists an effective waypoint
-    if (getPlaneDistance(waypoints.at(i), current_pose_.position) > lookahead_distance_)
+    if (getPlaneDistance(waypoints.at(i).first, current_pose_.position) > lookahead_distance_)
     {
       next_waypoint_number_ = i;
       return;
@@ -111,12 +111,12 @@ bool PurePursuit::canGetCurvature(double* output_kappa)
     return false;
   }
 
-  next_target_position_ = waypoints.at(next_waypoint_number_);
-  current_position = waypoints.at(current_idx);
+  next_target_position_ = waypoints.at(next_waypoint_number_).first;
+  current_position = waypoints.at(current_idx).first;
 
-  std::cout << std::fixed;
-  std::cout.precision(5);
-  std::cout << "target_index :" <<next_waypoint_number_ << std::endl;
+  // std::cout << std::fixed;
+  // std::cout.precision(5);
+  // std::cout << "target_index :" <<next_waypoint_number_ << std::endl;
   // std::cout << "target_coordinate : " << next_target_position_.x << " " << next_target_position_.y << std::endl;
 
   *output_kappa = calcCurvature(next_target_position_);
@@ -124,7 +124,7 @@ bool PurePursuit::canGetCurvature(double* output_kappa)
 }
 
 bool PurePursuit::reachMissionIdx(int misson_idx) {
-  geometry_msgs::Point mission_position = waypoints.at(misson_idx);
+  geometry_msgs::Point mission_position = waypoints.at(misson_idx).first;
   double distance = getPlaneDistance(mission_position, current_pose_.position);
   if (distance < 0.5)
    return true;

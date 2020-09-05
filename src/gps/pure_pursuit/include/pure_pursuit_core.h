@@ -64,9 +64,9 @@ private:
   double const_velocity_;            // km/h
   double final_constant;
 
-  std::vector<geometry_msgs::Point> global_path;
-  std::vector<geometry_msgs::Point> parking_path;
-  //std::vector<geometry_msgs::Point> global_path;
+  std::vector<std::pair<geometry_msgs::Point, int>> global_path;
+  std::vector<std::pair<geometry_msgs::Point, int>> parking_path;
+  std::vector<std::pair<geometry_msgs::Point, int>> avoidance_path;
 
   std::string ROS_HOME;
 

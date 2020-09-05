@@ -25,7 +25,7 @@ public:
   {
     lookahead_distance_ = ld;
   }
-  void setWaypoints(const std::vector<geometry_msgs::Point>& wps);
+  void setWaypoints(const std::vector<std::pair<geometry_msgs::Point, int>>& wps);
 
   void setCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
   {
@@ -56,7 +56,7 @@ public:
 
   double lookahead_distance_;
   geometry_msgs::Pose current_pose_;
-  std::vector<geometry_msgs::Point> waypoints;
+  std::vector<std::pair<geometry_msgs::Point, int>> waypoints;
   int mode;
 
   // for main control
