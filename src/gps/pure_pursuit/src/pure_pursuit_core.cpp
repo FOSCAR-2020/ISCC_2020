@@ -114,21 +114,20 @@ void PurePursuitNode::run(char** argv) {
 
     // 주차 구간
     if (pp_.mode == 1) {
-      int start_parking_idx = 140;
-      int end_parking_idx = 130;
-      int end_parking_backward_idx = 115;
-      int end_parking_full_steer_backward_idx = 85;
+      int start_parking_idx = 110;
+      int end_parking_idx = 109;
+      int end_parking_backward_idx = 85;
+      int end_parking_full_steer_backward_idx = 50;
       int backward_speed = -5;
-      int flag = 0;
 
-      if (flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
+      if (pp_.mission_flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
         pp_.setWaypoints(parking_path);
         const_lookahead_distance_ = 3;
         const_velocity_ = 3;
-        flag = 1;
+        pp_.mission_flag = 1;
       }
       // 주차 끝
-      if (flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
+      if (pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
         // 5초 멈춤
         for (int i = 0; i < 50; i++) {
           pulishControlMsg(0, 0);
@@ -146,10 +145,10 @@ void PurePursuitNode::run(char** argv) {
           pulishControlMsg(backward_speed, 30);
           ros::spinOnce();
         }
-        flag = 2;
+        pp_.mission_flag = 2;
       }
       // 주차 빠져나오고 다시 global path로
-      if (flag == 2) {
+      if (pp_.mission_flag == 2) {
         for (int i = 0; i < 30; i++) {
           pulishControlMsg(0, 0);
           // 0.1초
@@ -159,35 +158,36 @@ void PurePursuitNode::run(char** argv) {
         pp_.setWaypoints(global_path);
         const_lookahead_distance_ = 4;
         const_velocity_ = 6;
-        flag = 3;
+        pp_.mission_flag = 3;
       }
     }
     /////////////////////////////////////////////
 
     // 자회전 구간
     if (pp_.mode == 2) {
+      pp_.mission_flag = 0;
       const_lookahead_distance_ = 3;
-      const_velocity_ = 4;
+      const_velocity_ = 3;
     }
 
     // 정적 장애물 구간
     if (pp_.mode == 3) {
-      int flag = 0;
-      if (flag == 0 && pp_.is_obstacle_detected) {
+      if (pp_.mission_flag == 0 && pp_.is_obstacle_detected) {
         pp_.setWaypoints(avoidance_path);
         const_lookahead_distance_ = 3;
         const_velocity_ = 3;
-        flag = 1;
+        pp_.mission_flag = 1;
       }
-      if (flag == 1 && pp_.reachMissionIdx(60)) {
-        flag = 2;
+      if (pp_.mission_flag == 1 && pp_.reachMissionIdx(40)) {
+        pp_.mission_flag = 2;
       }
 
-      if (flag == 2 && pp_.is_obstacle_detected) {
+      if (pp_.mission_flag == 2 && pp_.is_obstacle_detected) {
         pp_.setWaypoints(global_path);
         const_lookahead_distance_ = 6;
         const_velocity_ = 3;
-        flag = 3;
+        pp_.mission_flag = 3;
+        pp_.mode = 4;
       }
     }
     /////////////////////////////////////////////

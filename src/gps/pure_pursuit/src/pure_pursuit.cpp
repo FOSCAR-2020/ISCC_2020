@@ -3,7 +3,7 @@
 namespace waypoint_follower
 {
 // Constructor
-PurePursuit::PurePursuit() : next_waypoint_number_(-1), current_idx(-1), lookahead_distance_(0), mode(0), is_obstacle_detected(false){}
+PurePursuit::PurePursuit() : next_waypoint_number_(-1), current_idx(-1), lookahead_distance_(0), mode(0), mission_flag(0), is_obstacle_detected(false){}
 
 // Destructor
 PurePursuit::~PurePursuit() {}
@@ -32,7 +32,6 @@ void PurePursuit::getNextWaypoint()
 {
   int path_size = static_cast<int>(waypoints.size());
   bool current_idx_flag = false;
-
   // if waypoints are not given, do nothing.
   // std::cout << path_size << std::endl;
   if (path_size == 0)
@@ -60,7 +59,7 @@ void PurePursuit::getNextWaypoint()
     current_idx = next_waypoint_number_;
   }
 
-  // look for current vehicle index
+  // look for current vehicle in dex
   for (int i = current_idx; i < path_size; i++) {
     // if search waypoint is the last
     if (i == (path_size - 1)) {

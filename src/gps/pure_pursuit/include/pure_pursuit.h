@@ -58,6 +58,8 @@ public:
   geometry_msgs::Pose current_pose_;
   std::vector<std::pair<geometry_msgs::Point, int>> waypoints;
   int mode;
+  int mission_flag;
+  //bool current_idx_flag;
 
   // for main control
   int is_obstacle_detected;
