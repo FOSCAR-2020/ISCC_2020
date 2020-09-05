@@ -98,96 +98,119 @@ void PurePursuitNode::run(char** argv) {
       continue;
     }
 
+    pp_.setLookaheadDistance(computeLookaheadDistance());
+
+    double kappa = 0;
+    bool can_get_curvature = pp_.canGetCurvature(&kappa);
+
+    // target point visualization
+    publishTargetPointVisualizationMsg();
+    publishCurrentPointVisualizationMsg();
+
     std::cout << "*******************************" << std::endl;
     std::cout << "current index : " << pp_.current_idx << std::endl;
     std::cout << "current mode : " << pp_.mode << std::endl;
     std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
 
+    // 주차 구간
+    if (pp_.mode == 1) {
+      int start_parking_idx = 140;
+      int end_parking_idx = 130;
+      int end_parking_backward_idx = 115;
+      int end_parking_full_steer_backward_idx = 85;
+      int backward_speed = -5;
+      int flag = 0;
 
-    // for test
-    // Global_Path 주행하다가 특정 점부터는 parkin_path로 스위칭
-    // int start_parking_idx = 140;
-    // int end_parking_idx = 130;
-    // int end_parking_backward_idx = 115;
-    // int end_parking_full_steer_backward_idx = 85;
-    // int backward_speed = -5;
-    //
-    // if (pp_.mode == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
-    //   pp_.setWaypoints(parking_path);
-    //   const_lookahead_distance_ = 3;
-    //   const_velocity_ = 3;
-    //   pp_.mode = 1;
-    // }
-    // // 주차 끝
-    // if (pp_.mode == 1 && pp_.reachMissionIdx(end_parking_idx)){
-    //   // 5초 멈춤
-    //   for (int i = 0; i < 50; i++) {
-    //     pulishControlMsg(0, 0);
-    //     // 0.1초
-    //     usleep(100000);
-    //   }
-    //
-    //   // 특정 지점까지는 그냥 후진
-    //   while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
-    //     pulishControlMsg(backward_speed, 0);
-    //     ros::spinOnce();
-    //   }
-    //   // 그 다음 지점까지는 풀조향 후진
-    //   while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
-    //     pulishControlMsg(backward_speed, 30);
-    //     ros::spinOnce();
-    //   }
-    //   pp_.mode = 2;
-    // }
-    // // 주차 빠져나오고 다시 global path로
-    // if (pp_.mode == 2) {
-    //   for (int i = 0; i < 30; i++) {
-    //     pulishControlMsg(0, 0);
-    //     // 0.1초
-    //     usleep(100000);
-    //   }
-    //
-    //   pp_.setWaypoints(global_path);
-    //   const_lookahead_distance_ = 4;
-    //   const_velocity_ = 6;
-    //   pp_.mode = 3;
-    // }
-    ////////////////////////////////////////////////////////////
+      if (flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
+        pp_.setWaypoints(parking_path);
+        const_lookahead_distance_ = 3;
+        const_velocity_ = 3;
+        flag = 1;
+      }
+      // 주차 끝
+      if (flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
+        // 5초 멈춤
+        for (int i = 0; i < 50; i++) {
+          pulishControlMsg(0, 0);
+          // 0.1초
+          usleep(100000);
+        }
 
-    // 동적 장애물 테스트
-    // if (pp_.is_obstacle_detected) {
-    //   while(pp_.is_obstacle_detected) {
-    //
-    //     pulishControlMsg(0, 0);
-    //
-    //     std::cout << pp_.is_obstacle_detected << std::endl;
-    //     // 1초
-    //
-    //     //usleep(1000000);
-    //     ros::spinOnce();
-    //     loop_rate.sleep();
-    //   }
-    // }
+        // 특정 지점까지는 그냥 후진
+        while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
+          pulishControlMsg(backward_speed, 0);
+          ros::spinOnce();
+        }
+        // 그 다음 지점까지는 풀조향 후진
+        while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
+          pulishControlMsg(backward_speed, 30);
+          ros::spinOnce();
+        }
+        flag = 2;
+      }
+      // 주차 빠져나오고 다시 global path로
+      if (flag == 2) {
+        for (int i = 0; i < 30; i++) {
+          pulishControlMsg(0, 0);
+          // 0.1초
+          usleep(100000);
+        }
+
+        pp_.setWaypoints(global_path);
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
+        flag = 3;
+      }
+    }
     /////////////////////////////////////////////
 
-    // 정적 장애물 테스트
-    // if (pp_.mode == 0 && pp_.is_obstacle_detected) {
-    //   pp_.setWaypoints(parking_path);
-    //   const_lookahead_distance_ = 3;
-    //   const_velocity_ = 3;
-    //   pp_.mode = 1;
-    // }
-    // if (pp_.mode == 1 && pp_.reachMissionIdx(60)) {
-    //   pp_.mode = 2;
-    // }
-    //
-    // if (pp_.mode == 2 && pp_.is_obstacle_detected) {
-    //   pp_.setWaypoints(global_path);
-    //   const_lookahead_distance_ = 6;
-    //   const_velocity_ = 3;
-    //   pp_.mode = 3;
-    // }
+    // 자회전 구간
+    if (pp_.mode == 2) {
+      const_lookahead_distance_ = 3;
+      const_velocity_ = 4;
+    }
+
+    // 정적 장애물 구간
+    if (pp_.mode == 3) {
+      int flag = 0;
+      if (flag == 0 && pp_.is_obstacle_detected) {
+        pp_.setWaypoints(avoidance_path);
+        const_lookahead_distance_ = 3;
+        const_velocity_ = 3;
+        flag = 1;
+      }
+      if (flag == 1 && pp_.reachMissionIdx(60)) {
+        flag = 2;
+      }
+
+      if (flag == 2 && pp_.is_obstacle_detected) {
+        pp_.setWaypoints(global_path);
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 3;
+        flag = 3;
+      }
+    }
     /////////////////////////////////////////////
+
+    // 동적 장애물 구간
+    if (pp_.mode == 4) {
+      if (pp_.is_obstacle_detected) {
+        while(pp_.is_obstacle_detected) {
+
+          pulishControlMsg(0, 0);
+
+          std::cout << pp_.is_obstacle_detected << std::endl;
+          // 1초
+
+          //usleep(1000000);
+          ros::spinOnce();
+          loop_rate.sleep();
+        }
+      }
+    }
+    /////////////////////////////////////////////
+
+
 
     // interval OR Mode 에 따른 상수값 바꿔주기
     // if (pp_.next_waypoint_number_ >= 300) {
@@ -261,16 +284,7 @@ void PurePursuitNode::run(char** argv) {
     //   std::cout << "Obstacle Detected" << std::endl;
     // }
 
-    pp_.setLookaheadDistance(computeLookaheadDistance());
-
-    double kappa = 0;
-    bool can_get_curvature = pp_.canGetCurvature(&kappa);
-
     publishPurePursuitDriveMsg(can_get_curvature, kappa);
-
-    // target point visualization
-    publishTargetPointVisualizationMsg();
-    publishCurrentPointVisualizationMsg();
 
     is_pose_set_ = false;
     loop_rate.sleep();
