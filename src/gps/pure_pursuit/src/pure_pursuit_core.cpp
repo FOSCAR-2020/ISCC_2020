@@ -98,6 +98,12 @@ void PurePursuitNode::run(char** argv) {
       continue;
     }
 
+    std::cout << "*******************************" << std::endl;
+    std::cout << "current index : " << pp_.current_idx << std::endl;
+    std::cout << "current mode : " << pp_.mode << std::endl;
+    std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
+
+
     // for test
     // Global_Path 주행하다가 특정 점부터는 parkin_path로 스위칭
     // int start_parking_idx = 140;
@@ -315,24 +321,40 @@ void PurePursuitNode::setPath(char** argv) {
   // <x, y, mode>
   geometry_msgs::Point p;
   double x, y;
-  //int mode;
+  int mode;
 
-  while(global_path_file >> x >> y) {
+  while(global_path_file >> x >> y >> mode) {
     p.x = x;
     p.y = y;
     //pp_.mode = mode;
 
-    global_path.push_back(p);
-    std::cout << "global_path : " << global_path.back().x << ", " << global_path.back().y << std::endl;
+    global_path.push_back(std::make_pair(p, mode));
+    //std::cout << "global_path : " << global_path.back().x << ", " << global_path.back().y << std::endl;
   }
-
-  if (paths.size() >= 2) {
+  if (paths.size() == 3) {
     std::ifstream parking_path_file(ROS_HOME + "/paths/" + paths[1] + ".txt");
-    while(parking_path_file >> x >> y) {
+    while(parking_path_file >> x >> y >> mode) {
       p.x = x;
       p.y = y;
-      parking_path.push_back(p);
-      std::cout << "parking_path : " << parking_path.back().x << ", " << parking_path.back().y << std::endl;
+      parking_path.push_back(std::make_pair(p, mode));
+      //std::cout << "parking_path : " << parking_path.back().x << ", " << parking_path.back().y << std::endl;
+    }
+
+    std::ifstream avoidance_path_file(ROS_HOME + "/paths/" + paths[2] + ".txt");
+    while(avoidance_path_file >> x >> y >> mode) {
+      p.x = x;
+      p.y = y;
+      avoidance_path.push_back(std::make_pair(p, mode));
+      // std::cout << "avoidance_path : " << avoidance_path.back().x << ", " << parking_path.back().y << std::endl;
+    }
+  }
+  else if (paths.size() == 2) {
+    std::ifstream parking_path_file(ROS_HOME + "/paths/" + paths[1] + ".txt");
+    while(parking_path_file >> x >> y >> mode) {
+      p.x = x;
+      p.y = y;
+      parking_path.push_back(std::make_pair(p, mode));
+      // std::cout << "parking_path : " << parking_path.back().x << ", " << parking_path.back().y << std::endl;
     }
   }
 
