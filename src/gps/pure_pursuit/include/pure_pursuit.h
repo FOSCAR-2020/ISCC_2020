@@ -41,10 +41,19 @@ public:
     return next_target_position_;
   }
 
+  geometry_msgs::Point getCurrentPose() const
+  {
+    return current_position;
+  }
+
 // private:
   // variables
   int next_waypoint_number_;
+  int current_idx;
+
   geometry_msgs::Point next_target_position_;
+  geometry_msgs::Point current_position;
+
   double lookahead_distance_;
   geometry_msgs::Pose current_pose_;
   std::vector<geometry_msgs::Point> waypoints;

@@ -5,10 +5,9 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Status1
         - /Pose1
         - /PointStamped1
-        - /Marker1
+        - /current_position1
         - /steering1
       Splitter Ratio: 0.5
     Tree Height: 507
@@ -61,10 +60,10 @@ Visualization Manager:
       Color: 255; 25; 0
       Enabled: true
       Head Length: 1.5
-      Head Radius: 3
+      Head Radius: 1
       Name: Pose
       Shaft Length: 1.5
-      Shaft Radius: 1.5
+      Shaft Radius: 0.300000012
       Shape: Arrow
       Topic: /current_pose
       Unreliable: false
@@ -77,6 +76,16 @@ Visualization Manager:
       Name: PointStamped
       Radius: 0.5
       Topic: /target_point
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Class: rviz/PointStamped
+      Color: 255; 0; 255
+      Enabled: true
+      History Length: 1
+      Name: current_position
+      Radius: 0.5
+      Topic: /current_point
       Unreliable: false
       Value: true
     - Class: rviz/MarkerArray
@@ -102,10 +111,10 @@ Visualization Manager:
       Color: 138; 226; 52
       Enabled: true
       Head Length: 1.5
-      Head Radius: 3
+      Head Radius: 1
       Name: steering
       Shaft Length: 1.5
-      Shaft Radius: 1.5
+      Shaft Radius: 0.300000012
       Shape: Arrow
       Topic: /steering_vis
       Unreliable: false
@@ -134,7 +143,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: 0.00999999978
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
@@ -144,11 +153,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 15.8728485
+      Scale: 13.9538774
       Target Frame: base_link
       Value: TopDownOrtho (rviz)
-      X: 955590.938
-      Y: 1956893.38
+      X: 955541.812
+      Y: 1956949
     Saved: ~
 Window Geometry:
   Displays:

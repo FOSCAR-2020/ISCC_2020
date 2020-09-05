@@ -54,6 +54,7 @@ void PurePursuitNode::initForROS()
 
   // for visualization
   target_point_pub = nh_.advertise<geometry_msgs::PointStamped>("target_point", 1);
+  current_point_pub = nh_.advertise<geometry_msgs::PointStamped>("current_point", 1);
 }
 
 void PurePursuitNode::run(char** argv) {
@@ -77,9 +78,9 @@ void PurePursuitNode::run(char** argv) {
     // 4. 차의 현재 위치와 목표 정지점 사이의 거리를 계산해, 그 거리가 일정 수준안에 들어왔을 때 신호등의 신호에 맞춰 행동한다.
     // 5. 주차의 경우 마지막 path에 도달하면, 분기점에 도달할때까지 어떻게든 후진하고, global_path로 전환한다. (ld = 2, vel = 3 적당했음)
 
-    // 6. Mode = 0 : 주차구간
-    //    Mode = 1 : 신호없는 직진 구간
-    //    Mode = 2 : 신호없는 진진 + 우회전 구간
+    // 6. Mode = 0 : 주차구간  -> 주차 전
+    //    Mode = 1 : 신호없는 직진 구간  -> 주차후 교차로 좌회전 끝날때
+    //    Mode = 2 : 신호없는 진진 + 우회전 구간 -> 정적 장애물
     //    Mode = 3 : 신호없는 자회전 구간
     //    Mode = 4 : 신호있는 구간 (직진)
     //    Mode = 5 : 신호있는 구간 (좌회전)
@@ -99,52 +100,52 @@ void PurePursuitNode::run(char** argv) {
 
     // for test
     // Global_Path 주행하다가 특정 점부터는 parkin_path로 스위칭
-    int start_parking_idx = 140;
-    int end_parking_idx = 130;
-    int end_parking_backward_idx = 115;
-    int end_parking_full_steer_backward_idx = 85;
-    int backward_speed = -5;
-
-    if (pp_.mode == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
-      pp_.setWaypoints(parking_path);
-      const_lookahead_distance_ = 3;
-      const_velocity_ = 3;
-      pp_.mode = 1;
-    }
-    // 주차 끝
-    if (pp_.mode == 1 && pp_.reachMissionIdx(end_parking_idx)){
-      // 5초 멈춤
-      for (int i = 0; i < 50; i++) {
-        pulishControlMsg(0, 0);
-        // 0.1초
-        usleep(100000);
-      }
-
-      // 특정 지점까지는 그냥 후진
-      while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
-        pulishControlMsg(backward_speed, 0);
-        ros::spinOnce();
-      }
-      // 그 다음 지점까지는 풀조향 후진
-      while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
-        pulishControlMsg(backward_speed, 30);
-        ros::spinOnce();
-      }
-      pp_.mode = 2;
-    }
-    // 주차 빠져나오고 다시 global path로
-    if (pp_.mode == 2) {
-      for (int i = 0; i < 30; i++) {
-        pulishControlMsg(0, 0);
-        // 0.1초
-        usleep(100000);
-      }
-
-      pp_.setWaypoints(global_path);
-      const_lookahead_distance_ = 4;
-      const_velocity_ = 6;
-      pp_.mode = 3;
-    }
+    // int start_parking_idx = 140;
+    // int end_parking_idx = 130;
+    // int end_parking_backward_idx = 115;
+    // int end_parking_full_steer_backward_idx = 85;
+    // int backward_speed = -5;
+    //
+    // if (pp_.mode == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
+    //   pp_.setWaypoints(parking_path);
+    //   const_lookahead_distance_ = 3;
+    //   const_velocity_ = 3;
+    //   pp_.mode = 1;
+    // }
+    // // 주차 끝
+    // if (pp_.mode == 1 && pp_.reachMissionIdx(end_parking_idx)){
+    //   // 5초 멈춤
+    //   for (int i = 0; i < 50; i++) {
+    //     pulishControlMsg(0, 0);
+    //     // 0.1초
+    //     usleep(100000);
+    //   }
+    //
+    //   // 특정 지점까지는 그냥 후진
+    //   while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
+    //     pulishControlMsg(backward_speed, 0);
+    //     ros::spinOnce();
+    //   }
+    //   // 그 다음 지점까지는 풀조향 후진
+    //   while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
+    //     pulishControlMsg(backward_speed, 30);
+    //     ros::spinOnce();
+    //   }
+    //   pp_.mode = 2;
+    // }
+    // // 주차 빠져나오고 다시 global path로
+    // if (pp_.mode == 2) {
+    //   for (int i = 0; i < 30; i++) {
+    //     pulishControlMsg(0, 0);
+    //     // 0.1초
+    //     usleep(100000);
+    //   }
+    //
+    //   pp_.setWaypoints(global_path);
+    //   const_lookahead_distance_ = 4;
+    //   const_velocity_ = 6;
+    //   pp_.mode = 3;
+    // }
     ////////////////////////////////////////////////////////////
 
     // 동적 장애물 테스트
@@ -263,6 +264,7 @@ void PurePursuitNode::run(char** argv) {
 
     // target point visualization
     publishTargetPointVisualizationMsg();
+    publishCurrentPointVisualizationMsg();
 
     is_pose_set_ = false;
     loop_rate.sleep();
@@ -300,7 +302,6 @@ void PurePursuitNode::pulishControlMsg(double throttle, double steering) const
 
 void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg) {
   pp_.setCurrentPose(msg);
-  std::cout << "i'm live" << std::endl;
   is_pose_set_ = true;
 }
 
@@ -310,11 +311,17 @@ void PurePursuitNode::setPath(char** argv) {
   std::ifstream global_path_file(ROS_HOME + "/paths/" + paths[0] + ".txt");
   //std::cout << ROS_HOME + "/paths/" + argv[1] << std::endl;
 
+  // path.txt
+  // <x, y, mode>
   geometry_msgs::Point p;
   double x, y;
+  //int mode;
+
   while(global_path_file >> x >> y) {
     p.x = x;
     p.y = y;
+    //pp_.mode = mode;
+
     global_path.push_back(p);
     std::cout << "global_path : " << global_path.back().x << ", " << global_path.back().y << std::endl;
   }
@@ -340,6 +347,14 @@ void PurePursuitNode::publishTargetPointVisualizationMsg () {
   target_point_pub.publish(target_point_msg);
 }
 
+void PurePursuitNode::publishCurrentPointVisualizationMsg () {
+  geometry_msgs::PointStamped current_point_msg;
+  current_point_msg.header.frame_id = "/base_link";
+  current_point_msg.header.stamp = ros::Time::now();
+  current_point_msg.point = pp_.getCurrentPose();
+  current_point_pub.publish(current_point_msg);
+}
+
 void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_radian) const {
   double yaw = atan2(2.0 * (pp_.current_pose_.orientation.w * pp_.current_pose_.orientation.z + pp_.current_pose_.orientation.x * pp_.current_pose_.orientation.y), 1.0 - 2.0 * (pp_.current_pose_.orientation.y * pp_.current_pose_.orientation.y + pp_.current_pose_.orientation.z * pp_.current_pose_.orientation.z));
 
@@ -356,7 +371,7 @@ void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_ra
 // for main control
 void PurePursuitNode::callbackFromObstacle(const avoid_obstacle::TrueObstacles& msg) {
   pp_.is_obstacle_detected = msg.detected;
-  std::cout << "msg.detected : " << msg.detected << std::endl;
+  //std::cout << "msg.detected : " << msg.detected << std::endl;
 }
 // void callbackFromTrafficLight(const {msg_type}& msg)
 // void callbackFromLane(const {msg_type}& msg)

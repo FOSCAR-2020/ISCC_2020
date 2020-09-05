@@ -3,7 +3,7 @@
 namespace waypoint_follower
 {
 // Constructor
-PurePursuit::PurePursuit() : next_waypoint_number_(-1), lookahead_distance_(0), mode(0), is_obstacle_detected(false){}
+PurePursuit::PurePursuit() : next_waypoint_number_(-1), current_idx(-1), lookahead_distance_(0), mode(0), is_obstacle_detected(false){}
 
 // Destructor
 PurePursuit::~PurePursuit() {}
@@ -31,6 +31,7 @@ double PurePursuit::calcCurvature(geometry_msgs::Point target) const
 void PurePursuit::getNextWaypoint()
 {
   int path_size = static_cast<int>(waypoints.size());
+  bool current_idx_flag = false;
 
   // if waypoints are not given, do nothing.
   // std::cout << path_size << std::endl;
@@ -48,15 +49,37 @@ void PurePursuit::getNextWaypoint()
         next_waypoint_number_ = i;
       }
     }
+    current_idx_flag = true;
     // std::cout <<"********FIRST WAYPOINT*********" << std::endl;
     // std::cout << waypoints.at(next_waypoint_number_).x << " " << waypoints.at(next_waypoint_number_).y << std::endl;
     // std::cout <<"*******************************" << std::endl;
   }
 
+  // 만약 처음 초기화를 한 상황이라면
+  if (current_idx_flag) {
+    current_idx = next_waypoint_number_;
+  }
+
+  // look for current vehicle index
+  for (int i = current_idx; i < path_size; i++) {
+    // if search waypoint is the last
+    if (i == (path_size - 1)) {
+      //ROS_INFO("search waypoint is the last");
+      current_idx = i;
+      break;
+    }
+
+    // if there exists an effective waypoint
+    if (getPlaneDistance(waypoints.at(i), current_pose_.position) > 1) {
+      current_idx = i;
+      break;
+    }
+  }
+
   // look for the next waypoint.
   for (int i = next_waypoint_number_; i < path_size; i++)
-  {
     // if search waypoint is the last
+    {
     if (i == (path_size - 1))
     {
       ROS_INFO("search waypoint is the last");
@@ -89,6 +112,8 @@ bool PurePursuit::canGetCurvature(double* output_kappa)
   }
 
   next_target_position_ = waypoints.at(next_waypoint_number_);
+  current_position = waypoints.at(current_idx);
+
   std::cout << std::fixed;
   std::cout.precision(5);
   std::cout << "target_index :" <<next_waypoint_number_ << std::endl;

@@ -46,6 +46,7 @@ private:
   ros::Publisher steering_vis_pub;
 
   ros::Publisher target_point_pub;
+  ros::Publisher current_point_pub;
 
   // subscriber
   ros::Subscriber pose_sub;
@@ -88,6 +89,7 @@ private:
   void pulishControlMsg(double throttle, double steering) const;
 
   void publishTargetPointVisualizationMsg ();
+  void publishCurrentPointVisualizationMsg ();
   void publishSteeringVisualizationMsg (const double& steering_radian) const;
 
   double computeLookaheadDistance() const;
