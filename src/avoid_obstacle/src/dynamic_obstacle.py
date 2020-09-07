@@ -6,8 +6,11 @@ from avoid_obstacle.msg import PointObstacles, DetectedObstacles, TrueObstacles
 
 from race.msg import lane_info, drive_values
 
+# drive_values_publisher
 drive_values_pub = rospy.Publisher('control_value', drive_values, queue_size=1)
+# obstacles publisher
 obstacles_pub = rospy.Publisher('detected_obs', DetectedObstacles, queue_size=1)
+# obstacle present publisher : yes or no
 trueObs_pub = rospy.Publisher('true_obs', TrueObstacles, queue_size=1)
 
 sec = 0
@@ -31,6 +34,7 @@ def callback(msg):
       true_obs.detected = 0
 
       rospy.loginfo(len(msg.circles))
+
       for i in msg.circles:
         center.append([i.center.x, i.center.y])
 
