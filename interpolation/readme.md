@@ -12,6 +12,10 @@
 ./waypoint_mode.py -m number -p file\_path
 path의 모든 waypoint에 추가 번호 number를 부여 (x y -> x y number)
 
+./waypoint_mode.py -m number -r a:b -p file\_path  
+path의 a번째 waypoint부터 (b-1)번째 waypoint까지 number를 부여  
+1 base indexing (10:15 -> 9, 10, 11, 12, 13 in numpy array)
+
 # waypoint_reverse
 ./waypoint_reverse.py file\_path
 file\_path의 waypoint 리스트를 뒤집어서 변환 및 저장.
