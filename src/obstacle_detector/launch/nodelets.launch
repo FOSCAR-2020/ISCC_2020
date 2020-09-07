@@ -20,7 +20,7 @@
 
     <param name="min_group_points"     value="5"/>
 
-    <param name="max_group_distance"   value="1.0"/>
+    <param name="max_group_distance"   value="0.5"/>
     <param name="distance_proportion"  value="0.00628"/>
     <param name="max_split_distance"   value="0.2"/>
     <param name="max_merge_separation" value="1.0"/>

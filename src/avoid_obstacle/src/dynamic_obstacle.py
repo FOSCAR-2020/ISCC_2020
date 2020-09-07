@@ -43,12 +43,7 @@ def callback(msg):
         point_obs.radius = i.radius
         point_obs.true_radius = i.true_radius
 
-        print(point_obs)
-        print("")
-
         detected_obs.obstacles.append(point_obs)
-
-      print("")
 
       if true_obs.detected:
         drive_value.throttle = int(0)
@@ -65,10 +60,10 @@ def callback(msg):
 def listener():
       rospy.init_node('dynamic_obstacles')
       rospy.Subscriber("raw_obstacles", Obstacles, callback)
-      rospy.spin()
 
 if __name__=='__main__':
       listener()
+      rospy.spin()
 
 """
 Structure of Obstacles.msg
