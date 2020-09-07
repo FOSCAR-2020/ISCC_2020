@@ -73,7 +73,7 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/PointStamped
-      Color: 204; 41; 204
+      Color: 255; 0; 255
       Enabled: true
       History Length: 1
       Name: PointStamped
@@ -83,7 +83,7 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/PointStamped
-      Color: 255; 0; 255
+      Color: 255; 0; 0
       Enabled: true
       History Length: 1
       Name: current_position
@@ -157,7 +157,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0.009999999776482582
+      Angle: 0
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -167,11 +167,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 3.5081257820129395
+      Scale: 4.296093463897705
       Target Frame: base_link
       Value: TopDownOrtho (rviz)
-      X: 935604.5625
-      Y: 1916001.125
+      X: 935615.3125
+      Y: 1915932
     Saved: ~
 Window Geometry:
   Displays:

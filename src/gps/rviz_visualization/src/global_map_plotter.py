@@ -25,6 +25,7 @@ target_point_pub = rospy.Publisher("target_point", PointStamped, queue_size=100)
 
 count = 0
 MARKERS_MAX = 100
+mode = 0
 
 path_x = []
 path_y = []
@@ -39,7 +40,8 @@ for path_file in sys.argv[1].split(','):
       for line in f.readlines():
         x = round(float(line.strip().split()[0]),4)
         y = round(float(line.strip().split()[1]),4)
-        mode = int(line.strip().split()[2])
+        if len(line.strip().split()) >= 3:
+          mode = int(line.strip().split()[2])
         path_x.append(x)
         path_y.append(y)
         modes.append(mode)
@@ -64,10 +66,13 @@ while path_len > count:
   marker.color.b = 1.0
 
   if modes[count]%2 == 0:
-    marker.color.g = 0.0
+    marker.color.r = 1
+    marker.color.g = 0.5
+    marker.color.b = 0
+    
 
   if modes[count]%2 == 1:
-    marker.color.b = 0.0  
+    marker.color.b = 0.0
 
   marker.pose.orientation.w = 1.0
   marker.pose.position.x = path_x[count]
