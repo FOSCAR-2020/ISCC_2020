@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+  <arg name="path2" />
+
+  <node pkg="tf" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 0 0 0 map base_link 50" />
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rviz_visualization)/config/rviz_setting.rviz"/>
+  <!-- <node pkg="rviz_visualization" type="line_vis.py" name="line_vis" output="screen"/> -->
+  <node pkg="rviz_visualization" type="global_map_plotter.py" name="global_map_plotter" args="$(arg path2)" output="screen"/>
+  <node pkg="rviz_visualization" type="surface_plotter.py" name="surface_plotter" />
+
+</launch>
