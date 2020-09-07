@@ -30,7 +30,7 @@ from race.msg import drive_values
 
 ack_publisher = None
 car_run_speed = 0
-max_speed = 5
+max_speed = 7
 prevX = 0
 
 #drive_values_publisher = rospy.Publisher('control_value', drive_values, queue_size=1)
@@ -51,14 +51,17 @@ def auto_drive(pid):
     global car_run_speed
     global max_speed
 
-    if car_run_speed <= max_speed:
+
+    if car_run_speed > 5 and abs(pid) > 5:
+        car_run_speed -= 0.5
+    elif car_run_speed <= max_speed:
         car_run_speed += 0.1
 
     drive_value = drive_values()
 
     drive_value.throttle = int(car_run_speed)
     #drive_value.throttle = 4
-    drive_value.steering = pid*1.5
+    drive_value.steering = -pid*3
     #drive_value.steering = pid
 
     drive_values_pub.publish(drive_value)
@@ -263,17 +266,20 @@ def main():
                     pid = round(pidcal.pid_control(steer_theta),6)
                     pid_list.append(pid)
 
+                    # if car_run_speed > 5 and abs(pid) > 5.0:
+                    #     car_run_speed -= 0.5
+
                     print("pid :",pid)
 
                     pid_old = pid
-                    auto_drive(steer_theta)
+                    auto_drive(pid)
 
                         # auto_drive(pid)
                 else:
-                    auto_drive(steer_theta)
-                    # auto_drive(pid)
-                    pidcal.error_sum = 0
-                    pidcal.error_old = 0
+                    #auto_drive(steer_theta)
+                    auto_drive(pid)
+                    # pidcal.error_sum = 0
+                    # pidcal.error_old = 0
 
 
                 end_time = time.time()

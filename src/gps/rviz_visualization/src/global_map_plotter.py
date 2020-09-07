@@ -31,15 +31,16 @@ path_y = []
 path_len = 0
 
 # with open(ROS_HOME + "/straight.txt") as f:
-with open(ROS_HOME + "/paths/" + sys.argv[1]) as f:
-  print("===========>" + ROS_HOME + "/paths/" + sys.argv[1])
-  for line in f.readlines():
-    x = round(float(line.strip().split()[0]),4)
-    y = round(float(line.strip().split()[1]),4)
-    path_x.append(x)
-    path_y.append(y)
-    path_len += 1
-    print(x, y)
+for path_file in sys.argv[1].split(','):
+    with open(ROS_HOME + "/paths/" + path_file + ".txt") as f:
+      print("===========>" + ROS_HOME + "/paths/" + path_file+ ".txt")
+      for line in f.readlines():
+        x = round(float(line.strip().split()[0]),4)
+        y = round(float(line.strip().split()[1]),4)
+        path_x.append(x)
+        path_y.append(y)
+        path_len += 1
+        #print(x, y)
 
 rospy.sleep(1)
 
@@ -70,7 +71,7 @@ while path_len > count:
     m.id = id
     id += 1
 
-  print(count)
+  #print(count)
   publisher.publish(markerArray)
 
   count += 1
@@ -79,13 +80,15 @@ while path_len > count:
 
 # for test
 while not rospy.is_shutdown():
-  idx = int(input("input index : "))
-  target_point = PointStamped()
-  target_point.header.frame_id = "/base_link"
-  target_point.point.x = path_x[idx]
-  target_point.point.y = path_y[idx]
+  try :
+    idx = int(input("input index : "))
+    target_point = PointStamped()
+    target_point.header.frame_id = "/base_link"
+    target_point.point.x = path_x[idx]
+    target_point.point.y = path_y[idx]
 
-  target_point_pub.publish(target_point)
-  rospy.sleep(0.01)
+    target_point_pub.publish(target_point)
+  except:
+    pass
+  rospy.sleep(0.5)
 ##
-

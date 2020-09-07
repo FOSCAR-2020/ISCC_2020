@@ -10,6 +10,8 @@
     <arg name="path2" value="$(arg path)" />
   </include>
 
+  <include file="$(find avoid_obstacle)/launch/avoid_obs.launch" />
+
   <arg name="node_name" default="gps_front"/>
   <arg name="param_file_name" doc="name of param file, e.g. rover" default="nmea1"/>
   <arg name="output" default="screen" />
@@ -26,7 +28,7 @@
               file="$(find ublox_gps)/config/$(arg param_file_name).yaml" />
   </node>
 
-  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path).txt $(arg ld) $(arg vel) $(arg final_constant)" />
+  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path) $(arg ld) $(arg vel) $(arg final_constant)" />
   <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
   <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
 

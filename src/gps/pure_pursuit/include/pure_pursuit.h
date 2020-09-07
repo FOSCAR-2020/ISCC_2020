@@ -25,10 +25,8 @@ public:
   {
     lookahead_distance_ = ld;
   }
-  void setWaypoints(const std::vector<geometry_msgs::Point>& wps)
-  {
-    waypoints = wps;
-  }
+  void setWaypoints(const std::vector<std::pair<geometry_msgs::Point, int>>& wps);
+
   void setCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
   {
     current_pose_ = msg->pose;
@@ -43,20 +41,38 @@ public:
     return next_target_position_;
   }
 
+  geometry_msgs::Point getCurrentPose() const
+  {
+    return current_position;
+  }
+
 // private:
   // variables
   int next_waypoint_number_;
+  int current_idx;
+
   geometry_msgs::Point next_target_position_;
+  geometry_msgs::Point current_position;
+
   double lookahead_distance_;
   geometry_msgs::Pose current_pose_;
-  std::vector<geometry_msgs::Point> waypoints;
+  std::vector<std::pair<geometry_msgs::Point, int>> waypoints;
+  int mode;
+  int mission_flag;
+  //bool current_idx_flag;
+
+  // for main control
+  int is_obstacle_detected;
 
   // functions
   double calcCurvature(geometry_msgs::Point target) const;
   void getNextWaypoint();
+
+
+  bool reachMissionIdx(int target_idx);
 };
 
-// me add
+// also from autoware
 geometry_msgs::Point calcRelativeCoordinate(geometry_msgs::Point point_msg, geometry_msgs::Pose current_pose);
 double getPlaneDistance(geometry_msgs::Point target1, geometry_msgs::Point target2);
 tf::Vector3 point2vector(geometry_msgs::Point point);

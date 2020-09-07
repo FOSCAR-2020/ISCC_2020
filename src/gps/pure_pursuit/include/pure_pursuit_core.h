@@ -8,13 +8,19 @@
 #include <std_msgs/Float32.h>
 #include <ros/package.h>
 
+// for main control
+// #include <>
+
 // User defined includes
 #include <race/drive_values.h>
+#include <avoid_obstacle/DetectedObstacles.h>
+#include <avoid_obstacle/TrueObstacles.h>
 #include <pure_pursuit.h>
 
 #include <vector>
 #include <memory>
 #include <string>
+
 
 namespace waypoint_follower
 {
@@ -40,9 +46,13 @@ private:
   ros::Publisher steering_vis_pub;
 
   ros::Publisher target_point_pub;
+  ros::Publisher current_point_pub;
 
   // subscriber
   ros::Subscriber pose_sub;
+  ros::Subscriber obstacle_sub;
+  ros::Subscriber traffic_light_sub;
+  // ros::Subscriber lane_sub;
 
   // constant
   const int LOOP_RATE_;  // processing frequency
@@ -54,7 +64,10 @@ private:
   double const_velocity_;            // km/h
   double final_constant;
 
-  std::vector<geometry_msgs::Point> global_path;
+  std::vector<std::pair<geometry_msgs::Point, int>> global_path;
+  std::vector<std::pair<geometry_msgs::Point, int>> parking_path;
+  std::vector<std::pair<geometry_msgs::Point, int>> avoidance_path;
+
   std::string ROS_HOME;
 
   // callbacks
@@ -62,12 +75,22 @@ private:
   //void callbackFromCurrentVelocity(
   //  const geometry_msgs::TwistStampedConstPtr& msg);
 
+  // for main control
+  void callbackFromObstacle(const avoid_obstacle::TrueObstacles& msg);
+  // void callbackFromTrafficLight(const {msg_type}& msg);
+  // void callbackFromLane(const {msg_type}& msg);
+
+
   // initializer
   void initForROS();
 
   // functions
-  void publishDriveMsg(
-    const bool& can_get_curvature, const double& kappa) const;
+  void publishPurePursuitDriveMsg(const bool& can_get_curvature, const double& kappa) const;
+  void pulishControlMsg(double throttle, double steering) const;
+
+  void publishTargetPointVisualizationMsg ();
+  void publishCurrentPointVisualizationMsg ();
+  void publishSteeringVisualizationMsg (const double& steering_radian) const;
 
   double computeLookaheadDistance() const;
 
@@ -77,6 +100,9 @@ private:
 
 double convertCurvatureToSteeringAngle(
   const double& wheel_base, const double& kappa);
+
+void path_split(const std::string& str, std::vector<std::string>& cont,
+		const std::string& delim);
 
 }  // namespace waypoint_follower
 

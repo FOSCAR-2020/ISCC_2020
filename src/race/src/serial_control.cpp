@@ -45,8 +45,8 @@ void serialCallback(const race::drive_values::ConstPtr& msg) {
 		speed_0 = 0x00;
 		speed_1 = 0x00;
 		gear = 0x01;
-		front_brake = 0x33;
-		estop = 0x01;
+		front_brake = 0x99;
+		estop = 0x00;
 	} else{
 		gear = 0x01;
 		speed_0 = 0x00;

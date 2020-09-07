@@ -10,12 +10,12 @@
     <arg name="path2" value="$(arg path)" />
   </include>
 
-  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path).txt $(arg ld) $(arg vel) $(arg vel) $(arg final_constant)" />
+  <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" output="screen" args="$(arg path) $(arg ld) $(arg vel) $(arg vel) $(arg final_constant)" />
   <node pkg="pure_pursuit" type="coordinate2pos" name="coordinate2pos" />
   <node pkg="utmk_coordinate" type="wgs84_to_utmk.py" name="wgs84_to_utmk" />
 
   <arg name="bag" />
-  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(find rviz_visualization)/bag_files/$(arg bag).bag -r 3"/>
+  <node pkg="rosbag" type="play" name="player" args="--clock $(find rviz_visualization)/bag_files/$(arg bag).bag -r 3"/>
 
 
 </launch>

@@ -14,6 +14,7 @@ src/lane_detect/result
 
 # test image
 *.jpg
+*.png
 
 src/CMakeLists.txt
 
