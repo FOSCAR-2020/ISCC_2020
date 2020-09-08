@@ -68,7 +68,8 @@ void PurePursuit::getNextWaypoint()
       break;
     }
 
-    if (getPlaneDistance(waypoints.at(i).first, current_pose_.position) > 1) {
+    if (getPlaneDistance(waypoints.at(i).first, current_pose_.position) > 1 &&
+     getPlaneDistance(waypoints.at(i).first, current_pose_.position) < 3) {
       current_idx = i;
       mode = waypoints.at(i).second;
       break;
