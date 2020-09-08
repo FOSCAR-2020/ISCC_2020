@@ -42,6 +42,8 @@ void PurePursuitNode::initForROS()
   // for main control
   obstacle_sub = nh_.subscribe("true_obs", 1,
     &PurePursuitNode::callbackFromObstacle, this);
+  obstacle_sub2 = nh_.subscribe("detected_obs", 1,
+    &PurePursuitNode::callbackFromObstacle2, this);
   // obstacle_sub = nh_.subscribe("{traffic_light_topic_name}",1,
   //   &PurePursuitNode::callbackFromTrafficLight, this);
   // obstacle_sub = nh_.subscribe("{lane_topic_name}", 1,
@@ -190,6 +192,33 @@ void PurePursuitNode::run(char** argv) {
     //     }
     //   }
     // }
+    // 정적1
+    // if (pp_.mode == 5) {
+    //   int target_dist = 3;
+    //   double tmp_yaw_rate = 0.0;
+    //
+    //   for(int i = 0; i < pp_.obstacles.size(); i++)
+    //   {
+    //       if(pp_.obstacles[i].yaw_rate < 45.0 && pp_.obstacles[i].yaw_rate > 0){
+    //           if (pp_.obstacles[i].dist < target_dist){
+    //               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
+    //               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
+    //               first_detected = true;
+    //               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
+    //           }
+    //       }
+    //       else if(left_detected && pp_.obstacles[i].yaw_rate > -45.0 && pp_.obstacles[i].yaw_rate <= 0)
+    //       {
+    //           if(pp_.obstacles[i].dist < target_dist)
+    //           {
+    //               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
+    //               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
+    //               right_detected = true;
+    //               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
+    //           }
+    //       }
+    //   }
+    // }
     /////////////////////////////////////////////
 
     publishPurePursuitDriveMsg(can_get_curvature, kappa);
@@ -315,6 +344,13 @@ void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_ra
 void PurePursuitNode::callbackFromObstacle(const avoid_obstacle::TrueObstacles& msg) {
   pp_.is_obstacle_detected = msg.detected;
   //std::cout << "msg.detected : " << msg.detected << std::endl;
+}
+
+void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
+  for(unsigned int i = 0; i < msg.obstacles.size(); i++) {
+      Obstacle obs = Obstacle(msg.obstacles[i].x, msg.obstacles[i].y, msg.obstacles[i].radius, msg.obstacles[i].true_radius);
+      pp_.obstacles.push_back(obs);
+  }
 }
 // void callbackFromTrafficLight(const {msg_type}& msg)
 // void callbackFromLane(const {msg_type}& msg)

@@ -10,7 +10,7 @@
 
 // C++ includes
 #include <vector>
-
+#include <obstacles.h>
 
 namespace waypoint_follower
 {
@@ -63,6 +63,8 @@ public:
 
   // for main control
   int is_obstacle_detected;
+  std::vector<Obstacle> obstacles;
+
 
   // functions
   double calcCurvature(geometry_msgs::Point target) const;
