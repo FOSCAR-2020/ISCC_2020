@@ -96,6 +96,20 @@ void PurePursuitNode::run(char** argv) {
     std::cout << "current mode : " << pp_.mode << std::endl;
     std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
 
+
+    if (pp_.mode == 1) {
+      const_lookahead_distance_ = 6;
+      const_velocity_ = 15;
+    }
+    if (pp_.mode == 2) {
+      const_lookahead_distance_ = 4;
+      const_velocity_ = 6;
+    }
+    if (pp_.mode == 3) {
+      const_lookahead_distance_ = 5;
+      const_velocity_ = 10;
+    }
+
     // 주차 구간
     // if (pp_.mode == 1) {
     //   int start_parking_idx = 110;
@@ -145,8 +159,8 @@ void PurePursuitNode::run(char** argv) {
     //     pp_.mission_flag = 3;
     //   }
     // }
-    // /////////////////////////////////////////////
-    //
+    // // /////////////////////////////////////////////
+    // //
     // // 자회전 구간
     // if (pp_.mode == 2) {
     //   pp_.mission_flag = 0;
@@ -158,26 +172,25 @@ void PurePursuitNode::run(char** argv) {
     // if (pp_.mode == 3) {
     //   if (pp_.mission_flag == 0 && pp_.is_obstacle_detected) {
     //     pp_.setWaypoints(avoidance_path);
-    //     const_lookahead_distance_ = 3;
+    //     const_lookahead_distance_ = 5;
     //     const_velocity_ = 3;
     //     pp_.mission_flag = 1;
     //   }
-    //   if (pp_.mission_flag == 1 && pp_.reachMissionIdx(40)) {
+    //   if (pp_.mission_flag == 1 && pp_.reachMissionIdx(70)) {
     //     pp_.mission_flag = 2;
     //   }
     //
     //   if (pp_.mission_flag == 2 && pp_.is_obstacle_detected) {
     //     pp_.setWaypoints(global_path);
-    //     const_lookahead_distance_ = 6;
+    //     const_lookahead_distance_ = 5;
     //     const_velocity_ = 3;
     //     pp_.mission_flag = 3;
-    //     pp_.mode = 4;
     //   }
     // }
     // /////////////////////////////////////////////
     //
     // // 동적 장애물 구간
-    // if (pp_.mode == 4) {
+    // if (pp_.mode == 3) {
     //   if (pp_.is_obstacle_detected) {
     //     while(pp_.is_obstacle_detected) {
     //
@@ -218,6 +231,18 @@ void PurePursuitNode::run(char** argv) {
     //           }
     //       }
     //   }
+    // }
+
+    // path 스위칭 테스트
+    // if (pp_.mode == 3 && pp_.mission_flag == 0) {
+    //   pp_.setWaypoints(avoidance_path);
+    //   const_lookahead_distance_ = 4;
+    //   const_velocity_ = 3;
+    //   pp_.mission_flag = 1;
+    // }
+    // if (pp_.mode == 3 && pp_.mission_flag == 1 && pp_.reachMissionIdx(40)) {
+    //   pp_.setWaypoints(global_path);
+    //   pp_.mission_flag = 2;
     // }
     /////////////////////////////////////////////
 

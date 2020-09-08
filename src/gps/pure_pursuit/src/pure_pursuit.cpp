@@ -68,14 +68,25 @@ void PurePursuit::getNextWaypoint()
       break;
     }
 
-    if (getPlaneDistance(waypoints.at(i).first, current_pose_.position) > 1 &&
-     getPlaneDistance(waypoints.at(i).first, current_pose_.position) < 3) {
+    if (getPlaneDistance(waypoints.at(i).first, current_pose_.position) > 4) {
+      int path_size2 = static_cast<int>(waypoints.size());
+      float min_distance2 = 9999999;
+      for (int j = 0; j < path_size2; j++) {
+        float current_distance2 = getPlaneDistance(waypoints.at(j).first, current_pose_.position);
+        if (min_distance2 > current_distance2) {
+          min_distance2 = current_distance2;
+          current_idx = j;
+        }
+      }
+      break;
+    }
+    if (getPlaneDistance(waypoints.at(i).first, current_pose_.position) > 1) {
       current_idx = i;
       mode = waypoints.at(i).second;
       break;
     }
   }
-
+ 
   // look for the next waypoint.
   for (int i = next_waypoint_number_; i < path_size; i++)
     // if search waypoint is the last
