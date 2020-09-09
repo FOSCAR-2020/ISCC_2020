@@ -1,0 +1,21 @@
+yolo_model:
+
+  config_file:
+    name: yolov3_2.cfg
+  weight_file:
+    name: yolov3_2.weights
+  threshold:
+    value: 0.6
+  detection_classes:
+    names:
+      - 3 red
+      - 3 yellow
+      - 3 green
+      - 3 left
+      - 4 red
+      - 4 green
+      - 4 yellow
+      - 4 red left
+      - 4 left go
+      - 4 red yellow
+      
