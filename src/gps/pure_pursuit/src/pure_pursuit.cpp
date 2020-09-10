@@ -86,7 +86,7 @@ void PurePursuit::getNextWaypoint()
       break;
     }
   }
- 
+
   // look for the next waypoint.
   for (int i = next_waypoint_number_; i < path_size; i++)
     // if search waypoint is the last
@@ -137,7 +137,7 @@ bool PurePursuit::canGetCurvature(double* output_kappa)
 bool PurePursuit::reachMissionIdx(int misson_idx) {
   geometry_msgs::Point mission_position = waypoints.at(misson_idx).first;
   double distance = getPlaneDistance(mission_position, current_pose_.position);
-  if (distance < 0.5)
+  if (distance < 0.8)
    return true;
   else
    return false;

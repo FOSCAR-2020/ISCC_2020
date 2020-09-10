@@ -1,9 +1,9 @@
 yolo_model:
 
   config_file:
-    name: yolov3_2.cfg
+    name: yolov3.cfg
   weight_file:
-    name: yolov3_2.weights
+    name: yolov3.weights
   threshold:
     value: 0.6
   detection_classes:
