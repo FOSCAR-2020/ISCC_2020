@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <avoid_obstacle/DetectedObstacles.h>
 #include <avoid_obstacle/TrueObstacles.h>
-#include <iostream>
 #include <vector>
 #include <race/drive_values.h>
 #include <math.h>
@@ -12,10 +11,11 @@ ros::Publisher drive_msg_pub;
 
 bool is_detected = false;
 
-bool first_detected = false;
+int avoid_cnt = 0;
 bool left_detected = false;
+bool left_avoid = false;
 bool right_detected = false;
-bool stop_flag = false;
+bool right_avoid = false;
 
 float target_dist = 3.0;
 
@@ -81,7 +81,7 @@ void publishControlValue(int throttle, double steering) {
 
 }
 
-void detectedCallback(const avoid_obstacle::DetectedObstacles& msg){
+void detectedCallback(const avoid_obstacle::DetectedObstacles& msg) {
     tmp_yaw_rate = 0.0;
     vector<Obstacle> obstacles;
 
@@ -89,22 +89,24 @@ void detectedCallback(const avoid_obstacle::DetectedObstacles& msg){
     {   
         Obstacle obs = Obstacle(msg.obstacles[i].x, msg.obstacles[i].y, msg.obstacles[i].radius, msg.obstacles[i].true_radius);
         obstacles.push_back(obs);
-    } 
+    }
+
     ROS_INFO("------------ Node Start ------------");
-    ROS_INFO("1st Obs : [%d],  left detected : [%d]", first_detected, left_detected);
-    ROS_INFO("right detected : [%d],  stop flag : [%d]", right_detected, stop_flag);
+    ROS_INFO("right_detected : [%d],  left detected : [%d]", right_detected, left_detected);
+    ROS_INFO("right_avoid : [%d],  left_avoid : [%d]", right_avoid, left_avoid);
 
     for(int i = 0; i < obstacles.size(); i++)
     {   
-        if(obstacles[i].yaw_rate < 45.0 && obstacles[i].yaw_rate > 0){
+        if(obstacles[i].yaw_rate > 0 && obstacles[i].yaw_rate < 60.0)
+        {
             if (obstacles[i].dist < target_dist){
                 // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
                 // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-                first_detected = true;
+                left_detected = true;
                 tmp_yaw_rate = obstacles[i].yaw_rate;
             }
         }
-        else if(left_detected && obstacles[i].yaw_rate > -45.0 && obstacles[i].yaw_rate <= 0)
+        if(left_avoid && obstacles[i].yaw_rate > -45.0 && obstacles[i].yaw_rate <= 0)
         {
             if(obstacles[i].dist < target_dist)
             {
@@ -115,44 +117,11 @@ void detectedCallback(const avoid_obstacle::DetectedObstacles& msg){
             }
         }
     }
-
-    ROS_INFO("SIZE : [%d]", cnt);
 }
 
 void trueCallback(const avoid_obstacle::TrueObstacles& msg){
     is_detected = msg.detected;
-    //ROS_INFO("Detected? : [%d]", is_detected);
-    
-    if (stop_flag)
-    {
-        publishControlValue(0, 0);
-    }
-    else if (left_detected && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45)
-    {
-        ROS_INFO_STREAM("Avoid!! Left Turn!!");
-        publishControlValue(3, -28);
-    }
-    else if (left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
-        ROS_INFO_STREAM("Go Left");
-        publishControlValue(3, -28);
-    }
-    else if (first_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
-        ROS_INFO_STREAM("Avoid!! Right Turn!!");
-        publishControlValue(3, 28);
-    }
-    else{        
-        if(first_detected)
-        {
-            target_dist = 5.0;
-            left_detected = true;
-        }
-        // if(left_detected && right_detected)
-        // {
-        //     stop_flag = true;
-        // }
-        //target_dist = 3.0;
-        publishControlValue(3, 0);
-    }
+    ROS_INFO("Detected? : [%d]", is_detected);
 }
 
 int main(int argc, char **argv)
@@ -160,11 +129,37 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "obstacle_subscriber");
     ros::NodeHandle node;
 
-    ros::Subscriber sub1 = node.subscribe("/detected_obs", 1000, detectedCallback);
-    ros::Subscriber sub2 = node.subscribe("/true_obs", 1000, trueCallback);
+    ros::Subscriber sub1 = node.subscribe("/detected_obs", 10, detectedCallback);
+    ros::Subscriber sub2 = node.subscribe("/true_obs", 10, trueCallback);
     drive_msg_pub = node.advertise<race::drive_values>("control_value", 1);
-
-    //ros::Publisher
     
-    ros::spin();
+    ros::Rate loop_rate(30);
+    while(ros::ok())
+    {
+        ros::spinOnce();
+
+        if(left_avoid && right_avoid){
+            publishControlValue(0, 0);
+        }
+        else if(left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45){
+            ROS_INFO_STREAM("Second Obs Detected");
+            publishControlValue(3, -20);
+        }
+        else if(left_avoid && tmp_yaw_rate > 5 && tmp_yaw_rate < 60){
+            ROS_INFO_STREAM("Avoiding");
+            publishControlValue(3, -20);
+        }
+        else if(left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
+            ROS_INFO_STREAM("First Obs Detected");
+            publishControlValue(3, 20);
+        }
+        else{
+            if(left_detected){
+                left_avoid = true;
+            }
+            publishControlValue(3, 0);            
+        }
+
+        loop_rate.sleep();
+    }
 }
