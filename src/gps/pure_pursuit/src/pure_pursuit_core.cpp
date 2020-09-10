@@ -224,39 +224,87 @@ void PurePursuitNode::run(char** argv) {
     //     const_velocity_ = 6;
     //   }
     // }
+
     // 정적1pp_.obstacles[i].dist < target_dist
     if (pp_.mode == 3) {
-      if(left_avoid && right_avoid){
-          pulishControlMsg(0, 0);
-          //pp_.mission_flag = 0;
-      }
-      else if(left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45){
-          ROS_INFO_STREAM("Second Obs Detected");
-          pulishControlMsg(3, -20);
-          pp_.mission_flag = 4;
-      }
-      else if(left_avoid && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
-          ROS_INFO_STREAM("Avoiding");
-          pulishControlMsg(3, -14);
-          pp_.mission_flag = 3;
-      }
-      else if(left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
-          ROS_INFO_STREAM("First Obs Detected");
-          pulishControlMsg(3, 20);
-          pp_.mission_flag = 1;
-      }
-      else if(pp_.mission_flag == 1)
+      if(!pp_.static_obstacle_flag && left_detected)
       {
-        if(left_detected){
-            left_avoid = true;
-        }
-        pulishControlMsg(3, -3);
-        pp_.mission_flag = 2;
+        ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
+        pp_.static_obstacle_flag = 1;
+        pulishControlMsg(3, tmp_yaw_rate);
+        // or pulishControlMsg(3, 20);
+      }
+      else if(pp_.static_obstacle_flag == 1 && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45)
+      {
+        ROS_INFO_STREAM("Avoid Left Obstacle");
+        pulishControlMsg(3, tmp_yaw_rate);
+        // or pulishControlMsg(3, 20);
+      }
+      else if(pp_.static_obstacle_flag == 1 && !left_detected)
+      {
+        ROS_INFO_STREAM("If not left_detected & Change Flag to 2");
+        left_avoid = true;
+        pp_.static_obstacle_flag = 2;
+        pulishControlMsg(3,0);
+      }
+      else if(pp_.static_obstacle_flag == 2 && left_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 45)
+      {
+        ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
+        pulishControlMsg(3, -tmp_yaw_rate);
+      }
+      else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -45)
+      {
+        ROS_INFO_STREAM("Change Flag to 3");
+        pp_.static_obstacle_flag = 3;
+        pulishControlMsg(3, tmp_yaw_rate);
+      }
+      else if(pp_.static_obstacle_flag == 3 && left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45)
+      {
+        ROS_INFO_STREAM("Avoid Right Obstacle");
+        //publish(3, tmp_yaw_rate);
+        pulishControlMsg(3, tmp_yaw_rate);
+      }
+      else if(pp_.static_obstacle_flag == 3 && left_avoid && !right_detected)
+      {
+        ROS_INFO_STREAM("Finish the Static Obstacle 1");
+        pp_.static_obstacle_flag = 4;
+        pulishControlMsg(3,14);
       }
 
-      if(pp_.mission_flag != 0)
+      if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
         continue;
-    }
+      }
+    //   if(left_avoid && right_avoid){
+    //       pulishControlMsg(0, 0);
+    //       //pp_.mission_flag = 0;
+    //   }
+    //   else if(left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45){
+    //       ROS_INFO_STREAM("Second Obs Detected");
+    //       pulishControlMsg(3, -20);
+    //       pp_.mission_flag = 4;
+    //   }
+    //   else if(left_avoid && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
+    //       ROS_INFO_STREAM("Avoiding");
+    //       pulishControlMsg(3, -14);
+    //       pp_.mission_flag = 3;
+    //   }
+    //   else if(left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
+    //       ROS_INFO_STREAM("First Obs Detected");
+    //       pulishControlMsg(3, 20);
+    //       pp_.mission_flag = 1;
+    //   }
+    //   else if(pp_.mission_flag == 1)
+    //   {
+    //     if(left_detected){
+    //         left_avoid = true;
+    //     }
+    //     pulishControlMsg(3, -3);
+    //     pp_.mission_flag = 2;
+    //   }
+    //
+    //   if(pp_.mission_flag != 0)
+    //     continue;
+    // }
 
     // path 스위칭 테스트
     // if (pp_.mode == 3 && pp_.mission_flag == 0) {
@@ -397,22 +445,29 @@ void PurePursuitNode::callbackFromObstacle(const avoid_obstacle::TrueObstacles& 
 }
 
 void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
+  // 전역 변수 tmp_yaw_rate
   tmp_yaw_rate = 0.0;
+
   left_detected = false;
   right_detected = false;
 
+  // 모든 장애물 데이터 벡터에 저장
   for(unsigned int i = 0; i < msg.obstacles.size(); i++) {
       Obstacle obs = Obstacle(msg.obstacles[i].x, msg.obstacles[i].y, msg.obstacles[i].radius, msg.obstacles[i].true_radius);
       pp_.obstacles.push_back(obs);
   }
 
+  // left avoid flag가 true 이면 인식 범위를 5로 늘림.
+  if(left_avoid){
+    target_dist = 5.0;
+  }
+
   for(unsigned int i = 0; i < pp_.obstacles.size(); i++)
   {
-    if(left_avoid){
-      target_dist = 5.0;
-    }
+      // 전방 0도 ~ 50도 확인
       if(pp_.obstacles[i].yaw_rate > 0 && pp_.obstacles[i].yaw_rate < 50.0)
       {
+          // 전방 1m ~ target_distance 확인
           if (pp_.obstacles[i].dist < target_dist && pp_.obstacles[i].dist > min_dist){
               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
@@ -421,7 +476,9 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
               //tmp_distance = pp_.obstacles[i].dist;
           }
       }
-      if(left_avoid && pp_.obstacles[i].yaw_rate > -45.0 && pp_.obstacles[i].yaw_rate <= 0)
+
+      // 첫 장애물 통과후, 오른쪽 장애물 인식
+      if(left_avoid && pp_.obstacles[i].yaw_rate > -50.0 && pp_.obstacles[i].yaw_rate <= 0)
       {
           if(pp_.obstacles[i].dist < target_dist)
           {
@@ -432,9 +489,9 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
           }
       }
 
-      if(pp_.mission_flag == 4 && !right_detected) {
-        right_avoid = true;
-      }
+      // if(pp_.mission_flag == 4 && !right_detected) {
+      //   right_avoid = true;
+      // }
   }
 }
 // void callbackFromTrafficLight(const {msg_type}& msg)

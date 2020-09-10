@@ -64,6 +64,7 @@ public:
   // for main control
   int is_obstacle_detected;
   std::vector<Obstacle> obstacles;
+  int static_obstacle_flag;
 
 
   // functions
