@@ -106,57 +106,32 @@ void PurePursuitNode::run(char** argv) {
     publishTargetPointVisualizationMsg();
     publishCurrentPointVisualizationMsg();
 
-    std::cout << "*******************************" << std::endl;
-    std::cout << "current index : " << pp_.current_idx << std::endl;
-    std::cout << "current mode : " << pp_.mode << std::endl;
-    std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
-    std::cout << "*******************************" << std::endl;
+    // std::cout << "*******************************" << std::endl;
+    // std::cout << "current index : " << pp_.current_idx << std::endl;
+    // std::cout << "current mode : " << pp_.mode << std::endl;
+    // std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
 
-    // MODE 1 - 주차
+    // if (pp_.mode == 1) {
+    //   const_lookahead_distance_ = 6;
+    //   const_velocity_ = 15;
+    // }
+    // if (pp_.mode == 2) {
+    //   const_lookahead_distance_ = 4;
+    //   const_velocity_ = 6;
+    // }
+    // if (pp_.mode == 3) {
+    //   const_lookahead_distance_ = 5;
+    //   const_velocity_ = 10;
+    // }
+
     // 주차 구간
     if (pp_.mode == 1) {
-      // first
-      int start_parking_idx = 131;
-      int end_parking_idx = 135;
-      int end_parking_backward_idx = 110;
-      int end_parking_full_steer_backward_idx = 60;
-
-      // second
-      // int start_parking_idx = 137;
-      // int end_parking_idx = 87;
-      // int end_parking_backward_idx = 65;
-      // int end_parking_full_steer_backward_idx = 25;
-
-
-      // third
-      // int start_parking_idx = 143;
-      // int end_parking_idx = 75;
-      // int end_parking_backward_idx = 55;
-      // int end_parking_full_steer_backward_idx = 15;
-
-      // forth
-      // int start_parking_idx = 147;
-      // int end_parking_idx = 88;
-      // int end_parking_backward_idx = 63;
-      // int end_parking_full_steer_backward_idx = 20;
-
-      // fifth
-      // int start_parking_idx = 152;
-      // int end_parking_idx = 80;
-      // int end_parking_backward_idx = 57;
-      // int end_parking_full_steer_backward_idx = 20;
-
-      // sixth
-      // int start_parking_idx = 157;
-      // int end_parking_idx = 75;
-      // int end_parking_backward_idx = 62;
-      // int end_parking_full_steer_backward_idx = 25;
-
-
-      // backward_speed : -5
+      int start_parking_idx = 110;
+      int end_parking_idx = 109;
+      int end_parking_backward_idx = 85;
+      int end_parking_full_steer_backward_idx = 50;
       int backward_speed = -5;
 
-      // x < start_parking_idx < y
       if (pp_.mission_flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
         pp_.setWaypoints(parking_path);
         const_lookahead_distance_ = 3;
@@ -164,10 +139,9 @@ void PurePursuitNode::run(char** argv) {
         pp_.mission_flag = 1;
       }
       // 주차 끝
-      if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
+      if (pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
         // 5초 멈춤
-        for (int i = 0; i < 50; i++)
-        {
+        for (int i = 0; i < 50; i++) {
           pulishControlMsg(0, 0);
           // 0.1초
           usleep(100000);
@@ -199,16 +173,67 @@ void PurePursuitNode::run(char** argv) {
         pp_.mission_flag = 3;
       }
     }
-
-
-    // MODE 2 : 좌회전 구간, 신호등 X
+    // /////////////////////////////////////////////
+    //
+    // 자회전 구간
     if (pp_.mode == 2) {
       pp_.mission_flag = 0;
-      const_lookahead_distance_ = 4;
-      const_velocity_ = 6;
+      const_lookahead_distance_ = 3;
+      const_velocity_ = 3;
     }
 
-    // MODE 3 : 정적 장애물 구간(드럼통)
+    // 정적 장애물 구간
+    // if (pp_.mode == 3) {
+    //   if (pp_.mission_flag == 0 && pp_.is_obstacle_detected) {
+    //     pp_.setWaypoints(avoidance_path);
+    //     const_lookahead_distance_ = 5;
+    //     const_velocity_ = 3;
+    //     pp_.mission_flag = 1;
+    //   }
+    //   if (pp_.mission_flag == 1 && pp_.reachMissionIdx(70)) {
+    //     pp_.mission_flag = 2;
+    //   }
+    //
+    //   if (pp_.mission_flag == 2 && pp_.is_obstacle_detected) {
+    //     pp_.setWaypoints(global_path);
+    //     const_lookahead_distance_ = 5;
+    //     const_velocity_ = 3;
+    //     pp_.mission_flag = 3;
+    //   }
+    // }
+    /////////////////////////////////////////////
+
+    // 동적 장애물 구간
+    // if (pp_.mode == 3) {
+    //   if (pp_.is_obstacle_detected) {
+    //     while(pp_.is_obstacle_detected) {
+    //
+    //       pulishControlMsg(0, 0);
+    //
+    //       std::cout << pp_.is_obstacle_detected << std::endl;
+    //       // 1초
+    //
+    //       //usleep(1000000);
+    //       ros::spinOnce();
+    //       loop_rate.sleep();
+    //     }
+    //     pp_.mission_flag = 1;
+    //   }
+    //   if (pp_.mission_flag == 1) {
+    //     const_lookahead_distance_ = 4;
+    //     const_velocity_ = 6;
+    //   }
+    // }
+
+    // Print Obstacle Status
+    /*
+    std::cout << "Obstacle Flag : " << pp_.static_obstacle_flag << std::endl;
+    std::cout << "Left Detected : " << left_detected << std::endl;
+    std::cout << "Right Detected : " << right_detected << std::endl;
+    std::cout << " Left Avoid : " << left_avoid << std::endl;
+    */
+    
+    // 정적1pp_.obstacles[i].dist < target_dist
     if (pp_.mode == 3) {
       if(!pp_.static_obstacle_flag && left_detected)
       {
@@ -257,239 +282,6 @@ void PurePursuitNode::run(char** argv) {
       if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
         continue;
       }
-
-      // MODE 4
-      if (pp_.mode == 4) {
-        pp_.mission_flag = 0;
-        const_lookahead_distance_ = 4;
-        const_velocity_ = 6;
-      }
-
-      // MODE 5 : 신호등 정지
-      if (pp_.mode == 5)
-      {
-        const_lookahead_distance_ = 4;
-        const_velocity_ = 6;
-
-        // 첫 신호등 인덱스 : 330
-        if(pp_.reachMissionIdx(330) && !pp_.straight_go_flag) {
-          pulishControlMsg(0,0);
-          continue;
-        }
-      }
-
-      // MODE 6 : 교차로 직진
-      if (pp_.mode == 6) {
-        pp_.mission_flag = 0;
-        const_lookahead_distance_ = 5;
-        const_velocity_ = 8;
-      }
-
-
-      // MODE 7 : 좌회전 신호등
-      if (pp_.mode == 7)
-      {
-        const_lookahead_distance_ = 4;
-        const_velocity_ = 6;
-
-        // 첫 신호등 인덱스 : 363
-        if(pp_.reachMissionIdx(364) && !pp_.left_go_flag) {
-          pulishControlMsg(0,0);
-          continue;
-        }
-      }
-
-      // MODE 8 : 교차로 좌회전
-      if (pp_.mode == 8) {
-        pp_.mission_flag = 0;
-        const_lookahead_distance_ = 4;
-        const_velocity_ = 6;
-      }
-
-      // MODE 9 : 동적 장애물 구간
-      if (pp_.mode == 9) {
-        const_lookahead_distance_ = 4;
-        const_velocity_ = 6;
-
-        if (pp_.is_obstacle_detected && pp_.mission_flag == 0)
-        {
-          while(pp_.is_obstacle_detected) {
-
-            pulishControlMsg(0, 0);
-
-            std::cout << pp_.is_obstacle_detected << std::endl;
-            // 1초
-            //usleep(1000000);
-            ros::spinOnce();
-            loop_rate.sleep();
-          }
-          pp_.mission_flag = 1;
-        }
-      }
-
-      // MODE 10 : 교차로 우회전
-      if (pp_.mode == 10 || pp_.mode == 11) {
-        pp_.mission_flag = 0;
-        const_lookahead_distance_ = 4;
-        const_velocity_ = 6;
-      }
-
-    // MODE 12 : 정적 장애물 2 , Path switching  -- version 1
-    if (pp_.mode == 12) {
-      if (pp_.mission_flag == 0 && pp_.is_obstacle_detected) {
-        pp_.setWaypoints(avoidance_path);
-        const_lookahead_distance_ = 5;
-        const_velocity_ = 3;
-        pp_.mission_flag = 1;
-      }
-      // current_idx : 25
-      if (pp_.mission_flag == 1 && pp_.current_idx >= 25) {
-        pp_.mission_flag = 2;
-      }
-
-      if (pp_.mission_flag == 2 && pp_.is_obstacle_detected) {
-        pp_.setWaypoints(global_path);
-        const_lookahead_distance_ = 5;
-        const_velocity_ = 3;
-        pp_.mission_flag = 3;
-      }
-
-      // 신호등 인덱스 : 542
-      if(pp_.mission_flag == 3 && pp_.reachMissionIdx(542) && !pp_.straight_go_flag) {
-        pulishControlMsg(0,0);
-        continue;
-      }
-    }
-
-    // MODE 12 : 정적 장애물 2 , Path switching  -- version 2
-    // if (pp_.mode == 12) {
-    //   if (pp_.mission_flag == 0 && pp_.reachMissionIdx(70)) {
-    //     pp_.setWaypoints(avoidance_path);
-    //     const_lookahead_distance_ = 3;
-    //     const_velocity_ = 3;
-    //     pp_.mission_flag = 1;
-    //   }
-    //
-    //   if (pp_.mission_flag == 1 && pp_.is_obstacle_detected) {
-    //     pp_.setWaypoints(global_path);
-    //     const_lookahead_distance_ = 5;
-    //     const_velocity_ = 3;
-    //     pp_.mission_flag = 2;
-    //   }
-    // 신호등 인덱스 : 542
-    // if(pp_.mission_flag == 3 && pp_.reachMissionIdx(542) && !pp_.straight_go_flag) {
-    //   pulishControlMsg(0,0);
-    //   continue;
-    // }
-    // }
-
-    // MODE 13, 14 ,15
-    if (pp_.mode == 13 ||pp_.mode == 14 || pp_.mode == 15) {
-      pp_.mission_flag = 0;
-      const_lookahead_distance_ = 5;
-      const_velocity_ = 8;
-    }
-
-    // MODE 16 : 차선변경
-    if (pp_.mode == 16) {
-      pp_.mission_flag = 0;
-      const_lookahead_distance_ = 4;
-      const_velocity_ = 6;
-    }
-
-    // MODE 17 : 좌회전 신호등
-    if (pp_.mode == 17)
-    {
-      const_lookahead_distance_ = 4;
-      const_velocity_ = 6;
-
-      // 신호등 인덱스 : 795
-      if(pp_.reachMissionIdx(795) && !pp_.left_go_flag) {
-        pulishControlMsg(0,0);
-        continue;
-      }
-    }
-
-    // MODE 18 : 좌회전
-    if (pp_.mode == 18) {
-      pp_.mission_flag = 0;
-      const_lookahead_distance_ = 4;
-      const_velocity_ = 6;
-    }
-
-    // MODE 19 : 차선 변경 , 자회전 신호등
-    if (pp_.mode == 19)
-    {
-      const_lookahead_distance_ = 4;
-      const_velocity_ = 6;
-
-      // 신호등 인덱스 : 1170
-      if(pp_.reachMissionIdx(1170) && !pp_.left_go_flag) {
-        pulishControlMsg(0,0);
-        continue;
-      }
-    }
-
-
-    // MODE 20 : 직진 (부스터)
-    if (pp_.mode == 20) {
-      pp_.mission_flag = 0;
-      const_lookahead_distance_ = 6;
-      const_velocity_ = 10;
-    }
-
-    // MODE 21 : 신호등 없는 구간
-    if (pp_.mode == 21 || pp_.mode == 22) {
-      pp_.mission_flag = 0;
-      const_lookahead_distance_ = 4;
-      const_velocity_ = 6;
-    }
-
-    // MODE 23 : 신호등 구간
-    if (pp_.mode == 23)
-    {
-      const_lookahead_distance_ = 5;
-      const_velocity_ = 8;
-
-      // 신호등 인덱스 : 1594
-      if(pp_.reachMissionIdx(1594) && !pp_.straight_go_flag) {
-        pulishControlMsg(0,0);
-        continue;
-      }
-    }
-
-    // MODE 24,25 : 신호등 직진 구간
-    if (pp_.mode == 24 || pp_.mode == 25)
-    {
-      const_lookahead_distance_ = 5;
-      const_velocity_ = 8;
-
-      // 신호등 인덱스 : 1621
-      if(pp_.reachMissionIdx(1621) && !pp_.straight_go_flag) {
-        pulishControlMsg(0,0);
-        continue;
-      }
-    }
-
-    // MODE 26,27,28,29 : 직진 (부스터2)
-    if (pp_.mode == 26 || pp_.mode == 27 || pp_.mode == 28 || pp_.mode == 29) {
-      pp_.mission_flag = 0;
-      const_lookahead_distance_ = 6;
-      const_velocity_ = 10;
-    }
-
-
-
-
-    // Print Obstacle Status
-    /*
-    std::cout << "Obstacle Flag : " << pp_.static_obstacle_flag << std::endl;
-    std::cout << "Left Detected : " << left_detected << std::endl;
-    std::cout << "Right Detected : " << right_detected << std::endl;
-    std::cout << " Left Avoid : " << left_avoid << std::endl;
-    */
-
-
     //   if(left_avoid && right_avoid){
     //       pulishControlMsg(0, 0);
     //       //pp_.mission_flag = 0;
@@ -536,7 +328,10 @@ void PurePursuitNode::run(char** argv) {
     /////////////////////////////////////////////
 
     // 신호등
-
+    // if (pp_.mode == 10 && pp_.reachMissionIdx(5) && !pp_.straight_go_flag) {
+    //   pulishControlMsg(0,0);
+    //   continue;
+    // }
     // if (pp_.mode == 11 && pp_.reachMissionIdx(5) && !pp_.left_go_flag) {
     //   pulishControlMsg(0,0);
     //   continue;
