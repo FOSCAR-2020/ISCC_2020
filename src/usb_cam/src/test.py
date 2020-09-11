@@ -14,9 +14,9 @@ while(not rospy.is_shutdown() and cap.isOpened()):
     #cv2.imshow('frame',frame)
     msg = bridge.cv2_to_imgmsg(frame, 'bgr8')
     pub.publish(msg)
-
-    if cv2.waitKey(10) & 0xFF == ord('q'):
-        break
+    rospy.sleep(0.01)
+    #if cv2.waitKey(33) & 0xFF == ord('q'):
+    #    break
 
 
 cap.release()

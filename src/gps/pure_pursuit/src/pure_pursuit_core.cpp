@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <unistd.h>
+#include <algorithm>
 
 #include <tf/transform_broadcaster.h>
 
@@ -58,8 +59,8 @@ void PurePursuitNode::initForROS()
     &PurePursuitNode::callbackFromObstacle, this);
   obstacle_sub2 = nh_.subscribe("detected_obs", 1,
     &PurePursuitNode::callbackFromObstacle2, this);
-  // obstacle_sub = nh_.subscribe("{traffic_light_topic_name}",1,
-  //   &PurePursuitNode::callbackFromTrafficLight, this);
+  traffic_light_sub = nh_.subscribe("darknet_ros/bounding_boxes",1,
+    &PurePursuitNode::callbackFromTrafficLight, this);
   // obstacle_sub = nh_.subscribe("{lane_topic_name}", 1,
   //   &PurePursuitNode::callbackFromLane, this);
 
@@ -109,7 +110,6 @@ void PurePursuitNode::run(char** argv) {
     // std::cout << "current index : " << pp_.current_idx << std::endl;
     // std::cout << "current mode : " << pp_.mode << std::endl;
     // std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
-
 
     // if (pp_.mode == 1) {
     //   const_lookahead_distance_ = 6;
@@ -494,7 +494,59 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
       // }
   }
 }
-// void callbackFromTrafficLight(const {msg_type}& msg)
+void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingBoxes& msg) {
+  std::vector<darknet_ros_msgs::BoundingBox> traffic_lights = msg.bounding_boxes;
+  std::sort(traffic_lights.begin(), traffic_lights.end(), compare);
+
+  // for (unsigned int i = 0; i < traffic_lights.size(); i++) {
+  //   int xmin = traffic_lights[i].xmin;
+  //   int ymin = traffic_lights[i].ymin;
+  //   int xmax = traffic_lights[i].xmax;
+  //   int ymax = traffic_lights[i].ymax;
+  //   int area;
+  //
+  //   std::cout << "index : " << i << std::endl;
+  //   std::cout << "class name : "<<traffic_lights[i].Class << std::endl;
+  //   // std::cout << "xmin : "<<traffic_lights[i].xmin << std::endl;
+  //   // std::cout << "ymin : "<<traffic_lights[i].ymin << std::endl;
+  //   // std::cout << "ymax : "<<traffic_lights[i].xmax << std::endl;
+  //   // std::cout << "ymin : "<<traffic_lights[i].ymax << std::endl;
+  //   area = (xmax - xmin) * (ymax - ymin);
+  //   std::cout << "area : " << area << std::endl;
+  // }
+
+
+  if (traffic_lights[0].Class == "3 red" || traffic_lights[0].Class == "3 yellow" || traffic_lights[0].Class == "4 red" ||
+      traffic_lights[0].Class == "4 yellow" || traffic_lights[0].Class == "4 red yellow")
+  {
+    pp_.straight_go_flag = false;
+    pp_.left_go_flag = false;
+  }
+  else if (traffic_lights[0].Class == "3 green" || traffic_lights[0].Class == "4 green")
+  {
+    pp_.straight_go_flag = true;
+    pp_.left_go_flag = false;
+  }
+  else if (traffic_lights[0].Class == "3 left" || traffic_lights[0].Class == "4 red left")
+  {
+    pp_.straight_go_flag = false;
+    pp_.left_go_flag = true;
+  }
+  else if (traffic_lights[0].Class == "4 left go")
+  {
+    pp_.straight_go_flag = true;
+    pp_.left_go_flag = true;
+  }
+
+  // traffic test
+  // std::cout << "*******************" << std::endl << std::endl;
+  // if (pp_.straight_go_flag){
+  //   std::cout << "straight go" << std::endl;
+  // }
+  // if (pp_.left_go_flag) {
+  //   std::cout << "left go" << std::endl;
+  // }
+}
 // void callbackFromLane(const {msg_type}& msg)
 
 double convertCurvatureToSteeringAngle(const double& wheel_base, const double& kappa) {
@@ -514,6 +566,13 @@ void path_split(const std::string& str, std::vector<std::string>& cont,
         prev = pos + delim.length();
     }
     while (pos < str.length() && prev < str.length());
+}
+
+bool compare(darknet_ros_msgs::BoundingBox a, darknet_ros_msgs::BoundingBox b) {
+  int a_area = (a.ymax - a.ymin) * (a.xmax - a.xmin);
+  int b_area = (b.ymax - b.ymin) * (b.xmax - b.xmin);
+
+  return a_area > b_area ? true : false;
 }
 
 }  // namespace waypoint_follower

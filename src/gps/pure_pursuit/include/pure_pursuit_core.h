@@ -15,6 +15,8 @@
 #include <race/drive_values.h>
 #include <avoid_obstacle/DetectedObstacles.h>
 #include <avoid_obstacle/TrueObstacles.h>
+// #include <darknet_ros_msgs/BoundingBoxes.h>
+// #include <darknet_ros_msgs/BoundingBox.h>
 #include <pure_pursuit.h>
 
 #include <vector>
@@ -79,7 +81,7 @@ private:
   // for main control
   void callbackFromObstacle(const avoid_obstacle::TrueObstacles& msg);
   void callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg);
-  // void callbackFromTrafficLight(const {msg_type}& msg);
+  void callbackFromTrafficLight(const darknet_ros_msgs::BoundingBoxes& msg);
   // void callbackFromLane(const {msg_type}& msg);
 
 
@@ -105,6 +107,8 @@ double convertCurvatureToSteeringAngle(
 
 void path_split(const std::string& str, std::vector<std::string>& cont,
 		const std::string& delim);
+
+bool compare(darknet_ros_msgs::BoundingBox a, darknet_ros_msgs::BoundingBox b);
 
 }  // namespace waypoint_follower
 

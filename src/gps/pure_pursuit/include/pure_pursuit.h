@@ -11,6 +11,8 @@
 // C++ includes
 #include <vector>
 #include <obstacles.h>
+#include <darknet_ros_msgs/BoundingBox.h>
+#include <darknet_ros_msgs/BoundingBoxes.h>
 
 namespace waypoint_follower
 {
@@ -65,6 +67,9 @@ public:
   int is_obstacle_detected;
   std::vector<Obstacle> obstacles;
   int static_obstacle_flag;
+  bool straight_go_flag;
+  bool left_go_flag;
+
 
 
   // functions
