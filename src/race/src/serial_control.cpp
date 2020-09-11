@@ -72,7 +72,7 @@ int main (int argc, char** argv) {
 	ros::Publisher encoder_value_pub = nh.advertise<std_msgs::Int32>("encoder_value", 10);
 
 	try {
-		ser.setPort("/dev/ttyUSB0");
+		ser.setPort("/dev/ttyRS232");
 		ser.setBaudrate(115200);
 		serial::Timeout to = serial::Timeout::simpleTimeout(1000);
 		ser.setTimeout(to);

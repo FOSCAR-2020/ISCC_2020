@@ -224,33 +224,36 @@ void PurePursuitNode::run(char** argv) {
     //     const_velocity_ = 6;
     //   }
     // }
-
+    std::cout << "Obstacle Flag : " << pp_.static_obstacle_flag << std::endl;
+    std::cout << "Left Detected : " << left_detected << std::endl;
+    std::cout << "Right Detected : " << right_detected << std::endl;
+    std::cout << " Left Avoid : " << left_avoid << std::endl;
     // 정적1pp_.obstacles[i].dist < target_dist
     if (pp_.mode == 3) {
       if(!pp_.static_obstacle_flag && left_detected)
       {
         ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
         pp_.static_obstacle_flag = 1;
-        pulishControlMsg(3, tmp_yaw_rate);
-        // or pulishControlMsg(3, 20);
+        //pulishControlMsg(3, tmp_yaw_rate);
+        pulishControlMsg(3, 14);
       }
       else if(pp_.static_obstacle_flag == 1 && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45)
       {
         ROS_INFO_STREAM("Avoid Left Obstacle");
-        pulishControlMsg(3, tmp_yaw_rate);
-        // or pulishControlMsg(3, 20);
+        //pulishControlMsg(3, tmp_yaw_rate);
+        pulishControlMsg(3, 14);
       }
-      else if(pp_.static_obstacle_flag == 1 && !left_detected)
+      else if(pp_.static_obstacle_flag == 1 && !left_detected && !left_avoid)
       {
-        ROS_INFO_STREAM("If not left_detected & Change Flag to 2");
+        ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
         left_avoid = true;
         pp_.static_obstacle_flag = 2;
-        pulishControlMsg(3,0);
+        pulishControlMsg(3,-3);
       }
       else if(pp_.static_obstacle_flag == 2 && left_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 45)
       {
         ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
-        pulishControlMsg(3, -tmp_yaw_rate);
+        pulishControlMsg(3, -10);
       }
       else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -45)
       {
@@ -318,6 +321,16 @@ void PurePursuitNode::run(char** argv) {
     //   pp_.mission_flag = 2;
     // }
     /////////////////////////////////////////////
+
+    // 신호등
+    // if (pp_.mode == 10 && pp_.reachMissionIdx(5) && !pp_.straight_go_flag) {
+    //   pulishControlMsg(0,0);
+    //   continue;
+    // }
+    // if (pp_.mode == 11 && pp_.reachMissionIdx(5) && !pp_.left_go_flag) {
+    //   pulishControlMsg(0,0);
+    //   continue;
+    // }
 
     publishPurePursuitDriveMsg(can_get_curvature, kappa);
 
@@ -450,6 +463,7 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
 
   left_detected = false;
   right_detected = false;
+  pp_.obstacles.clear();
 
   // 모든 장애물 데이터 벡터에 저장
   for(unsigned int i = 0; i < msg.obstacles.size(); i++) {
