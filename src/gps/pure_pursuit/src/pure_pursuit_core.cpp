@@ -217,13 +217,13 @@ void PurePursuitNode::run(char** argv) {
         ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
         pp_.static_obstacle_flag = 1;
         //pulishControlMsg(3, tmp_yaw_rate);
-        pulishControlMsg(3, 14);
+        pulishControlMsg(3, 20);
       }
       else if(pp_.static_obstacle_flag == 1 && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45)
       {
         ROS_INFO_STREAM("Avoid Left Obstacle");
         //pulishControlMsg(3, tmp_yaw_rate);
-        pulishControlMsg(3, 14);
+        pulishControlMsg(3, 20);
       }
       else if(pp_.static_obstacle_flag == 1 && !left_detected && !left_avoid)
       {
@@ -235,19 +235,19 @@ void PurePursuitNode::run(char** argv) {
       else if(pp_.static_obstacle_flag == 2 && left_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 45)
       {
         ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
-        pulishControlMsg(3, -16);
+        pulishControlMsg(3, -20);
       }
-      else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -45)
+      else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -60)
       {
         ROS_INFO_STREAM("Change Flag to 3");
         pp_.static_obstacle_flag = 3;
-        pulishControlMsg(3, -28);
+        pulishControlMsg(3, -24);
       }
-      else if(pp_.static_obstacle_flag == 3 && left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45)
+      else if(pp_.static_obstacle_flag == 3 && left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -60)
       {
         ROS_INFO_STREAM("Avoid Right Obstacle");
         //publish(3, tmp_yaw_rate);
-        pulishControlMsg(3, -28);
+        pulishControlMsg(3, -24);
       }
       else if(pp_.static_obstacle_flag == 3 && left_avoid && !right_detected)
       {
@@ -707,8 +707,8 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
           }
       }
 
-      // 첫 장애물 통과후, 오른쪽 장애물 인식
-      if(left_avoid && pp_.obstacles[i].yaw_rate > -50.0 && pp_.obstacles[i].yaw_rate <= 0)
+      // 첫 장애물 통과후, 오른쪽 장애물 인식  => 전방 -60~0도 확인
+      if(left_avoid && pp_.obstacles[i].yaw_rate > -60.0 && pp_.obstacles[i].yaw_rate <= 0)
       {
           if(pp_.obstacles[i].dist < target_dist)
           {
