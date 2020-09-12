@@ -11,6 +11,7 @@ src/lane_detect/result
 *.mkv
 *.pyc
 *.mp4
+*.bag
 
 # test image
 *.jpg

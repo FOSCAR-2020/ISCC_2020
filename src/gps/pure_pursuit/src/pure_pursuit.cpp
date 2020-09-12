@@ -138,7 +138,7 @@ bool PurePursuit::canGetCurvature(double* output_kappa)
 bool PurePursuit::reachMissionIdx(int misson_idx) {
   geometry_msgs::Point mission_position = waypoints.at(misson_idx).first;
   double distance = getPlaneDistance(mission_position, current_pose_.position);
-  if (distance < 0.8)
+  if (distance < 1.0)
    return true;
   else
    return false;

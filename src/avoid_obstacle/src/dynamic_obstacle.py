@@ -38,7 +38,7 @@ def callback(msg):
       for i in msg.circles:
         center.append([i.center.x, i.center.y])
 
-        if i.center.x < 8 and (i.center.y > - 1.4 and i.center.y < 1.4):
+        if i.center.x < 5 and (i.center.y > - 1.4 and i.center.y < 1.4):
             true_obs.detected = 1
 
         point_obs = PointObstacles()

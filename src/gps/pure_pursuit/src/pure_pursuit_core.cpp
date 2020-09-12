@@ -115,11 +115,13 @@ void PurePursuitNode::run(char** argv) {
     // MODE 1 - 주차
     // 주차 구간
     if (pp_.mode == 1) {
+      const_lookahead_distance_ = 6;
+      const_velocity_ = 10;
       // first
-      int start_parking_idx = 131;
-      int end_parking_idx = 135;
-      int end_parking_backward_idx = 110;
-      int end_parking_full_steer_backward_idx = 60;
+      // int start_parking_idx = 131;
+      // int end_parking_idx = 135;
+      // int end_parking_backward_idx = 110;
+      // int end_parking_full_steer_backward_idx = 60;
 
       // second
       // int start_parking_idx = 137;
@@ -153,51 +155,51 @@ void PurePursuitNode::run(char** argv) {
       // int end_parking_full_steer_backward_idx = 25;
 
 
-      // backward_speed : -5
-      int backward_speed = -5;
-
-      // x < start_parking_idx < y
-      if (pp_.mission_flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
-        pp_.setWaypoints(parking_path);
-        const_lookahead_distance_ = 3;
-        const_velocity_ = 3;
-        pp_.mission_flag = 1;
-      }
-      // 주차 끝
-      if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
-        // 5초 멈춤
-        for (int i = 0; i < 50; i++)
-        {
-          pulishControlMsg(0, 0);
-          // 0.1초
-          usleep(100000);
-        }
-
-        // 특정 지점까지는 그냥 후진
-        while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
-          pulishControlMsg(backward_speed, 0);
-          ros::spinOnce();
-        }
-        // 그 다음 지점까지는 풀조향 후진
-        while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
-          pulishControlMsg(backward_speed, 30);
-          ros::spinOnce();
-        }
-        pp_.mission_flag = 2;
-      }
-      // 주차 빠져나오고 다시 global path로
-      if (pp_.mission_flag == 2) {
-        for (int i = 0; i < 30; i++) {
-          pulishControlMsg(0, 0);
-          // 0.1초
-          usleep(100000);
-        }
-
-        pp_.setWaypoints(global_path);
-        const_lookahead_distance_ = 4;
-        const_velocity_ = 6;
-        pp_.mission_flag = 3;
-      }
+      // // backward_speed : -5
+      // int backward_speed = -5;
+      //
+      // // x < start_parking_idx < y
+      // if (pp_.mission_flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
+      //   pp_.setWaypoints(parking_path);
+      //   const_lookahead_distance_ = 3;
+      //   const_velocity_ = 3;
+      //   pp_.mission_flag = 1;
+      // }
+      // // 주차 끝
+      // if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
+      //   // 5초 멈춤
+      //   for (int i = 0; i < 50; i++)
+      //   {
+      //     pulishControlMsg(0, 0);
+      //     // 0.1초
+      //     usleep(100000);
+      //   }
+      //
+      //   // 특정 지점까지는 그냥 후진
+      //   while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
+      //     pulishControlMsg(backward_speed, 0);
+      //     ros::spinOnce();
+      //   }
+      //   // 그 다음 지점까지는 풀조향 후진
+      //   while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
+      //     pulishControlMsg(backward_speed, 30);
+      //     ros::spinOnce();
+      //   }
+      //   pp_.mission_flag = 2;
+      // }
+      // // 주차 빠져나오고 다시 global path로
+      // if (pp_.mission_flag == 2) {
+      //   for (int i = 0; i < 30; i++) {
+      //     pulishControlMsg(0, 0);
+      //     // 0.1초
+      //     usleep(100000);
+      //   }
+      //
+      //   pp_.setWaypoints(global_path);
+      //   const_lookahead_distance_ = 4;
+      //   const_velocity_ = 6;
+      //   pp_.mission_flag = 3;
+      // }
     }
 
 
@@ -233,25 +235,25 @@ void PurePursuitNode::run(char** argv) {
       else if(pp_.static_obstacle_flag == 2 && left_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 45)
       {
         ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
-        pulishControlMsg(3, -10);
+        pulishControlMsg(3, -16);
       }
       else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -45)
       {
         ROS_INFO_STREAM("Change Flag to 3");
         pp_.static_obstacle_flag = 3;
-        pulishControlMsg(3, tmp_yaw_rate);
+        pulishControlMsg(3, -28);
       }
       else if(pp_.static_obstacle_flag == 3 && left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45)
       {
         ROS_INFO_STREAM("Avoid Right Obstacle");
         //publish(3, tmp_yaw_rate);
-        pulishControlMsg(3, tmp_yaw_rate);
+        pulishControlMsg(3, -28);
       }
       else if(pp_.static_obstacle_flag == 3 && left_avoid && !right_detected)
       {
         ROS_INFO_STREAM("Finish the Static Obstacle 1");
         pp_.static_obstacle_flag = 4;
-        pulishControlMsg(3,14);
+        pulishControlMsg(3,0);
       }
 
       if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
@@ -311,7 +313,7 @@ void PurePursuitNode::run(char** argv) {
         const_lookahead_distance_ = 4;
         const_velocity_ = 6;
 
-        if (pp_.is_obstacle_detected && pp_.mission_flag == 0)
+        if (pp_.is_obstacle_detected)
         {
           while(pp_.is_obstacle_detected) {
 
@@ -323,7 +325,7 @@ void PurePursuitNode::run(char** argv) {
             ros::spinOnce();
             loop_rate.sleep();
           }
-          pp_.mission_flag = 1;
+          // pp_.mission_flag = 1;
         }
       }
 
@@ -343,11 +345,10 @@ void PurePursuitNode::run(char** argv) {
         pp_.mission_flag = 1;
       }
       // current_idx : 25
-      if (pp_.mission_flag == 1 && pp_.current_idx >= 25) {
+      else if (pp_.mission_flag == 1 && pp_.current_idx >= 50) {
         pp_.mission_flag = 2;
       }
-
-      if (pp_.mission_flag == 2 && pp_.is_obstacle_detected) {
+      else if (pp_.mission_flag == 2 && pp_.is_obstacle_detected) {
         pp_.setWaypoints(global_path);
         const_lookahead_distance_ = 5;
         const_velocity_ = 3;
@@ -456,6 +457,11 @@ void PurePursuitNode::run(char** argv) {
         pulishControlMsg(0,0);
         continue;
       }
+      // 신호등 인덱스 : 1594
+      // if(pp_.reachMissionIdx(1590) && !pp_.straight_go_flag) {
+      //   pulishControlMsg(0,0);
+      //   continue;
+      // }
     }
 
     // MODE 24,25 : 신호등 직진 구간
