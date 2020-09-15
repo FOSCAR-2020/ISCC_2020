@@ -331,8 +331,8 @@ void PurePursuitNode::run(char** argv) {
 
       // MODE 9 : 동적 장애물 구간
       if (pp_.mode == 9) {
-        const_lookahead_distance_ = 5;
-        const_velocity_ = 8;
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
 
         if (pp_.is_obstacle_detected)
         {

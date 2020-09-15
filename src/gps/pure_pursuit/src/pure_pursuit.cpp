@@ -3,8 +3,8 @@
 namespace waypoint_follower
 {
 // Constructor
-PurePursuit::PurePursuit() : next_waypoint_number_(-1), current_idx(-1), lookahead_distance_(0), mode(0), mission_flag(0), is_obstacle_detected(false), static_obstacle_flag(0),
-                             straight_go_flag(false), left_go_flag(false) {}
+PurePursuit::PurePursuit() : next_waypoint_number_(-1), current_idx(-1), lookahead_distance_(0), mode(0), mission_flag(0), is_obstacle_detected(0), static_obstacle_flag(0),
+                             straight_go_flag(false), left_go_flag(false), is_obstacle_detected_8m(0) {}
 
 // Destructor
 PurePursuit::~PurePursuit() {}

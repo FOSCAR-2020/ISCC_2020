@@ -64,6 +64,8 @@ void PurePursuitNode::initForROS()
     &PurePursuitNode::callbackFromObstacle, this);
   obstacle_sub2 = nh_.subscribe("detected_obs", 1,
     &PurePursuitNode::callbackFromObstacle2, this);
+  obstacle_sub_8m = nh_.subscribe("true_obs_long", 1,
+    &PurePursuitNode::callbackFromObstacle_8M, this);
   traffic_light_sub = nh_.subscribe("darknet_ros/bounding_boxes",1,
     &PurePursuitNode::callbackFromTrafficLight, this);
   // obstacle_sub = nh_.subscribe("{lane_topic_name}", 1,
@@ -140,7 +142,7 @@ void PurePursuitNode::run(char** argv) {
       // int end_parking_idx = 109;
       // int end_parking_backward_idx = 85;
       // int end_parking_full_steer_backward_idx = 50;
-      int start_parking_idx = 160;
+      int start_parking_idx = 180;
       int end_parking_idx = 150;
       int end_parking_backward_idx = 125;
       int end_parking_full_steer_backward_idx = 85;
@@ -193,7 +195,7 @@ void PurePursuitNode::run(char** argv) {
     if (pp_.mode == 2) {
       pp_.mission_flag = 0;
       const_lookahead_distance_ = 3;
-      const_velocity_ = 3;
+      const_velocity_ = 5;
     }
     if (pp_.mode == 4) {
       pp_.mission_flag = 0;
@@ -207,22 +209,25 @@ void PurePursuitNode::run(char** argv) {
     }
     if (pp_.mode == 8) {
       pp_.mission_flag = 0;
-      const_lookahead_distance_ = 7;
-      const_velocity_ = 12;
+      const_lookahead_distance_ = 5;
+      const_velocity_ = 8;
     }
 
     // 정적2
-    if (pp_.mode == 6) {
+    if (pp_.mode == 12) {
       if (pp_.mission_flag >= 1) {
         std::cout << "************************" << std::endl;
         std::cout << "TIME : " << (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() << std::endl;
         std::cout << "mission flag :" << pp_.mission_flag << std::endl;
+        std::cout << "obstacles_detected : " << pp_.is_obstacle_detected << std::endl;
       }
       if (pp_.mission_flag == 0 && pp_.is_obstacle_detected) {
-        const_lookahead_distance_ = 5;
+        const_lookahead_distance_ = 4;
         const_velocity_ = 3;
         pp_.mission_flag = 1;
         obs_start = std::chrono::system_clock::now();
+        pulishControlMsg(3, 24);
+        continue;
       }
       else if (pp_.mission_flag == 1 && pp_.is_obstacle_detected) {
         //pp_.mission_flag = 2;
@@ -233,19 +238,31 @@ void PurePursuitNode::run(char** argv) {
         pp_.setWaypoints(avoidance_path);
         pp_.mission_flag = 2;
         //pulishControlMsg(0, 0);
+
+        // for test
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
         continue;
         //pulishControlMsg(3, 15);
       }
-      else if (pp_.mission_flag == 2 && pp_.is_obstacle_detected && (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() > 5.0) {
+      // avoid path
+      else if (pp_.mission_flag == 2 && pp_.is_obstacle_detected && (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() > 4.0) {
+        pp_.mission_flag = 3;
         pulishControlMsg(3, -28);
         continue;
       }
-      else if (pp_.mission_flag == 2 && !pp_.is_obstacle_detected && (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() > 16.0) {
+      else if(pp_.mission_flag == 3 && pp_.is_obstacle_detected)
+      {
+        pulishControlMsg(3, -28);
+        continue;
+      }
+      //  && (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() > 10.0
+      else if (pp_.mission_flag == 3 && !pp_.is_obstacle_detected) {
         // if (double((clock() - obs_time) /CLOCKS_PER_SEC) < 3) {
         //   continue;
         // }
         pp_.setWaypoints(global_path);
-        pp_.mission_flag = 3;
+        pp_.mission_flag = 4;
         const_lookahead_distance_ = 5;
         const_velocity_ = 6;
       }
@@ -253,25 +270,30 @@ void PurePursuitNode::run(char** argv) {
     /////////////////////////////////////////////
 
     // 동적 장애물 구간
-    if (pp_.mode == 5) {
-      if (pp_.is_obstacle_detected) {
+    if (pp_.mode == 9) {
+      const_lookahead_distance_ = 4;
+      const_velocity_ = 6;
+
+      if (pp_.is_obstacle_detected)
+      {
         while(pp_.is_obstacle_detected) {
 
           pulishControlMsg(0, 0);
 
           std::cout << pp_.is_obstacle_detected << std::endl;
           // 1초
-
           //usleep(1000000);
           ros::spinOnce();
           loop_rate.sleep();
         }
         // pp_.mission_flag = 1;
       }
-      // if (pp_.mission_flag == 1) {
-      //   const_lookahead_distance_ = 4;
-      //   const_velocity_ = 6;
-      // }
+    }
+
+    if (pp_.mode == 10 || pp_.mode == 11) {
+      pp_.mission_flag = 0;
+      const_lookahead_distance_ = 4;
+      const_velocity_ = 6;
     }
 
     // Print Obstacle Status
@@ -388,62 +410,6 @@ void PurePursuitNode::run(char** argv) {
         if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
           continue;
         }
-
-      /********************************************************************************************/
-    //   if(left_avoid && right_avoid){
-    //       pulishControlMsg(0, 0);
-    //       //pp_.mission_flag = 0;
-    //   }
-    //   else if(left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45){
-    //       ROS_INFO_STREAM("Second Obs Detected");
-    //       pulishControlMsg(3, -20);
-    //       pp_.mission_flag = 4;
-    //   }
-    //   else if(left_avoid && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
-    //       ROS_INFO_STREAM("Avoiding");
-    //       pulishControlMsg(3, -14);
-    //       pp_.mission_flag = 3;
-    //   }
-    //   else if(left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45){
-    //       ROS_INFO_STREAM("First Obs Detected");
-    //       pulishControlMsg(3, 20);
-    //       pp_.mission_flag = 1;
-    //   }
-    //   else if(pp_.mission_flag == 1)
-    //   {
-    //     if(left_detected){
-    //         left_avoid = true;
-    //     }
-    //     pulishControlMsg(3, -3);
-    //     pp_.mission_flag = 2;
-    //   }
-    //
-    //   if(pp_.mission_flag != 0)
-    //     continue;
-    // }
-
-    // path 스위칭 테스트
-    // if (pp_.mode == 3 && pp_.mission_flag == 0) {
-    //   pp_.setWaypoints(avoidance_path);
-    //   const_lookahead_distance_ = 4;
-    //   const_velocity_ = 3;
-    //   pp_.mission_flag = 1;
-    // }
-    // if (pp_.mode == 3 && pp_.mission_flag == 1 && pp_.reachMissionIdx(40)) {
-    //   pp_.setWaypoints(global_path);
-    //   pp_.mission_flag = 2;
-    // }
-    /////////////////////////////////////////////
-
-    // 신호등
-    // if (pp_.mode == 10 && pp_.reachMissionIdx(5) && !pp_.straight_go_flag) {
-    //   pulishControlMsg(0,0);
-    //   continue;
-    // }
-    // if (pp_.mode == 11 && pp_.reachMissionIdx(5) && !pp_.left_go_flag) {
-    //   pulishControlMsg(0,0);
-    //   continue;
-    // }
 
     publishPurePursuitDriveMsg(can_get_curvature, kappa);
 
@@ -564,11 +530,19 @@ void PurePursuitNode::publishSteeringVisualizationMsg (const double& steering_ra
   steering_vis_pub.publish(pose);
 }
 
-// for main control
+// 5m obstacle subscribe
 void PurePursuitNode::callbackFromObstacle(const avoid_obstacle::TrueObstacles& msg) {
   pp_.is_obstacle_detected = msg.detected;
   //std::cout << "msg.detected : " << msg.detected << std::endl;
 }
+
+// 5m obstacle subscribe
+void PurePursuitNode::callbackFromObstacle_8M(const avoid_obstacle::TrueObstacles& msg) {
+  pp_.is_obstacle_detected_8m = msg.detected;
+  //std::cout << "msg.detected : " << msg.detected << std::endl;
+}
+
+
 
 // void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
 //   // 전역 변수 tmp_yaw_rate
