@@ -12,6 +12,8 @@ drive_values_pub = rospy.Publisher('control_value', drive_values, queue_size=1)
 obstacles_pub = rospy.Publisher('detected_obs', DetectedObstacles, queue_size=1)
 # obstacle present publisher : yes or no
 trueObs_pub = rospy.Publisher('true_obs', TrueObstacles, queue_size=1)
+# obstacle present publisher : yes or no
+trueObs_pub_long = rospy.Publisher('true_obs_long', TrueObstacles, queue_size=1)
 
 sec = 0
 
@@ -32,6 +34,9 @@ def callback(msg):
       detected_obs = DetectedObstacles()
       true_obs = TrueObstacles()
       true_obs.detected = 0
+      true_obs_long = TrueObstacles()
+      true_obs_long.detected = 0
+      
 
       rospy.loginfo(len(msg.circles))
 
@@ -40,6 +45,9 @@ def callback(msg):
 
         if i.center.x < 5 and (i.center.y > - 1.4 and i.center.y < 1.4):
             true_obs.detected = 1
+
+        if i.center.x < 8 and (i.center.y > - 1.4 and i.center.y < 1.4):
+            true_obs_long.detected = 1
 
         point_obs = PointObstacles()
         point_obs.x = i.center.x
@@ -55,6 +63,7 @@ def callback(msg):
 
       obstacles_pub.publish(detected_obs)
       trueObs_pub.publish(true_obs)
+      trueObs_pub_long.publish(true_obs_long)
 
       # drive_values_pub.publish(drive_value)
 

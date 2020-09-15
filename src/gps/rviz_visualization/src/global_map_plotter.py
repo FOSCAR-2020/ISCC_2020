@@ -38,8 +38,8 @@ for path_file in sys.argv[1].split(','):
     with open(ROS_HOME + "/paths/" + path_file + ".txt") as f:
       print("===========>" + ROS_HOME + "/paths/" + path_file+ ".txt")
       for line in f.readlines():
-        x = round(float(line.strip().split()[0]),4)
-        y = round(float(line.strip().split()[1]),4)
+        x = float(line.strip().split()[0])
+        y = float(line.strip().split()[1])
         if len(line.strip().split()) >= 3:
           mode = int(line.strip().split()[2])
         path_x.append(x)
