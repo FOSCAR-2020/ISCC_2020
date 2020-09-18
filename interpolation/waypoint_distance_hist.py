@@ -3,7 +3,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-
+import math
 file_name = ''
 path = ''
 
@@ -28,7 +28,18 @@ if __name__ == "__main__":
 
     path = parse_txt(file_name)
     print(path)
-    distances = [np.linalg.norm(path[i+1]-path[i]) for i in range(0,len(path)-1)]
-    plt.bar(np.linspace(0,len(path)-2,len(path)-1),distances,width=1)
-    plt.show()
+    distances2=[]
 
+    for i in range(0,len(path)-1):
+        x = path[i+1][0]-path[i][0]
+        y = path[i+1][1]-path[i][1]
+        distances2.append(math.sqrt(x*x) +(y*y))
+
+
+    # distances = [np.linalg.norm(path[i+1]-path[i]) for i in range(0,len(path)-1)]
+    for i in range(len(distances2)):
+        if distances2[i] >= 0.5:
+            print("{} :".format(i),distances2[i])
+
+    plt.plot(np.linspace(0,len(path)-2,len(path)-1),distances2,marker='o')
+    plt.show()
