@@ -65,11 +65,15 @@ public:
 
   // for main control
   int is_obstacle_detected;
-  int is_obstacle_detected_8m;
-  std::vector<Obstacle> obstacles;
   int static_obstacle_flag;
   bool straight_go_flag;
   bool left_go_flag;
+  int is_obstacle_detected_8m;
+
+  std::vector<Obstacle> obstacles;
+
+  
+
 
 
 

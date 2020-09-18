@@ -22,7 +22,7 @@ path_y = []
 path_len = 0
 
 # with open(ROS_HOME + "/straight.txt") as f:
-with open(ROS_HOME + "/paths/final/surface.txt") as f:
+with open(ROS_HOME + "/paths/final/visual/surface.txt") as f:
   for line in f.readlines():
     x = float(line.strip().split()[0])
     y = float(line.strip().split()[1])
@@ -74,7 +74,7 @@ path_x = []
 path_y = []
 path_len = 0
 
-with open(ROS_HOME + "/paths/final/stop_line.txt") as f:
+with open(ROS_HOME + "/paths/final/visual/stop_line.txt") as f:
   for line in f.readlines():
     x = float(line.strip().split()[0])
     y = float(line.strip().split()[1])

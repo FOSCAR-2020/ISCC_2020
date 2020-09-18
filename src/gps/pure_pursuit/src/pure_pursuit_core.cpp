@@ -3,6 +3,8 @@
 #include <fstream>
 #include <cstdlib>
 #include <unistd.h>
+#include <time.h>
+#include <chrono>
 #include <algorithm>
 
 #include <tf/transform_broadcaster.h>
@@ -36,6 +38,9 @@ bool right_avoid = false;
 
 float target_dist = 3.0;
 float min_dist = 1.0;
+
+int obs_cnt = 0;
+std::chrono::system_clock::time_point obs_start;
 
 /* traffic Index manager */
 const int tf_idx_1 = 1180;
@@ -121,28 +126,46 @@ void PurePursuitNode::run(char** argv) {
     std::cout << "current index : " << pp_.current_idx << std::endl;
     std::cout << "current mode : " << pp_.mode << std::endl;
     std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
-    std::cout << "*******************************" << std::endl;
+
+    geometry_msgs::Point green_point = pp_.waypoints.at(pp_.current_idx).first;
+    geometry_msgs::Point pink_point = pp_.waypoints.at(pp_.next_waypoint_number_).first;
+    double yaw = atan2(2.0 * (pp_.current_pose_.orientation.w * pp_.current_pose_.orientation.z + pp_.current_pose_.orientation.x * pp_.current_pose_.orientation.y), 1.0 - 2.0 * (pp_.current_pose_.orientation.y * pp_.current_pose_.orientation.y + pp_.current_pose_.orientation.z * pp_.current_pose_.orientation.z));
+    double map_yaw = atan2(pink_point.y - green_point.y, pink_point.x - green_point.x);
+    double diff_yaw = fabs(yaw - map_yaw);
+
+    std::cout << "diff yaw " << diff_yaw << std::endl;
+    // std::cout << "map_yaw " << map_yaw << std::endl;
+    // std::cout << "yaw " << yaw << std::endl;
 
     // MODE 0 - START
     if(pp_.mode == 0){
+      if (diff_yaw > 0.2) {
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
+      }
+      else {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6 + (6 * cos(8*diff_yaw));
+      }
+
       pp_.mission_flag = 0;
-      const_lookahead_distance_ = 6;
-      const_velocity_ = 10;
+      // const_lookahead_distance_ = 6;
+      // const_velocity_ = 10;
     }
 
     // MODE 1 - 주차
     // 주차 구간
     if (pp_.mode == 1) {
-      if (pp_.mission_flag == 3) {
+      if (pp_.mission_flag == 3 || pp_.mission_flag == 0) {
         const_lookahead_distance_ = 4;
         const_velocity_ = 6;
       }
 
       // first
       // int start_parking_idx = 260;
-      // int end_parking_idx = 135;
+      // int end_parking_idx = 120;
       // int end_parking_backward_idx = 100;
-      // int end_parking_full_steer_backward_idx = 60;
+      // int end_parking_full_steer_backward_idx = 75;
 
       // second
       int start_parking_idx = 280;
@@ -176,7 +199,7 @@ void PurePursuitNode::run(char** argv) {
       // int end_parking_full_steer_backward_idx = 25;
 
 
-      // backward_speed : -5
+      // backward_speed : -7
       int backward_speed = -7;
 
       // //x < start_parking_idx < y
@@ -359,51 +382,67 @@ void PurePursuitNode::run(char** argv) {
 
     // MODE 12 : 정적 장애물 2 , Path switching  -- version 1
     if (pp_.mode == 12) {
+      if (pp_.mission_flag >= 1) {
+        std::cout << "************************" << std::endl;
+        std::cout << "TIME : " << (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() << std::endl;
+        std::cout << "mission flag :" << pp_.mission_flag << std::endl;
+        std::cout << "obstacles_detected : " << pp_.is_obstacle_detected << std::endl;
+      }
       if (pp_.mission_flag == 0 && pp_.is_obstacle_detected) {
-        pp_.setWaypoints(avoidance_path);
-        const_lookahead_distance_ = 6;
-        const_velocity_ = 4;
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 3;
         pp_.mission_flag = 1;
+        obs_start = std::chrono::system_clock::now();
+        pulishControlMsg(3, 24);
+        continue;
       }
-      // current_idx : 25
-      else if (pp_.mission_flag == 1 && pp_.current_idx >= 300) {
+      else if (pp_.mission_flag == 1 && pp_.is_obstacle_detected) {
+        //pp_.mission_flag = 2;
+        pulishControlMsg(3, 24);
+        continue;
+      }
+      else if (pp_.mission_flag == 1 && !pp_.is_obstacle_detected) {
+        pp_.setWaypoints(avoidance_path);
         pp_.mission_flag = 2;
+        //pulishControlMsg(0, 0);
+
+        // for test
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
+        final_constant = 2.0;
+
+        continue;
+        //pulishControlMsg(3, 15);
       }
-      else if (pp_.mission_flag == 2 && pp_.is_obstacle_detected) {
-        pp_.setWaypoints(global_path);
-        const_lookahead_distance_ = 6;
-        const_velocity_ = 4;
+      // avoid path
+      else if (pp_.mission_flag == 2 && pp_.is_obstacle_detected && (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() > 4.0) {
         pp_.mission_flag = 3;
+        pulishControlMsg(3, -28);
+        continue;
+      }
+      else if(pp_.mission_flag == 3 && pp_.is_obstacle_detected)
+      {
+        pulishControlMsg(3, -28);
+        continue;
+      }
+      //  && (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() > 10.0
+      else if (pp_.mission_flag == 3 && !pp_.is_obstacle_detected) {
+        // if (double((clock() - obs_time) /CLOCKS_PER_SEC) < 3) {
+        //   continue;
+        // }
+        pp_.setWaypoints(global_path);
+        pp_.mission_flag = 4;
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
+        final_constant = 1.5;
       }
 
       // 세번째 신호등 인덱스 : tf_idx_3
-      if(pp_.mission_flag == 3 && pp_.reachMissionIdx(tf_idx_3) && !pp_.straight_go_flag) {
+      if(pp_.mission_flag == 4 && pp_.reachMissionIdx(tf_idx_3) && !pp_.straight_go_flag) {
         pulishControlMsg(0,0);
         continue;
       }
     }
-
-    // MODE 12 : 정적 장애물 2 , Path switching  -- version 2
-    // if (pp_.mode == 12) {
-    //   if (pp_.mission_flag == 0 && pp_.reachMissionIdx(70)) {
-    //     pp_.setWaypoints(avoidance_path);
-    //     const_lookahead_distance_ = 3;
-    //     const_velocity_ = 3;
-    //     pp_.mission_flag = 1;
-    //   }
-    //
-    //   if (pp_.mission_flag == 1 && pp_.is_obstacle_detected) {
-    //     pp_.setWaypoints(global_path);
-    //     const_lookahead_distance_ = 5;
-    //     const_velocity_ = 3;
-    //     pp_.mission_flag = 2;
-    //   }
-    // 신호등 인덱스 : 542
-    // if(pp_.mission_flag == 3 && pp_.reachMissionIdx(542) && !pp_.straight_go_flag) {
-    //   pulishControlMsg(0,0);
-    //   continue;
-    // }
-    // }
 
     // MODE 13, 14 ,15
     if (pp_.mode == 13 ||pp_.mode == 14 || pp_.mode == 15) {
@@ -422,6 +461,8 @@ void PurePursuitNode::run(char** argv) {
     // MODE 17 : 좌회전 신호등
     if (pp_.mode == 17)
     {
+      pp_.mission_flag = 0;
+
       const_lookahead_distance_ = 4;
       const_velocity_ = 6;
 
@@ -456,8 +497,16 @@ void PurePursuitNode::run(char** argv) {
     // MODE 20 : 직진 (부스터)
     if (pp_.mode == 20) {
       pp_.mission_flag = 0;
-      const_lookahead_distance_ = 7;
-      const_velocity_ = 12;
+      // const_lookahead_distance_ = 7;
+      // const_velocity_ = 12;
+      if (diff_yaw > 0.2) {
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
+      }
+      else {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6 + (6 * cos(8*diff_yaw));
+      }
     }
 
     // MODE 21 : 신호등 없는 구간
@@ -475,24 +524,27 @@ void PurePursuitNode::run(char** argv) {
       const_velocity_ = 8;
     }
 
-    // MODE 23 : 신호등 구간
+    // MODE 23 :
     if (pp_.mode == 23)
     {
+      pp_.mission_flag = 0;
+
       const_lookahead_distance_ = 6;
       const_velocity_ = 10;
-
       // 신호등 인덱스 : 1594
       // if(pp_.reachMissionIdx(1590) && !pp_.straight_go_flag) {
       //   pulishControlMsg(0,0);
       //   continue;
       // }
     }
-
+    // MODE 24 : 신호등 구간
     if(pp_.mode == 24)
     {
+      pp_.mission_flag = 0;
+
       const_lookahead_distance_ = 4;
       const_velocity_ = 6;
-      // 다섯번째 신호등 인덱스 : tf_idx_6
+      // 여섯번째 신호등 인덱스 : tf_idx_6
       if(pp_.reachMissionIdx(tf_idx_6) && !pp_.straight_go_flag) {
         pulishControlMsg(0,0);
         continue;
@@ -502,12 +554,15 @@ void PurePursuitNode::run(char** argv) {
     // MODE 24,25 : 신호등 직진 구간
     if (pp_.mode == 25)
     {
+      pp_.mission_flag = 0;
       const_lookahead_distance_ = 6;
       const_velocity_ = 10;
     }
 
+    // MODE 26 : 신호등 직진 구간
     if(pp_.mode == 26)
     {
+      pp_.mission_flag = 0;
       const_lookahead_distance_ = 4;
       const_velocity_ = 6;
 
@@ -521,8 +576,16 @@ void PurePursuitNode::run(char** argv) {
     // MODE 26,27,28,29 : 직진 (부스터2)
     if (pp_.mode == 27 || pp_.mode == 28 || pp_.mode == 29) {
       pp_.mission_flag = 0;
-      const_lookahead_distance_ = 7;
-      const_velocity_ = 12;
+      // const_lookahead_distance_ = 7;
+      // const_velocity_ = 12;
+      if (diff_yaw > 0.2) {
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
+      }
+      else {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6 + (6 * cos(8*diff_yaw));
+      }
       //final_constant = 1.5;
     }
 
@@ -723,24 +786,47 @@ void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingB
   //   std::cout << "area : " << area << std::endl;
   // }
 
+ // for test
+ int index = 0;
+ if(traffic_lights.size() > 1)
+ {
+    int first_traffic = (traffic_lights[0].xmax - traffic_lights[0].xmin) * (traffic_lights[0].ymax - traffic_lights[0].ymin);
+    int second_traffic = (traffic_lights[1].xmax - traffic_lights[1].xmin) * (traffic_lights[1].ymax - traffic_lights[1].ymin);
 
-  if (traffic_lights[0].Class == "3 red" || traffic_lights[0].Class == "3 yellow" || traffic_lights[0].Class == "4 red" ||
-      traffic_lights[0].Class == "4 yellow" || traffic_lights[0].Class == "4 red yellow")
+    if(first_traffic * 0.9 < second_traffic)
+    {
+        if(traffic_lights[0].xmin < traffic_lights[1].xmin)
+        {
+            // 0 index select
+            index = 0;
+        }
+        else
+        {
+          // 1 index select
+          index = 1;
+        }
+    }
+ }
+ ///////////////////////////////////////////////
+
+
+  if (traffic_lights[index].Class == "3 red" || traffic_lights[index].Class == "3 yellow" || traffic_lights[index].Class == "4 red" ||
+      traffic_lights[index].Class == "4 yellow" || traffic_lights[index].Class == "4 red yellow")
   {
     pp_.straight_go_flag = false;
     pp_.left_go_flag = false;
   }
-  else if (traffic_lights[0].Class == "3 green" || traffic_lights[0].Class == "4 green")
+  else if (traffic_lights[index].Class == "3 green" || traffic_lights[index].Class == "4 green")
   {
     pp_.straight_go_flag = true;
     pp_.left_go_flag = false;
   }
-  else if (traffic_lights[0].Class == "3 left" || traffic_lights[0].Class == "4 red left")
+  else if (traffic_lights[index].Class == "3 left" || traffic_lights[index].Class == "4 red left")
   {
     pp_.straight_go_flag = false;
     pp_.left_go_flag = true;
   }
-  else if (traffic_lights[0].Class == "4 left go")
+  else if (traffic_lights[index].Class == "4 left go")
   {
     pp_.straight_go_flag = true;
     pp_.left_go_flag = true;

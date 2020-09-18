@@ -38,8 +38,8 @@ add_executable(
   pure_pursuit
   src/pure_pursuit_node.cpp
   src/pure_pursuit.cpp
-  #src/pure_pursuit_core.cpp
-  src/pure_pursuit_core_school.cpp
+  src/pure_pursuit_core.cpp
+  #src/pure_pursuit_core_school.cpp
 )
 target_link_libraries(pure_pursuit ${catkin_LIBRARIES})
 add_dependencies(pure_pursuit ${catkin_EXPORTED_TARGETS})
