@@ -131,23 +131,80 @@ void PurePursuitNode::run(char** argv) {
     //   const_velocity_ = 10;
     // }
 
-    if (pp_.mode == 0) {
-      const_lookahead_distance_ = 6;
-      const_velocity_ = 10;
+    if (pp_.mode == 0 || pp_.mode == 1) {
+      geometry_msgs::Point green_point = pp_.waypoints.at(pp_.current_idx).first;
+      geometry_msgs::Point pink_point = pp_.waypoints.at(pp_.next_waypoint_number_).first;
+      double yaw = atan2(2.0 * (pp_.current_pose_.orientation.w * pp_.current_pose_.orientation.z + pp_.current_pose_.orientation.x * pp_.current_pose_.orientation.y), 1.0 - 2.0 * (pp_.current_pose_.orientation.y * pp_.current_pose_.orientation.y + pp_.current_pose_.orientation.z * pp_.current_pose_.orientation.z));
+      double map_yaw = atan2(pink_point.y - green_point.y, pink_point.x - green_point.x);
+      double diff_yaw = fabs(yaw - map_yaw);
+
+      std::cout << "map_yaw " << map_yaw << std::endl;
+      std::cout << "yaw " << yaw << std::endl;
+      std::cout << "diff yaw " << diff_yaw << std::endl;
+
+      if (diff_yaw > 0.2) {
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
+      }
+      else {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6 + (6 * cos(8*diff_yaw));
+      }
+      pp_.mission_flag = 4;
+
+      // const_lookahead_distance_ = 6;
+      // const_velocity_ = 10;
     }
 
     // 주차 구간
     if (pp_.mode == 1) {
-      // int start_parking_idx = 110;
-      // int end_parking_idx = 109;
-      // int end_parking_backward_idx = 85;
-      // int end_parking_full_steer_backward_idx = 50;
-      int start_parking_idx = 180;
-      int end_parking_idx = 150;
-      int end_parking_backward_idx = 125;
-      int end_parking_full_steer_backward_idx = 85;
+      if (pp_.mission_flag == 3 || pp_.mission_flag == 0) {
+        const_lookahead_distance_ = 4;
+        const_velocity_ = 6;
+      }
+
+      // first
+      // int start_parking_idx = 260;
+      // int end_parking_idx = 120;
+      // int end_parking_backward_idx = 100;
+      // int end_parking_full_steer_backward_idx = 75;
+
+      // second
+      // int start_parking_idx = 280;
+      // int end_parking_idx = 87;
+      // int end_parking_backward_idx = 55;
+      // int end_parking_full_steer_backward_idx = 25;
+
+
+      // third
+      // int start_parking_idx = 290;
+      // int end_parking_idx = 145;
+      // int end_parking_backward_idx = 120;
+      // int end_parking_full_steer_backward_idx = 90;
+
+      // forth
+      // int start_parking_idx = 320;
+      // int end_parking_idx = 88;
+      // int end_parking_backward_idx = 55;
+      // int end_parking_full_steer_backward_idx = 20;
+
+      // fifth
+      // int start_parking_idx = 330;
+      // int end_parking_idx = 80;
+      // int end_parking_backward_idx = 50;
+      // int end_parking_full_steer_backward_idx = 20;
+
+      // sixth
+      int start_parking_idx = 345;
+      int end_parking_idx = 75;
+      int end_parking_backward_idx = 55;
+      int end_parking_full_steer_backward_idx = 25;
+
+
+      // backward_speed : -5
       int backward_speed = -5;
 
+      // //x < start_parking_idx < y
       if (pp_.mission_flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
         pp_.setWaypoints(parking_path);
         const_lookahead_distance_ = 3;
@@ -155,9 +212,10 @@ void PurePursuitNode::run(char** argv) {
         pp_.mission_flag = 1;
       }
       // 주차 끝
-      if (pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
+      if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
         // 5초 멈춤
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 50; i++)
+        {
           pulishControlMsg(0, 0);
           // 0.1초
           usleep(100000);
@@ -189,6 +247,7 @@ void PurePursuitNode::run(char** argv) {
         pp_.mission_flag = 3;
       }
     }
+
     // /////////////////////////////////////////////
     //
     // 자회전 구간
@@ -242,6 +301,8 @@ void PurePursuitNode::run(char** argv) {
         // for test
         const_lookahead_distance_ = 4;
         const_velocity_ = 6;
+        final_constant = 2.0;
+
         continue;
         //pulishControlMsg(3, 15);
       }
@@ -672,36 +733,59 @@ void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingB
   // }
 
 
-  if (traffic_lights[0].Class == "3 red" || traffic_lights[0].Class == "3 yellow" || traffic_lights[0].Class == "4 red" ||
-      traffic_lights[0].Class == "4 yellow" || traffic_lights[0].Class == "4 red yellow")
+   int index = 0;
+  if(traffic_lights.size() > 1)
   {
-    pp_.straight_go_flag = false;
-    pp_.left_go_flag = false;
-  }
-  else if (traffic_lights[0].Class == "3 green" || traffic_lights[0].Class == "4 green")
-  {
-    pp_.straight_go_flag = true;
-    pp_.left_go_flag = false;
-  }
-  else if (traffic_lights[0].Class == "3 left" || traffic_lights[0].Class == "4 red left")
-  {
-    pp_.straight_go_flag = false;
-    pp_.left_go_flag = true;
-  }
-  else if (traffic_lights[0].Class == "4 left go")
-  {
-    pp_.straight_go_flag = true;
-    pp_.left_go_flag = true;
+     int first_traffic = (traffic_lights[0].xmax - traffic_lights[0].xmin) * (traffic_lights[0].ymax - traffic_lights[0].ymin);
+     int second_traffic = (traffic_lights[1].xmax - traffic_lights[1].xmin) * (traffic_lights[1].ymax - traffic_lights[1].ymin);
+
+     if(first_traffic * 0.8 < second_traffic)
+     {
+         if(traffic_lights[0].xmin < traffic_lights[1].xmin)
+         {
+             // 0 index select
+             index = 0;
+         }
+         else
+         {
+           // 1 index select
+           index = 1;
+         }
+     }
   }
 
+  if (traffic_lights[index].Class == "3 red" || traffic_lights[index].Class == "3 yellow" || traffic_lights[index].Class == "4 red" ||
+      traffic_lights[index].Class == "4 yellow" || traffic_lights[index].Class == "4 red yellow")
+  {
+    pp_.straight_go_flag = false;
+    pp_.left_go_flag = false;
+  }
+  else if (traffic_lights[index].Class == "3 green" || traffic_lights[index].Class == "4 green")
+  {
+    pp_.straight_go_flag = true;
+    pp_.left_go_flag = false;
+  }
+  else if (traffic_lights[index].Class == "3 left" || traffic_lights[index].Class == "4 red left")
+  {
+    pp_.straight_go_flag = false;
+    pp_.left_go_flag = true;
+  }
+  else if (traffic_lights[index].Class == "4 left go")
+  {
+    pp_.straight_go_flag = true;
+    pp_.left_go_flag = true;
+  }
+  //std::cout <<"go " << pp_.straight_go_flag << std::endl;
+  //std::cout << "left " << pp_.left_go_flag << std::endl;
+
   // traffic test
-  // std::cout << "*******************" << std::endl << std::endl;
-  // if (pp_.straight_go_flag){
-  //   std::cout << "straight go" << std::endl;
-  // }
-  // if (pp_.left_go_flag) {
-  //   std::cout << "left go" << std::endl;
-  // }
+  std::cout << "*******************" << std::endl << std::endl;
+  if (pp_.straight_go_flag){
+    std::cout << "straight go" << std::endl;
+  }
+  if (pp_.left_go_flag) {
+    std::cout << "left go" << std::endl;
+  }
 }
 // void callbackFromLane(const {msg_type}& msg)
 

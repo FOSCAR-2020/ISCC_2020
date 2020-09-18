@@ -152,10 +152,10 @@ void PurePursuitNode::run(char** argv) {
 
 
       // third
-      // int start_parking_idx = 300;
-      // int end_parking_idx = 75;
-      // int end_parking_backward_idx = 48;
-      // int end_parking_full_steer_backward_idx = 15;
+      // int start_parking_idx = 290;
+      // int end_parking_idx = 145;
+      // int end_parking_backward_idx = 120;
+      // int end_parking_full_steer_backward_idx = 90;
 
       // forth
       // int start_parking_idx = 320;
