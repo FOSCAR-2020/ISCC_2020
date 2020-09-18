@@ -31,3 +31,6 @@ file\_path.rvs.txt로 저장
 ./waypoint_translation -a num1 -b num2 -p file\_path  
 file\_path의 모든 waypoint를 (-a,-b)만큼 이동  
  
+# waypoint_distance_hist
+./waypoint_distance_hist file_\path
+file\_path의 waypoint 사이의 거리를 막대그래프로 보여줌
