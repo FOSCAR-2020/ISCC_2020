@@ -1,0 +1,2 @@
+#!/bin/bash
+roslaunch rviz_visualization pure_pursuit_bag2.launch path:=final/global_path,final/p6,final/avoid ld:=4 vel:=6 final_constant:=1.5
