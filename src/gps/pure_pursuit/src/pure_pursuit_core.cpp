@@ -51,6 +51,9 @@ const int tf_idx_5 = 3403; // 3406
 const int tf_idx_6 = 5052; // 5055
 const int tf_idx_7 = 5285; // 5285
 
+const int cw_idx_1 = 940;
+const int cw_idx_2 = 1915;
+const int cw_idx_3 = 2755;
 /*************************/
 
 // float tmp_distance = 100.0;
@@ -166,16 +169,16 @@ void PurePursuitNode::run(char** argv) {
       }
 
       // first
-      int start_parking_idx = 260;
-      int end_parking_idx = 120;
-      int end_parking_backward_idx = 100;
-      int end_parking_full_steer_backward_idx = 75;
+      // int start_parking_idx = 260;
+      // int end_parking_idx = 120;
+      // int end_parking_backward_idx = 100;
+      // int end_parking_full_steer_backward_idx = 75;
 
       // second
-      // int start_parking_idx = 280;
-      // int end_parking_idx = 87;
-      // int end_parking_backward_idx = 55;
-      // int end_parking_full_steer_backward_idx = 25;
+      int start_parking_idx = 280;
+      int end_parking_idx = 87;
+      int end_parking_backward_idx = 55;
+      int end_parking_full_steer_backward_idx = 25;
 
 
       // third
@@ -246,11 +249,12 @@ void PurePursuitNode::run(char** argv) {
         pp_.setWaypoints(global_path);
         pp_.mission_flag = 3;
       }
+
       if (pp_.mission_flag == 3)
       {
-        const_lookahead_distance_ = 7;
-        const_velocity_ = 12;
-        final_constant = 1.75;
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 10;
+        final_constant = 1.5;
       }
     }
 
@@ -258,126 +262,138 @@ void PurePursuitNode::run(char** argv) {
     // MODE 2 : 좌회전 구간, 신호등 X
     if (pp_.mode == 2) {
       pp_.mission_flag = 0;
-      const_lookahead_distance_ = 5;
-      const_velocity_ = 8;
+      const_lookahead_distance_ = 4;
+      const_velocity_ = 6;
       final_constant = 1.5;
     }
-
+/*************************************************************************************************************/
     // MODE 3 : 정적 장애물 구간(드럼통) - 왼 오
-    // if (pp_.mode == 3) {
-    //   const_lookahead_distance_ = 3;
-    //   const_velocity_ = 5;
-    //
-    //   if(!pp_.static_obstacle_flag && left_detected)
-    //   {
-    //     ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
-    //     pp_.static_obstacle_flag = 1;
-    //     //pulishControlMsg(3, tmp_yaw_rate);
-    //     pulishControlMsg(3, 20);
-    //   }
-    //   else if(pp_.static_obstacle_flag == 1 && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45)
-    //   {
-    //     ROS_INFO_STREAM("Avoid Left Obstacle");
-    //     //pulishControlMsg(3, tmp_yaw_rate);
-    //     pulishControlMsg(3, 20);
-    //   }
-    //   else if(pp_.static_obstacle_flag == 1 && !left_detected && !left_avoid)
-    //   {
-    //     ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
-    //     left_avoid = true;
-    //     pp_.static_obstacle_flag = 2;
-    //     pulishControlMsg(3,-3);
-    //   }
-    //   else if(pp_.static_obstacle_flag == 2 && left_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 45)
-    //   {
-    //     ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
-    //     pulishControlMsg(3, -20);
-    //   }
-    //   else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -60)
-    //   {
-    //     ROS_INFO_STREAM("Change Flag to 3");
-    //     pp_.static_obstacle_flag = 3;
-    //     pulishControlMsg(3, -24);
-    //   }
-    //   else if(pp_.static_obstacle_flag == 3 && left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -60)
-    //   {
-    //     ROS_INFO_STREAM("Avoid Right Obstacle");
-    //     //publish(3, tmp_yaw_rate);
-    //     pulishControlMsg(3, -24);
-    //   }
-    //   else if(pp_.static_obstacle_flag == 3 && left_avoid && !right_detected)
-    //   {
-    //     ROS_INFO_STREAM("Finish the Static Obstacle 1");
-    //     pp_.static_obstacle_flag = 4;
-    //     pulishControlMsg(3,0);
-    //   }
-    //
-    //   if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
-    //     continue;
-    //   }
+    if (pp_.mode == 3) {
+      const_lookahead_distance_ = 3;
+      const_velocity_ = 5;
 
-      // MODE 3 : 정적 장애물 구간(드럼통)
-      if (pp_.mode == 3) {
-        const_lookahead_distance_ = 3;
-        const_velocity_ = 5;
+      if(!pp_.static_obstacle_flag && left_detected)
+      {
+        ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
+        pp_.static_obstacle_flag = 1;
+        //pulishControlMsg(3, tmp_yaw_rate);
+        pulishControlMsg(3, 20);
+      }
+      else if(pp_.static_obstacle_flag == 1 && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45)
+      {
+        ROS_INFO_STREAM("Avoid Left Obstacle");
+        //pulishControlMsg(3, tmp_yaw_rate);
+        pulishControlMsg(3, 20);
+      }
+      else if(pp_.static_obstacle_flag == 1 && !left_detected && !left_avoid)
+      {
+        ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
+        left_avoid = true;
+        pp_.static_obstacle_flag = 2;
+        pulishControlMsg(3,-3);
+      }
+      else if(pp_.static_obstacle_flag == 2 && left_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 45)
+      {
+        ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
+        pulishControlMsg(3, -20);
+      }
+      else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -60)
+      {
+        ROS_INFO_STREAM("Change Flag to 3");
+        pp_.static_obstacle_flag = 3;
+        pulishControlMsg(3, -24);
+      }
+      else if(pp_.static_obstacle_flag == 3 && left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -60)
+      {
+        ROS_INFO_STREAM("Avoid Right Obstacle");
+        //publish(3, tmp_yaw_rate);
+        pulishControlMsg(3, -24);
+      }
+      else if(pp_.static_obstacle_flag == 3 && left_avoid && !right_detected)
+      {
+        ROS_INFO_STREAM("Finish the Static Obstacle 1");
+        pp_.static_obstacle_flag = 4;
+        pulishControlMsg(3,0);
+      }
 
-        if(!pp_.static_obstacle_flag && right_detected)
-        {
-          ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
-          pp_.static_obstacle_flag = 1;
-          //pulishControlMsg(3, tmp_yaw_rate);
-          pulishControlMsg(3, -20);
-        }
-        else if(pp_.static_obstacle_flag == 1 && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45)
-        {
-          ROS_INFO_STREAM("Avoid Right Obstacle");
-          //pulishControlMsg(3, tmp_yaw_rate);
-          pulishControlMsg(3, -20);
-        }
-        else if(pp_.static_obstacle_flag == 1 && !right_detected && !right_avoid)
-        {
-          ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
-          right_avoid = true;
-          pp_.static_obstacle_flag = 2;
-          pulishControlMsg(3,5);
-        }
-        else if(pp_.static_obstacle_flag == 2 && right_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -45)
-        {
-          ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
-          pulishControlMsg(3, 20);
-        }
-        else if(pp_.static_obstacle_flag == 2 && right_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 50)
-        {
-          ROS_INFO_STREAM("Change Flag to 3");
-          pp_.static_obstacle_flag = 3;
-          pulishControlMsg(3, 24);
-        }
-        else if(pp_.static_obstacle_flag == 3 && right_avoid && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 50)
-        {
-          ROS_INFO_STREAM("Avoid Right Obstacle");
-          //publish(3, tmp_yaw_rate);
-          pulishControlMsg(3, 24);
-        }
-        else if(pp_.static_obstacle_flag == 3 && right_avoid && !left_detected)
-        {
-          ROS_INFO_STREAM("Finish the Static Obstacle 1");
-          pp_.static_obstacle_flag = 4;
-          pulishControlMsg(3,0);
+      if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
+        continue;
+      }
 
-          const_lookahead_distance_ = 4;
-          const_velocity_ = 4;
-        }
-
-        if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
-          continue;
-        }
-
+/*************************************************************************************************************/
+      // MODE 3 : 정적 장애물 구간(드럼통) - 오 왼
+      // if (pp_.mode == 3) {
+      //   const_lookahead_distance_ = 3;
+      //   const_velocity_ = 5;
+      //
+      //   if(!pp_.static_obstacle_flag && right_detected)
+      //   {
+      //     ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
+      //     pp_.static_obstacle_flag = 1;
+      //     //pulishControlMsg(3, tmp_yaw_rate);
+      //     pulishControlMsg(3, -20);
+      //   }
+      //   else if(pp_.static_obstacle_flag == 1 && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45)
+      //   {
+      //     ROS_INFO_STREAM("Avoid Right Obstacle");
+      //     //pulishControlMsg(3, tmp_yaw_rate);
+      //     pulishControlMsg(3, -20);
+      //   }
+      //   else if(pp_.static_obstacle_flag == 1 && !right_detected && !right_avoid)
+      //   {
+      //     ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
+      //     right_avoid = true;
+      //     pp_.static_obstacle_flag = 2;
+      //     pulishControlMsg(3,5);
+      //   }
+      //   else if(pp_.static_obstacle_flag == 2 && right_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -45)
+      //   {
+      //     ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
+      //     pulishControlMsg(3, 20);
+      //   }
+      //   else if(pp_.static_obstacle_flag == 2 && right_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 50)
+      //   {
+      //     ROS_INFO_STREAM("Change Flag to 3");
+      //     pp_.static_obstacle_flag = 3;
+      //     pulishControlMsg(3, 24);
+      //   }
+      //   else if(pp_.static_obstacle_flag == 3 && right_avoid && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 50)
+      //   {
+      //     ROS_INFO_STREAM("Avoid Right Obstacle");
+      //     //publish(3, tmp_yaw_rate);
+      //     pulishControlMsg(3, 24);
+      //   }
+      //   else if(pp_.static_obstacle_flag == 3 && right_avoid && !left_detected)
+      //   {
+      //     ROS_INFO_STREAM("Finish the Static Obstacle 1");
+      //     pp_.static_obstacle_flag = 4;
+      //     pulishControlMsg(3,0);
+      //
+      //     const_lookahead_distance_ = 4;
+      //     const_velocity_ = 4;
+      //   }
+      //
+      //   if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
+      //     continue;
+      //   }
+/*************************************************************************************************************/
 
       // MODE 4
+      // 횡단보도 미션
       if (pp_.mode == 4) {
-        pp_.mission_flag = 0;
         const_lookahead_distance_ = 5;
         const_velocity_ = 8;
+
+        if (pp_.reachMissionIdx(cw_idx_1) && pp_.mission_flag == 0) {
+          for (int i = 0; i < 40; i++)
+          {
+            pulishControlMsg(0, 0);
+            // 0.1초
+            usleep(100000);
+          }
+
+          pp_.mission_flag = 1;
+        }
       }
 
       // MODE 5 : 신호등 정지
@@ -385,6 +401,7 @@ void PurePursuitNode::run(char** argv) {
       {
         const_lookahead_distance_ = 5;
         const_velocity_ = 8;
+        pp_.mission_flag = 0;
 
         // 첫 신호등 인덱스 : tf_idx_1
         if(pp_.reachMissionIdx(tf_idx_1) && !pp_.straight_go_flag) {
@@ -425,6 +442,7 @@ void PurePursuitNode::run(char** argv) {
       if (pp_.mode == 9) {
         const_lookahead_distance_ = 4;
         const_velocity_ = 6;
+        pp_.mission_flag = 0;
 
         if (pp_.is_obstacle_detected)
         {
@@ -443,10 +461,27 @@ void PurePursuitNode::run(char** argv) {
       }
 
       // MODE 10 : 교차로 우회전
-      if (pp_.mode == 10 || pp_.mode == 11) {
-        pp_.mission_flag = 0;
+      // 횡단보도 추가
+      if (pp_.mode == 10) {
         const_lookahead_distance_ = 6;
         const_velocity_ = 10;
+
+        if (pp_.reachMissionIdx(cw_idx_2) && pp_.mission_flag == 0) {
+          for (int i = 0; i < 40; i++)
+          {
+            pulishControlMsg(0, 0);
+            // 0.1초
+            usleep(100000);
+          }
+
+          pp_.mission_flag = 1;
+        }
+      }
+
+      if (pp_.mode == 11) {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 10;
+        pp_.mission_flag = 0;
       }
 
     // MODE 12 : 정적 장애물 2 , Path switching  -- version 1
@@ -510,6 +545,12 @@ void PurePursuitNode::run(char** argv) {
         final_constant = 1.5;
       }
 
+      // If failed the mission
+      //pp_.mission_flag = 4;
+      //const_lookahead_distance_ = 4;
+      //const_velocity_ = 6;
+      //final_constant = 1.5;
+
       // 세번째 신호등 인덱스 : tf_idx_3, temp comment
       if(pp_.mission_flag == 4 && pp_.reachMissionIdx(tf_idx_3) && !pp_.straight_go_flag) {
         pulishControlMsg(0,0);
@@ -517,8 +558,7 @@ void PurePursuitNode::run(char** argv) {
       }
     }
 
-    // MODE 13, 14 ,15
-    if (pp_.mode == 13 ||pp_.mode == 14 || pp_.mode == 15) {
+    if (pp_.mode == 13) {
       pp_.mission_flag = 0;
       // if (diff_yaw > 0.2) {
       //   const_lookahead_distance_ = 4;
@@ -529,10 +569,34 @@ void PurePursuitNode::run(char** argv) {
       //   const_velocity_ = 6 + (6 * cos(8*diff_yaw));
       // }
 
-
       const_lookahead_distance_ = 6;
       const_velocity_ = 10;
     }
+
+    // 횡단보도
+    if (pp_.mode == 14) {
+      const_lookahead_distance_ = 6;
+      const_velocity_ = 8;
+
+      if (pp_.reachMissionIdx(cw_idx_3) && pp_.mission_flag == 0) {
+        for (int i = 0; i < 40; i++)
+        {
+          pulishControlMsg(0, 0);
+          // 0.1초
+          usleep(100000);
+        }
+
+        pp_.mission_flag = 1;
+      }
+    }
+
+    // 횡단 끝나고
+    if (pp_.mode == 15) {
+      pp_.mission_flag = 0;
+      const_lookahead_distance_ = 6;
+      const_velocity_ = 10;
+    }
+
 
     // MODE 16 : 차선변경
     if (pp_.mode == 16) {
@@ -585,18 +649,19 @@ void PurePursuitNode::run(char** argv) {
     // MODE 20 : 직진 (부스터)
     if (pp_.mode == 20) {
       pp_.mission_flag = 0;
-      // const_lookahead_distance_ = 6;
-      // const_velocity_ = 12;
-      if (diff_yaw > 0.2) {
-        const_lookahead_distance_ = 6;
-        const_velocity_ = 4;
-        final_constant = 2.0;
-      }
-      else {
-        const_lookahead_distance_ = 6;
-        const_velocity_ = 8 + (6 * cos(8*diff_yaw));
-        final_constant = 2.0;
-      }
+      const_lookahead_distance_ = 6;
+      const_velocity_ = 10;
+      final_constant = 1.5;
+      // if (diff_yaw > 0.2) {
+      //   const_lookahead_distance_ = 6;
+      //   const_velocity_ = 4;
+      //   final_constant = 2.0;
+      // }
+      // else {
+      //   const_lookahead_distance_ = 6;
+      //   const_velocity_ = 8 + (6 * cos(8*diff_yaw));
+      //   final_constant = 2.0;
+      // }
     }
 
     // MODE 21 : 신호등 없는 구간
@@ -680,9 +745,10 @@ void PurePursuitNode::run(char** argv) {
     // MODE 26,27,28,29 : 직진 (부스터2)
     if (pp_.mode == 27 || pp_.mode == 28 || pp_.mode == 29) {
       pp_.mission_flag = 0;
+
       const_lookahead_distance_ = 6;
-      const_velocity_ = 12;
-      final_constant = 1.75;
+      const_velocity_ = 10;
+      final_constant = 1.5;
       // if (diff_yaw > 0.2) {
       //
       //   const_lookahead_distance_ = 6;
@@ -821,59 +887,6 @@ void PurePursuitNode::callbackFromObstacle(const avoid_obstacle::TrueObstacles& 
 }
 
 // 왼오
-// void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
-//   // 전역 변수 tmp_yaw_rate
-//   tmp_yaw_rate = 0.0;
-//
-//   left_detected = false;
-//   right_detected = false;
-//   pp_.obstacles.clear();
-//
-//   // 모든 장애물 데이터 벡터에 저장
-//   for(unsigned int i = 0; i < msg.obstacles.size(); i++) {
-//       Obstacle obs = Obstacle(msg.obstacles[i].x, msg.obstacles[i].y, msg.obstacles[i].radius, msg.obstacles[i].true_radius);
-//       pp_.obstacles.push_back(obs);
-//   }
-//
-//   // left avoid flag가 true 이면 인식 범위를 5로 늘림.
-//   if(left_avoid){
-//     target_dist = 5.0;
-//   }
-//
-//   for(unsigned int i = 0; i < pp_.obstacles.size(); i++)
-//   {
-//       // 전방 0도 ~ 50도 확인
-//       if(pp_.obstacles[i].yaw_rate > 0 && pp_.obstacles[i].yaw_rate < 50.0)
-//       {
-//           // 전방 1m ~ target_distance 확인
-//           if (pp_.obstacles[i].dist < target_dist && pp_.obstacles[i].dist > min_dist){
-//               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
-//               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-//               left_detected = true;
-//               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
-//               //tmp_distance = pp_.obstacles[i].dist;
-//           }
-//       }
-//
-//       // 첫 장애물 통과후, 오른쪽 장애물 인식  => 전방 -60~0도 확인
-//       if(left_avoid && pp_.obstacles[i].yaw_rate > -60.0 && pp_.obstacles[i].yaw_rate <= 0)
-//       {
-//           if(pp_.obstacles[i].dist < target_dist)
-//           {
-//               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
-//               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-//               right_detected = true;
-//               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
-//           }
-//       }
-//
-//       // if(pp_.mission_flag == 4 && !right_detected) {
-//       //   right_avoid = true;
-//       // }
-//   }
-// }
-
-// 왼오
 void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
   // 전역 변수 tmp_yaw_rate
   tmp_yaw_rate = 0.0;
@@ -888,35 +901,34 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
       pp_.obstacles.push_back(obs);
   }
 
-  //Rigt -> left Static obs sub
-  //left avoid flag가 true 이면 인식 범위를 5로 늘림.
-  if(right_avoid){
+  // left avoid flag가 true 이면 인식 범위를 5로 늘림.
+  if(left_avoid){
     target_dist = 5.0;
   }
 
   for(unsigned int i = 0; i < pp_.obstacles.size(); i++)
   {
       // 전방 0도 ~ 50도 확인
-      if(pp_.obstacles[i].yaw_rate <= 0 && pp_.obstacles[i].yaw_rate > -50.0)
+      if(pp_.obstacles[i].yaw_rate > 0 && pp_.obstacles[i].yaw_rate < 50.0)
       {
           // 전방 1m ~ target_distance 확인
           if (pp_.obstacles[i].dist < target_dist && pp_.obstacles[i].dist > min_dist){
               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-              right_detected = true;
+              left_detected = true;
               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
               //tmp_distance = pp_.obstacles[i].dist;
           }
       }
 
-      // 첫 장애물 통과후, 오른쪽 장애물 인식
-      if(right_avoid && pp_.obstacles[i].yaw_rate < 60.0 && pp_.obstacles[i].yaw_rate > 0)
+      // 첫 장애물 통과후, 오른쪽 장애물 인식  => 전방 -60~0도 확인
+      if(left_avoid && pp_.obstacles[i].yaw_rate > -60.0 && pp_.obstacles[i].yaw_rate <= 0)
       {
           if(pp_.obstacles[i].dist < target_dist)
           {
               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-              left_detected = true;
+              right_detected = true;
               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
           }
       }
@@ -926,7 +938,61 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
       // }
   }
 }
-
+/*************************************************************************************************************/
+// 오 - 왼
+// void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
+//   // 전역 변수 tmp_yaw_rate
+//   tmp_yaw_rate = 0.0;
+//
+//   left_detected = false;
+//   right_detected = false;
+//   pp_.obstacles.clear();
+//
+//   // 모든 장애물 데이터 벡터에 저장
+//   for(unsigned int i = 0; i < msg.obstacles.size(); i++) {
+//       Obstacle obs = Obstacle(msg.obstacles[i].x, msg.obstacles[i].y, msg.obstacles[i].radius, msg.obstacles[i].true_radius);
+//       pp_.obstacles.push_back(obs);
+//   }
+//
+//   //Rigt -> left Static obs sub
+//   //left avoid flag가 true 이면 인식 범위를 5로 늘림.
+//   if(right_avoid){
+//     target_dist = 5.0;
+//   }
+//
+//   for(unsigned int i = 0; i < pp_.obstacles.size(); i++)
+//   {
+//       // 전방 0도 ~ 50도 확인
+//       if(pp_.obstacles[i].yaw_rate <= 0 && pp_.obstacles[i].yaw_rate > -50.0)
+//       {
+//           // 전방 1m ~ target_distance 확인
+//           if (pp_.obstacles[i].dist < target_dist && pp_.obstacles[i].dist > min_dist){
+//               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
+//               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
+//               right_detected = true;
+//               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
+//               //tmp_distance = pp_.obstacles[i].dist;
+//           }
+//       }
+//
+//       // 첫 장애물 통과후, 오른쪽 장애물 인식
+//       if(right_avoid && pp_.obstacles[i].yaw_rate < 60.0 && pp_.obstacles[i].yaw_rate > 0)
+//       {
+//           if(pp_.obstacles[i].dist < target_dist)
+//           {
+//               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
+//               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
+//               left_detected = true;
+//               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
+//           }
+//       }
+//
+//       // if(pp_.mission_flag == 4 && !right_detected) {
+//       //   right_avoid = true;
+//       // }
+//   }
+// }
+/*************************************************************************************************************/
 void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingBoxes& msg) {
   std::vector<darknet_ros_msgs::BoundingBox> traffic_lights = msg.bounding_boxes;
   std::sort(traffic_lights.begin(), traffic_lights.end(), compare);
@@ -969,8 +1035,6 @@ void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingB
         }
     }
  }
- ///////////////////////////////////////////////
-
 
   if (traffic_lights[index].Class == "3 red" || traffic_lights[index].Class == "3 yellow" || traffic_lights[index].Class == "4 red" ||
       traffic_lights[index].Class == "4 yellow" || traffic_lights[index].Class == "4 red yellow")
