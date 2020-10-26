@@ -36,6 +36,8 @@ if __name__ == "__main__":
     k_city_start_position = path[0]
     mode = k_city_start_position[2]
 
+    # 955568.875223, 1956919.86782 <- center
+    # 955576.342688 1956929.82429 <- side
     school_start_position = np.array([955568.875223, 1956919.86782, mode],np.float64)
     print("k_city_start_position : {}".format(k_city_start_position))
     print("school_start_position : {}".format(school_start_position))
@@ -46,7 +48,7 @@ if __name__ == "__main__":
     print("offset : {}".format(offset))
     
     #### for rotation ####
-    theta = 80 # degree
+    theta = 40 # degree
     theta = theta * np.pi / 180
     rotation_matrix = np.array([[np.cos(theta), np.sin(theta), 0],[-np.sin(theta), np.cos(theta), 0], [0, 0, 1]], np.float64)
     

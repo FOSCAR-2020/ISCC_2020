@@ -384,7 +384,8 @@ void PurePursuitNode::run(char** argv) {
         const_lookahead_distance_ = 5;
         const_velocity_ = 8;
 
-        if (pp_.reachMissionIdx(cw_idx_1) && pp_.mission_flag == 0) {
+        if (pp_.reachMissionIdx(480) && pp_.mission_flag == 0) {
+        //if (pp_.reachMissionIdx(cw_idx_1) && pp_.mission_flag == 0) {
           for (int i = 0; i < 40; i++)
           {
             pulishControlMsg(0, 0);
@@ -394,6 +395,13 @@ void PurePursuitNode::run(char** argv) {
 
           pp_.mission_flag = 1;
         }
+
+        // temp for test
+        // if(pp_.current_idx  >= 480 + 15) {
+        //   const_lookahead_distance_ = 6;
+        //   const_velocity_ = 12;
+        // }
+        //////////////////////////////////
       }
 
       // MODE 5 : 신호등 정지
