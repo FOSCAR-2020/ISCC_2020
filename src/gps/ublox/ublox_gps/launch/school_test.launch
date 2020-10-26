@@ -6,7 +6,7 @@
   <arg name="vel" />
   <arg name="final_constant" />
 
-  <include file="$(find rviz_visualization)/launch/rviz.launch">
+  <include file="$(find rviz_visualization)/launch/rviz_school.launch">
     <arg name="path2" value="$(arg path)" />
   </include>
 

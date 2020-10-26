@@ -159,100 +159,100 @@ void PurePursuitNode::run(char** argv) {
 
     // MODE 1 - 주차
     // 주차 구간
-    // if (pp_.mode == 1) {
-    //   if (pp_.mission_flag == 3 || pp_.mission_flag == 0) {
-    //     const_lookahead_distance_ = 6;
-    //     const_velocity_ = 6;
-    //   }
-    //
-    //   // first
-    //   int start_parking_idx = 260;
-    //   int end_parking_idx = 120;
-    //   int end_parking_backward_idx = 100;
-    //   int end_parking_full_steer_backward_idx = 75;
-    //
-    //   // second
-    //   // int start_parking_idx = 280;
-    //   // int end_parking_idx = 87;
-    //   // int end_parking_backward_idx = 55;
-    //   // int end_parking_full_steer_backward_idx = 25;
-    //
-    //
-    //   // third
-    //   // int start_parking_idx = 290;
-    //   // int end_parking_idx = 145;
-    //   // int end_parking_backward_idx = 117; // 120
-    //   // int end_parking_full_steer_backward_idx = 90;
-    //
-    //   // forth
-    //   // int start_parking_idx = 320;
-    //   // int end_parking_idx = 88;
-    //   // int end_parking_backward_idx = 55;
-    //   // int end_parking_full_steer_backward_idx = 23;
-    //
-    //   // fifth
-    //   // int start_parking_idx = 330;
-    //   // int end_parking_idx = 80;
-    //   // int end_parking_backward_idx = 50;
-    //   // int end_parking_full_steer_backward_idx = 23;
-    //
-    //   //sixth
-    //   // int start_parking_idx = 345;
-    //   // int end_parking_idx = 75;
-    //   // int end_parking_backward_idx = 55;
-    //   // int end_parking_full_steer_backward_idx = 25;
-    //
-    //
-    //   // backward_speed : -7
-    //   int backward_speed = -7;
-    //
-    //   // //x < start_parking_idx < y
-    //   if (pp_.mission_flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
-    //     pp_.setWaypoints(parking_path);
-    //     const_lookahead_distance_ = 3;
-    //     const_velocity_ = 3;
-    //     pp_.mission_flag = 1;
-    //   }
-    //   // 주차 끝
-    //   if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
-    //     // 5초 멈춤
-    //     for (int i = 0; i < 50; i++)
-    //     {
-    //       pulishControlMsg(0, 0);
-    //       // 0.1초
-    //       usleep(100000);
-    //     }
-    //
-    //     // 특정 지점까지는 그냥 후진
-    //     while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
-    //       pulishControlMsg(backward_speed, 0);
-    //       ros::spinOnce();
-    //     }
-    //     // 그 다음 지점까지는 풀조향 후진
-    //     while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
-    //       pulishControlMsg(backward_speed, 30);
-    //       ros::spinOnce();
-    //     }
-    //     pp_.mission_flag = 2;
-    //   }
-    //   // 주차 빠져나오고 다시 global path로
-    //   if (pp_.mission_flag == 2) {
-    //     for (int i = 0; i < 30; i++) {
-    //       pulishControlMsg(0, 0);
-    //       // 0.1초
-    //       usleep(100000);
-    //     }
-    //
-    //     pp_.setWaypoints(global_path);
-    //     pp_.mission_flag = 3;
-    //   }
-    //   if (pp_.mission_flag == 3)
-    //   {
-    //     const_lookahead_distance_ = 7;
-    //     const_velocity_ = 12;
-    //     final_constant = 1.75;
-    //   }
-    // }
+    if (pp_.mode == 1) {
+      if (pp_.mission_flag == 3 || pp_.mission_flag == 0) {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6;
+      }
+
+      // first
+      int start_parking_idx = 260;
+      int end_parking_idx = 120;
+      int end_parking_backward_idx = 100;
+      int end_parking_full_steer_backward_idx = 75;
+
+      // second
+      // int start_parking_idx = 280;
+      // int end_parking_idx = 87;
+      // int end_parking_backward_idx = 55;
+      // int end_parking_full_steer_backward_idx = 25;
+
+
+      // third
+      // int start_parking_idx = 290;
+      // int end_parking_idx = 145;
+      // int end_parking_backward_idx = 117; // 120
+      // int end_parking_full_steer_backward_idx = 90;
+
+      // forth
+      // int start_parking_idx = 320;
+      // int end_parking_idx = 88;
+      // int end_parking_backward_idx = 55;
+      // int end_parking_full_steer_backward_idx = 23;
+
+      // fifth
+      // int start_parking_idx = 330;
+      // int end_parking_idx = 80;
+      // int end_parking_backward_idx = 50;
+      // int end_parking_full_steer_backward_idx = 23;
+
+      //sixth
+      // int start_parking_idx = 345;
+      // int end_parking_idx = 75;
+      // int end_parking_backward_idx = 55;
+      // int end_parking_full_steer_backward_idx = 25;
+
+
+      // backward_speed : -7
+      int backward_speed = -7;
+
+      // //x < start_parking_idx < y
+      if (pp_.mission_flag == 0 && pp_.next_waypoint_number_ >= start_parking_idx){
+        pp_.setWaypoints(parking_path);
+        const_lookahead_distance_ = 3;
+        const_velocity_ = 3;
+        pp_.mission_flag = 1;
+      }
+      // 주차 끝
+      if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
+        // 5초 멈춤
+        for (int i = 0; i < 50; i++)
+        {
+          pulishControlMsg(0, 0);
+          // 0.1초
+          usleep(100000);
+        }
+
+        // 특정 지점까지는 그냥 후진
+        while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
+          pulishControlMsg(backward_speed, 0);
+          ros::spinOnce();
+        }
+        // 그 다음 지점까지는 풀조향 후진
+        while (!pp_.reachMissionIdx(end_parking_full_steer_backward_idx)) {
+          pulishControlMsg(backward_speed, 30);
+          ros::spinOnce();
+        }
+        pp_.mission_flag = 2;
+      }
+      // 주차 빠져나오고 다시 global path로
+      if (pp_.mission_flag == 2) {
+        for (int i = 0; i < 30; i++) {
+          pulishControlMsg(0, 0);
+          // 0.1초
+          usleep(100000);
+        }
+
+        pp_.setWaypoints(global_path);
+        pp_.mission_flag = 3;
+      }
+      if (pp_.mission_flag == 3)
+      {
+        const_lookahead_distance_ = 7;
+        const_velocity_ = 12;
+        final_constant = 1.75;
+      }
+    }
 
 
     // MODE 2 : 좌회전 구간, 신호등 X
@@ -263,111 +263,114 @@ void PurePursuitNode::run(char** argv) {
       final_constant = 1.5;
     }
 
-    // MODE 3 : 정적 장애물 구간(드럼통)
-    if (pp_.mode == 3) {
-      const_lookahead_distance_ = 3;
-      const_velocity_ = 5;
-
-      if(!pp_.static_obstacle_flag && left_detected)
-      {
-        ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
-        pp_.static_obstacle_flag = 1;
-        //pulishControlMsg(3, tmp_yaw_rate);
-        pulishControlMsg(3, 20);
-      }
-      else if(pp_.static_obstacle_flag == 1 && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45)
-      {
-        ROS_INFO_STREAM("Avoid Left Obstacle");
-        //pulishControlMsg(3, tmp_yaw_rate);
-        pulishControlMsg(3, 20);
-      }
-      else if(pp_.static_obstacle_flag == 1 && !left_detected && !left_avoid)
-      {
-        ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
-        left_avoid = true;
-        pp_.static_obstacle_flag = 2;
-        pulishControlMsg(3,-3);
-      }
-      else if(pp_.static_obstacle_flag == 2 && left_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 45)
-      {
-        ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
-        pulishControlMsg(3, -20);
-      }
-      else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -60)
-      {
-        ROS_INFO_STREAM("Change Flag to 3");
-        pp_.static_obstacle_flag = 3;
-        pulishControlMsg(3, -24);
-      }
-      else if(pp_.static_obstacle_flag == 3 && left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -60)
-      {
-        ROS_INFO_STREAM("Avoid Right Obstacle");
-        //publish(3, tmp_yaw_rate);
-        pulishControlMsg(3, -24);
-      }
-      else if(pp_.static_obstacle_flag == 3 && left_avoid && !right_detected)
-      {
-        ROS_INFO_STREAM("Finish the Static Obstacle 1");
-        pp_.static_obstacle_flag = 4;
-        pulishControlMsg(3,0);
-      }
-
-      if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
-        continue;
-      }
+    // MODE 3 : 정적 장애물 구간(드럼통) - 왼 오
+    // if (pp_.mode == 3) {
+    //   const_lookahead_distance_ = 3;
+    //   const_velocity_ = 5;
+    //
+    //   if(!pp_.static_obstacle_flag && left_detected)
+    //   {
+    //     ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
+    //     pp_.static_obstacle_flag = 1;
+    //     //pulishControlMsg(3, tmp_yaw_rate);
+    //     pulishControlMsg(3, 20);
+    //   }
+    //   else if(pp_.static_obstacle_flag == 1 && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 45)
+    //   {
+    //     ROS_INFO_STREAM("Avoid Left Obstacle");
+    //     //pulishControlMsg(3, tmp_yaw_rate);
+    //     pulishControlMsg(3, 20);
+    //   }
+    //   else if(pp_.static_obstacle_flag == 1 && !left_detected && !left_avoid)
+    //   {
+    //     ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
+    //     left_avoid = true;
+    //     pp_.static_obstacle_flag = 2;
+    //     pulishControlMsg(3,-3);
+    //   }
+    //   else if(pp_.static_obstacle_flag == 2 && left_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 45)
+    //   {
+    //     ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
+    //     pulishControlMsg(3, -20);
+    //   }
+    //   else if(pp_.static_obstacle_flag == 2 && left_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -60)
+    //   {
+    //     ROS_INFO_STREAM("Change Flag to 3");
+    //     pp_.static_obstacle_flag = 3;
+    //     pulishControlMsg(3, -24);
+    //   }
+    //   else if(pp_.static_obstacle_flag == 3 && left_avoid && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -60)
+    //   {
+    //     ROS_INFO_STREAM("Avoid Right Obstacle");
+    //     //publish(3, tmp_yaw_rate);
+    //     pulishControlMsg(3, -24);
+    //   }
+    //   else if(pp_.static_obstacle_flag == 3 && left_avoid && !right_detected)
+    //   {
+    //     ROS_INFO_STREAM("Finish the Static Obstacle 1");
+    //     pp_.static_obstacle_flag = 4;
+    //     pulishControlMsg(3,0);
+    //   }
+    //
+    //   if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
+    //     continue;
+    //   }
 
       // MODE 3 : 정적 장애물 구간(드럼통)
-      // if (pp_.mode == 3) {
-      //   if(!pp_.static_obstacle_flag && right_detected)
-      //   {
-      //     ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
-      //     pp_.static_obstacle_flag = 1;
-      //     //pulishControlMsg(3, tmp_yaw_rate);
-      //     pulishControlMsg(3, -20);
-      //   }
-      //   else if(pp_.static_obstacle_flag == 1 && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45)
-      //   {
-      //     ROS_INFO_STREAM("Avoid Right Obstacle");
-      //     //pulishControlMsg(3, tmp_yaw_rate);
-      //     pulishControlMsg(3, -20);
-      //   }
-      //   else if(pp_.static_obstacle_flag == 1 && !right_detected && !right_avoid)
-      //   {
-      //     ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
-      //     right_avoid = true;
-      //     pp_.static_obstacle_flag = 2;
-      //     pulishControlMsg(3,5);
-      //   }
-      //   else if(pp_.static_obstacle_flag == 2 && right_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -45)
-      //   {
-      //     ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
-      //     pulishControlMsg(3, 20);
-      //   }
-      //   else if(pp_.static_obstacle_flag == 2 && right_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 50)
-      //   {
-      //     ROS_INFO_STREAM("Change Flag to 3");
-      //     pp_.static_obstacle_flag = 3;
-      //     pulishControlMsg(3, 24);
-      //   }
-      //   else if(pp_.static_obstacle_flag == 3 && right_avoid && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 50)
-      //   {
-      //     ROS_INFO_STREAM("Avoid Right Obstacle");
-      //     //publish(3, tmp_yaw_rate);
-      //     pulishControlMsg(3, 24);
-      //   }
-      //   else if(pp_.static_obstacle_flag == 3 && right_avoid && !left_detected)
-      //   {
-      //     ROS_INFO_STREAM("Finish the Static Obstacle 1");
-      //     pp_.static_obstacle_flag = 4;
-      //     pulishControlMsg(3,0);
-      //
-      //     const_lookahead_distance_ = 4;
-      //     const_velocity_ = 4;
-      //   }
-      //
-      //   if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
-      //     continue;
-      //   }
+      if (pp_.mode == 3) {
+        const_lookahead_distance_ = 3;
+        const_velocity_ = 5;
+
+        if(!pp_.static_obstacle_flag && right_detected)
+        {
+          ROS_INFO_STREAM("Detect First Obstacle & Change Flag to 1");
+          pp_.static_obstacle_flag = 1;
+          //pulishControlMsg(3, tmp_yaw_rate);
+          pulishControlMsg(3, -20);
+        }
+        else if(pp_.static_obstacle_flag == 1 && right_detected && tmp_yaw_rate < -5 && tmp_yaw_rate > -45)
+        {
+          ROS_INFO_STREAM("Avoid Right Obstacle");
+          //pulishControlMsg(3, tmp_yaw_rate);
+          pulishControlMsg(3, -20);
+        }
+        else if(pp_.static_obstacle_flag == 1 && !right_detected && !right_avoid)
+        {
+          ROS_INFO_STREAM("Pass the First Obstacle & Change Flag to 2");
+          right_avoid = true;
+          pp_.static_obstacle_flag = 2;
+          pulishControlMsg(3,5);
+        }
+        else if(pp_.static_obstacle_flag == 2 && right_avoid && right_detected && tmp_yaw_rate < 0 && tmp_yaw_rate > -45)
+        {
+          ROS_INFO_STREAM("Pass First Obstacle & Yaw to Straight");
+          pulishControlMsg(3, 20);
+        }
+        else if(pp_.static_obstacle_flag == 2 && right_avoid && left_detected && tmp_yaw_rate >= 0 && tmp_yaw_rate < 50)
+        {
+          ROS_INFO_STREAM("Change Flag to 3");
+          pp_.static_obstacle_flag = 3;
+          pulishControlMsg(3, 24);
+        }
+        else if(pp_.static_obstacle_flag == 3 && right_avoid && left_detected && tmp_yaw_rate > 5 && tmp_yaw_rate < 50)
+        {
+          ROS_INFO_STREAM("Avoid Right Obstacle");
+          //publish(3, tmp_yaw_rate);
+          pulishControlMsg(3, 24);
+        }
+        else if(pp_.static_obstacle_flag == 3 && right_avoid && !left_detected)
+        {
+          ROS_INFO_STREAM("Finish the Static Obstacle 1");
+          pp_.static_obstacle_flag = 4;
+          pulishControlMsg(3,0);
+
+          const_lookahead_distance_ = 4;
+          const_velocity_ = 4;
+        }
+
+        if(pp_.static_obstacle_flag > 0 && pp_.static_obstacle_flag < 4)
+          continue;
+        }
 
 
       // MODE 4
@@ -484,7 +487,7 @@ void PurePursuitNode::run(char** argv) {
         continue;
         //pulishControlMsg(3, 15);
       }
-      // avoid path
+      // avoid path original time 4.0
       else if (pp_.mission_flag == 2 && pp_.is_obstacle_detected && (std::chrono::duration<double>(std::chrono::system_clock::now() - obs_start)).count() > 4.0) {
         pp_.mission_flag = 3;
         pulishControlMsg(3, -28);
@@ -507,7 +510,7 @@ void PurePursuitNode::run(char** argv) {
         final_constant = 1.5;
       }
 
-      // 세번째 신호등 인덱스 : tf_idx_3
+      // 세번째 신호등 인덱스 : tf_idx_3, temp comment
       if(pp_.mission_flag == 4 && pp_.reachMissionIdx(tf_idx_3) && !pp_.straight_go_flag) {
         pulishControlMsg(0,0);
         continue;
@@ -817,58 +820,7 @@ void PurePursuitNode::callbackFromObstacle(const avoid_obstacle::TrueObstacles& 
   //std::cout << "msg.detected : " << msg.detected << std::endl;
 }
 
-void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
-  // 전역 변수 tmp_yaw_rate
-  tmp_yaw_rate = 0.0;
-
-  left_detected = false;
-  right_detected = false;
-  pp_.obstacles.clear();
-
-  // 모든 장애물 데이터 벡터에 저장
-  for(unsigned int i = 0; i < msg.obstacles.size(); i++) {
-      Obstacle obs = Obstacle(msg.obstacles[i].x, msg.obstacles[i].y, msg.obstacles[i].radius, msg.obstacles[i].true_radius);
-      pp_.obstacles.push_back(obs);
-  }
-
-  // left avoid flag가 true 이면 인식 범위를 5로 늘림.
-  if(left_avoid){
-    target_dist = 5.0;
-  }
-
-  for(unsigned int i = 0; i < pp_.obstacles.size(); i++)
-  {
-      // 전방 0도 ~ 50도 확인
-      if(pp_.obstacles[i].yaw_rate > 0 && pp_.obstacles[i].yaw_rate < 50.0)
-      {
-          // 전방 1m ~ target_distance 확인
-          if (pp_.obstacles[i].dist < target_dist && pp_.obstacles[i].dist > min_dist){
-              // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
-              // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-              left_detected = true;
-              tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
-              //tmp_distance = pp_.obstacles[i].dist;
-          }
-      }
-
-      // 첫 장애물 통과후, 오른쪽 장애물 인식  => 전방 -60~0도 확인
-      if(left_avoid && pp_.obstacles[i].yaw_rate > -60.0 && pp_.obstacles[i].yaw_rate <= 0)
-      {
-          if(pp_.obstacles[i].dist < target_dist)
-          {
-              // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
-              // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-              right_detected = true;
-              tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
-          }
-      }
-
-      // if(pp_.mission_flag == 4 && !right_detected) {
-      //   right_avoid = true;
-      // }
-  }
-}
-
+// 왼오
 // void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
 //   // 전역 변수 tmp_yaw_rate
 //   tmp_yaw_rate = 0.0;
@@ -883,35 +835,34 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
 //       pp_.obstacles.push_back(obs);
 //   }
 //
-//   //Rigt -> left Static obs sub
-//   //left avoid flag가 true 이면 인식 범위를 5로 늘림.
-//   if(right_avoid){
+//   // left avoid flag가 true 이면 인식 범위를 5로 늘림.
+//   if(left_avoid){
 //     target_dist = 5.0;
 //   }
 //
 //   for(unsigned int i = 0; i < pp_.obstacles.size(); i++)
 //   {
 //       // 전방 0도 ~ 50도 확인
-//       if(pp_.obstacles[i].yaw_rate <= 0 && pp_.obstacles[i].yaw_rate > -50.0)
+//       if(pp_.obstacles[i].yaw_rate > 0 && pp_.obstacles[i].yaw_rate < 50.0)
 //       {
 //           // 전방 1m ~ target_distance 확인
 //           if (pp_.obstacles[i].dist < target_dist && pp_.obstacles[i].dist > min_dist){
 //               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
 //               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-//               right_detected = true;
+//               left_detected = true;
 //               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
 //               //tmp_distance = pp_.obstacles[i].dist;
 //           }
 //       }
 //
-//       // 첫 장애물 통과후, 오른쪽 장애물 인식
-//       if(right_avoid && pp_.obstacles[i].yaw_rate < 60.0 && pp_.obstacles[i].yaw_rate > 0)
+//       // 첫 장애물 통과후, 오른쪽 장애물 인식  => 전방 -60~0도 확인
+//       if(left_avoid && pp_.obstacles[i].yaw_rate > -60.0 && pp_.obstacles[i].yaw_rate <= 0)
 //       {
 //           if(pp_.obstacles[i].dist < target_dist)
 //           {
 //               // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
 //               // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
-//               left_detected = true;
+//               right_detected = true;
 //               tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
 //           }
 //       }
@@ -921,6 +872,60 @@ void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstac
 //       // }
 //   }
 // }
+
+// 왼오
+void PurePursuitNode::callbackFromObstacle2(const avoid_obstacle::DetectedObstacles& msg) {
+  // 전역 변수 tmp_yaw_rate
+  tmp_yaw_rate = 0.0;
+
+  left_detected = false;
+  right_detected = false;
+  pp_.obstacles.clear();
+
+  // 모든 장애물 데이터 벡터에 저장
+  for(unsigned int i = 0; i < msg.obstacles.size(); i++) {
+      Obstacle obs = Obstacle(msg.obstacles[i].x, msg.obstacles[i].y, msg.obstacles[i].radius, msg.obstacles[i].true_radius);
+      pp_.obstacles.push_back(obs);
+  }
+
+  //Rigt -> left Static obs sub
+  //left avoid flag가 true 이면 인식 범위를 5로 늘림.
+  if(right_avoid){
+    target_dist = 5.0;
+  }
+
+  for(unsigned int i = 0; i < pp_.obstacles.size(); i++)
+  {
+      // 전방 0도 ~ 50도 확인
+      if(pp_.obstacles[i].yaw_rate <= 0 && pp_.obstacles[i].yaw_rate > -50.0)
+      {
+          // 전방 1m ~ target_distance 확인
+          if (pp_.obstacles[i].dist < target_dist && pp_.obstacles[i].dist > min_dist){
+              // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
+              // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
+              right_detected = true;
+              tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
+              //tmp_distance = pp_.obstacles[i].dist;
+          }
+      }
+
+      // 첫 장애물 통과후, 오른쪽 장애물 인식
+      if(right_avoid && pp_.obstacles[i].yaw_rate < 60.0 && pp_.obstacles[i].yaw_rate > 0)
+      {
+          if(pp_.obstacles[i].dist < target_dist)
+          {
+              // ROS_INFO("Point [X,Y] : [%f, %f]", obstacles[i].x, obstacles[i].y);
+              // ROS_INFO("Distance : [%f]     Yaw_Rate : [%f]", obstacles[i].dist, obstacles[i].yaw_rate);
+              left_detected = true;
+              tmp_yaw_rate = pp_.obstacles[i].yaw_rate;
+          }
+      }
+
+      // if(pp_.mission_flag == 4 && !right_detected) {
+      //   right_avoid = true;
+      // }
+  }
+}
 
 void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingBoxes& msg) {
   std::vector<darknet_ros_msgs::BoundingBox> traffic_lights = msg.bounding_boxes;

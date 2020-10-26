@@ -131,36 +131,82 @@ void PurePursuitNode::run(char** argv) {
     //   const_velocity_ = 10;
     // }
 
-    if (pp_.mode == 0 || pp_.mode == 1) {
+    if (pp_.mode >= 0) {
       geometry_msgs::Point green_point = pp_.waypoints.at(pp_.current_idx).first;
       geometry_msgs::Point pink_point = pp_.waypoints.at(pp_.next_waypoint_number_).first;
       double yaw = atan2(2.0 * (pp_.current_pose_.orientation.w * pp_.current_pose_.orientation.z + pp_.current_pose_.orientation.x * pp_.current_pose_.orientation.y), 1.0 - 2.0 * (pp_.current_pose_.orientation.y * pp_.current_pose_.orientation.y + pp_.current_pose_.orientation.z * pp_.current_pose_.orientation.z));
       double map_yaw = atan2(pink_point.y - green_point.y, pink_point.x - green_point.x);
+      double map_car_yaw =atan2(pink_point.y - pp_.current_pose_.position.y, pink_point.x - pp_.current_pose_.position.x);
+      double sinTheta =sin(fabs(map_yaw-map_car_yaw));
+      // double sinTheta =sin(30);
       double diff_yaw = fabs(yaw - map_yaw);
+      double temp_distance = sqrt(pow(green_point.x - pp_.current_pose_.position.x, 2) + pow(green_point.y - pp_.current_pose_.position.y, 2));
+      // double distan
+      double distance_from_car = fabs(sinTheta*temp_distance);// temp_distance > 1 ? sqrt(temp_distance-1) : sqrt(temp_distance);
+
+      //std::pair <double,double> puresueLoadVec={pink_point.x - green_point.x, pink_point.y - green_point.y };
+      //std::pair <double,double> puresueCarVec={pink_point.x -  pp_.current_pose_.position.x, pink_point.y -  pp_.current_pose_.position.y };
+      //double sizeCarVec=sqrt(puresueCarVec.first*puresueCarVec.first+puresueCarVec.second*puresueCarVec.second);
+      //double sizeLoadVec=sqrt(puresueLoadVec.first*puresueLoadVec.first+puresueLoadVec.second*puresueLoadVec.second);
+      //double cosTheta =(puresueCarVec.first*puresueLoadVec.first+puresueCarVec.second*puresueLoadVec.second)/(sizeCarVec*sizeLoadVec);
+      //double new_sin=sqrt(1-pow(cosTheta,2));
+      //double distance_from_car_two=new_sin*temp_distance;
 
       std::cout << "map_yaw " << map_yaw << std::endl;
       std::cout << "yaw " << yaw << std::endl;
       std::cout << "diff yaw " << diff_yaw << std::endl;
+      std::cout << "distance_from_car" << distance_from_car << std::endl;
+      // std::cout << "distance_from_car2" << temp_distance*sin(fabs(map_yaw-map_car_yaw)/3.141592*180) << std::endl;
 
-      if (diff_yaw > 0.2) {
-        const_lookahead_distance_ = 4;
+      if (diff_yaw > 0.1 && distance_from_car > 0.1) {
+        const_lookahead_distance_ = 6;
         const_velocity_ = 6;
+        final_constant = 1.5;
+      }
+      else if(distance_from_car > 0.1)
+      {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6;
+        final_constant = 1.5;
+      }
+      else if (diff_yaw > 0.1) {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6;
+        final_constant = 1.5;
       }
       else {
         const_lookahead_distance_ = 6;
-        const_velocity_ = 6 + (6 * cos(8*diff_yaw));
+        const_velocity_ = 9 + (4 * cos(8*diff_yaw));
+        final_constant = 1.0;
       }
-      pp_.mission_flag = 4;
 
+      // if (distance_from_car > 0.1) {
+      //   const_velocity_ = const_velocity_ / 2;
+      // }
+
+      //pp_.mission_flag = 4;
+      //
       // const_lookahead_distance_ = 6;
       // const_velocity_ = 10;
+      // final_constant = 1.0;
+      //
+      // if (pp_.reachMissionIdx(276) && pp_.mission_flag == 0) {
+      //   for (int i = 0; i < 50; i++)
+      //   {
+      //     pulishControlMsg(0, 0);
+      //     // 0.1초
+      //     usleep(100000);
+      //   }
+      //
+      //   pp_.mission_flag = 1;
+      // }
     }
 
     // 주차 구간
-    if (pp_.mode == 1) {
+    if (pp_.mode == 1123) {
       if (pp_.mission_flag == 3 || pp_.mission_flag == 0) {
-        const_lookahead_distance_ = 4;
-        const_velocity_ = 6;
+        const_lookahead_distance_ = 8;
+        const_velocity_ = 13;
       }
 
       // first
@@ -779,13 +825,13 @@ void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingB
   //std::cout << "left " << pp_.left_go_flag << std::endl;
 
   // traffic test
-  std::cout << "*******************" << std::endl << std::endl;
-  if (pp_.straight_go_flag){
-    std::cout << "straight go" << std::endl;
-  }
-  if (pp_.left_go_flag) {
-    std::cout << "left go" << std::endl;
-  }
+  // std::cout << "*******************" << std::endl << std::endl;
+  // if (pp_.straight_go_flag){
+  //   std::cout << "straight go" << std::endl;
+  // }
+  // if (pp_.left_go_flag) {
+  //   std::cout << "left go" << std::endl;
+  // }
 }
 // void callbackFromLane(const {msg_type}& msg)
 
