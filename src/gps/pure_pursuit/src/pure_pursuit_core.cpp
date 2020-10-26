@@ -219,7 +219,7 @@ void PurePursuitNode::run(char** argv) {
       // 주차 끝
       if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
         // 5초 멈춤
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 120; i++)
         {
           pulishControlMsg(0, 0);
           // 0.1초
