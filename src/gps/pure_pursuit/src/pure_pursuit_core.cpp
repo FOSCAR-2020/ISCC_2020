@@ -125,10 +125,10 @@ void PurePursuitNode::run(char** argv) {
     publishTargetPointVisualizationMsg();
     publishCurrentPointVisualizationMsg();
 
-    std::cout << "*******************************" << std::endl;
-    std::cout << "current index : " << pp_.current_idx << std::endl;
-    std::cout << "current mode : " << pp_.mode << std::endl;
-    std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
+    // std::cout << "*******************************" << std::endl;
+    // std::cout << "current index : " << pp_.current_idx << std::endl;
+    // std::cout << "current mode : " << pp_.mode << std::endl;
+    // std::cout << "target index : " << pp_.next_waypoint_number_ << std::endl;
 
     geometry_msgs::Point green_point = pp_.waypoints.at(pp_.current_idx).first;
     geometry_msgs::Point pink_point = pp_.waypoints.at(pp_.next_waypoint_number_).first;
@@ -136,9 +136,15 @@ void PurePursuitNode::run(char** argv) {
     double map_yaw = atan2(pink_point.y - green_point.y, pink_point.x - green_point.x);
     double diff_yaw = fabs(yaw - map_yaw);
 
-    std::cout << "diff yaw " << diff_yaw << std::endl;
+    double map_car_yaw =atan2(pink_point.y - pp_.current_pose_.position.y, pink_point.x - pp_.current_pose_.position.x);
+    double sinTheta =sin(fabs(map_yaw-map_car_yaw));
+    double temp_distance = sqrt(pow(green_point.x - pp_.current_pose_.position.x, 2) + pow(green_point.y - pp_.current_pose_.position.y, 2));
+    double distance_from_car = fabs(sinTheta*temp_distance);
+
     // std::cout << "map_yaw " << map_yaw << std::endl;
     // std::cout << "yaw " << yaw << std::endl;
+    // std::cout << "diff yaw " << diff_yaw << std::endl;
+    // std::cout << "distance_from_car" << distance_from_car << std::endl;
 
     // MODE 0 - START
     if(pp_.mode == 0){
@@ -162,7 +168,7 @@ void PurePursuitNode::run(char** argv) {
 
     // MODE 1 - 주차
     // 주차 구간
-    if (pp_.mode == 1) {
+    if (pp_.mode == 123) {
       if (pp_.mission_flag == 3 || pp_.mission_flag == 0) {
         const_lookahead_distance_ = 6;
         const_velocity_ = 6;
@@ -267,7 +273,7 @@ void PurePursuitNode::run(char** argv) {
       final_constant = 1.5;
     }
 /*************************************************************************************************************/
-    // MODE 3 : 정적 장애물 구간(드럼통) - 왼 오
+    // // MODE 3 : 정적 장애물 구간(드럼통) - 왼 오
     if (pp_.mode == 3) {
       const_lookahead_distance_ = 3;
       const_velocity_ = 5;
@@ -384,9 +390,9 @@ void PurePursuitNode::run(char** argv) {
         const_lookahead_distance_ = 5;
         const_velocity_ = 8;
 
-        if (pp_.reachMissionIdx(480) && pp_.mission_flag == 0) {
-        //if (pp_.reachMissionIdx(cw_idx_1) && pp_.mission_flag == 0) {
-          for (int i = 0; i < 40; i++)
+        //if (pp_.reachMissionIdx(480) && pp_.mission_flag == 0) {
+        if (pp_.reachMissionIdx(cw_idx_1) && pp_.mission_flag == 0) {
+          for (int i = 0; i < 50; i++)
           {
             pulishControlMsg(0, 0);
             // 0.1초
@@ -475,7 +481,7 @@ void PurePursuitNode::run(char** argv) {
         const_velocity_ = 10;
 
         if (pp_.reachMissionIdx(cw_idx_2) && pp_.mission_flag == 0) {
-          for (int i = 0; i < 40; i++)
+          for (int i = 0; i < 50; i++)
           {
             pulishControlMsg(0, 0);
             // 0.1초
@@ -560,10 +566,10 @@ void PurePursuitNode::run(char** argv) {
       //final_constant = 1.5;
 
       // 세번째 신호등 인덱스 : tf_idx_3, temp comment
-      if(pp_.mission_flag == 4 && pp_.reachMissionIdx(tf_idx_3) && !pp_.straight_go_flag) {
-        pulishControlMsg(0,0);
-        continue;
-      }
+      // if(pp_.mission_flag == 4 && pp_.reachMissionIdx(tf_idx_3) && !pp_.straight_go_flag) {
+      //   pulishControlMsg(0,0);
+      //   continue;
+      // }
     }
 
     if (pp_.mode == 13) {
@@ -587,7 +593,7 @@ void PurePursuitNode::run(char** argv) {
       const_velocity_ = 8;
 
       if (pp_.reachMissionIdx(cw_idx_3) && pp_.mission_flag == 0) {
-        for (int i = 0; i < 40; i++)
+        for (int i = 0; i < 50; i++)
         {
           pulishControlMsg(0, 0);
           // 0.1초
@@ -660,15 +666,28 @@ void PurePursuitNode::run(char** argv) {
       const_lookahead_distance_ = 6;
       const_velocity_ = 10;
       final_constant = 1.5;
-      // if (diff_yaw > 0.2) {
+
+      // safe driving
+      // if (diff_yaw > 0.1 && distance_from_car > 0.1) {
       //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 4;
-      //   final_constant = 2.0;
+      //   const_velocity_ = 6;
+      //   final_constant = 1.75;
+      // }
+      // else if(distance_from_car > 0.1)
+      // {
+      //   const_lookahead_distance_ = 6;
+      //   const_velocity_ = 8;
+      //   final_constant = 1.5;
+      // }
+      // else if (diff_yaw > 0.1) {
+      //   const_lookahead_distance_ = 6;
+      //   const_velocity_ = 8;
+      //   final_constant = 1.5;
       // }
       // else {
       //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 8 + (6 * cos(8*diff_yaw));
-      //   final_constant = 2.0;
+      //   const_velocity_ = 9 + (4 * cos(8*diff_yaw));
+      //   final_constant = 1.0;
       // }
     }
 
@@ -757,16 +776,29 @@ void PurePursuitNode::run(char** argv) {
       const_lookahead_distance_ = 6;
       const_velocity_ = 10;
       final_constant = 1.5;
-      // if (diff_yaw > 0.2) {
-      //
+
+      // safe driving
+      // if (diff_yaw > 0.1 && distance_from_car > 0.1) {
       //   const_lookahead_distance_ = 6;
       //   const_velocity_ = 6;
+      //   final_constant = 1.75;
+      // }
+      // else if(distance_from_car > 0.1)
+      // {
+      //   const_lookahead_distance_ = 6;
+      //   const_velocity_ = 8;
+      //   final_constant = 1.5;
+      // }
+      // else if (diff_yaw > 0.1) {
+      //   const_lookahead_distance_ = 6;
+      //   const_velocity_ = 8;
+      //   final_constant = 1.5;
       // }
       // else {
       //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 8 + (6 * cos(8*diff_yaw));
+      //   const_velocity_ = 9 + (4 * cos(8*diff_yaw));
+      //   final_constant = 1.0;
       // }
-      //final_constant = 1.5;
     }
 
     publishPurePursuitDriveMsg(can_get_curvature, kappa);
@@ -1024,25 +1056,50 @@ void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingB
 
  // for test
  int index = 0;
- if(traffic_lights.size() > 1)
- {
-    int first_traffic = (traffic_lights[0].xmax - traffic_lights[0].xmin) * (traffic_lights[0].ymax - traffic_lights[0].ymin);
-    int second_traffic = (traffic_lights[1].xmax - traffic_lights[1].xmin) * (traffic_lights[1].ymax - traffic_lights[1].ymin);
 
-    if(first_traffic * 0.8 < second_traffic)
-    {
-        if(traffic_lights[0].xmin < traffic_lights[1].xmin)
-        {
-            // 0 index select
-            index = 0;
-        }
-        else
-        {
-          // 1 index select
-          index = 1;
-        }
-    }
+ // check mode 17
+ if (pp_.mode == 17) {
+   if(traffic_lights.size() > 1)
+   {
+     int first_traffic = (traffic_lights[0].xmax - traffic_lights[0].xmin) * (traffic_lights[0].ymax - traffic_lights[0].ymin);
+     int second_traffic = (traffic_lights[1].xmax - traffic_lights[1].xmin) * (traffic_lights[1].ymax - traffic_lights[1].ymin);
+
+     if(first_traffic * 0.6 < second_traffic) {
+       if (traffic_lights[0].Class == "3 left" || traffic_lights[0].Class == "4 red left" || traffic_lights[0].Class == "4 left go" ||
+          traffic_lights[1].Class == "3 left" || traffic_lights[1].Class == "4 red left" || traffic_lights[1].Class == "4 left go") {
+            pp_.left_go_flag = true;
+          }
+       else {
+         pp_.left_go_flag = false;
+       }
+
+       if (pp_.left_go_flag) {
+         std::cout << "mode 17 left go" << std::endl;
+       }
+      return;
+     }
+   }
  }
+
+ // if(traffic_lights.size() > 1)
+ // {
+ //    int first_traffic = (traffic_lights[0].xmax - traffic_lights[0].xmin) * (traffic_lights[0].ymax - traffic_lights[0].ymin);
+ //    int second_traffic = (traffic_lights[1].xmax - traffic_lights[1].xmin) * (traffic_lights[1].ymax - traffic_lights[1].ymin);
+ //
+ //    if(first_traffic * 0.8 < second_traffic)
+ //    {
+ //        if(traffic_lights[0].xmin < traffic_lights[1].xmin)
+ //        {
+ //            // 0 index select
+ //            index = 0;
+ //        }
+ //        else
+ //        {
+ //          // 1 index select
+ //          index = 1;
+ //        }
+ //    }
+ // }
 
   if (traffic_lights[index].Class == "3 red" || traffic_lights[index].Class == "3 yellow" || traffic_lights[index].Class == "4 red" ||
       traffic_lights[index].Class == "4 yellow" || traffic_lights[index].Class == "4 red yellow")
@@ -1066,14 +1123,14 @@ void PurePursuitNode::callbackFromTrafficLight(const darknet_ros_msgs::BoundingB
     pp_.left_go_flag = true;
   }
 
-  // traffic test
-  // std::cout << "*******************" << std::endl << std::endl;
-  // if (pp_.straight_go_flag){
-  //   std::cout << "straight go" << std::endl;
-  // }
-  // if (pp_.left_go_flag) {
-  //   std::cout << "left go" << std::endl;
-  // }
+  //traffic test
+  std::cout << "*******************" << std::endl << std::endl;
+  if (pp_.straight_go_flag){
+    std::cout << "straight go" << std::endl;
+  }
+  if (pp_.left_go_flag) {
+    std::cout << "left go" << std::endl;
+  }
 }
 // void callbackFromLane(const {msg_type}& msg)
 

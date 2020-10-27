@@ -161,17 +161,17 @@ void PurePursuitNode::run(char** argv) {
       if (diff_yaw > 0.1 && distance_from_car > 0.1) {
         const_lookahead_distance_ = 6;
         const_velocity_ = 6;
-        final_constant = 1.5;
+        final_constant = 1.75;
       }
       else if(distance_from_car > 0.1)
       {
         const_lookahead_distance_ = 6;
-        const_velocity_ = 6;
+        const_velocity_ = 8;
         final_constant = 1.5;
       }
       else if (diff_yaw > 0.1) {
         const_lookahead_distance_ = 6;
-        const_velocity_ = 6;
+        const_velocity_ = 8;
         final_constant = 1.5;
       }
       else {
