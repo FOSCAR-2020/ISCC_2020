@@ -48,7 +48,7 @@ if __name__ == "__main__":
     print("offset : {}".format(offset))
     
     #### for rotation ####
-    theta = 40 # degree
+    theta = 260 # degree
     theta = theta * np.pi / 180
     rotation_matrix = np.array([[np.cos(theta), np.sin(theta), 0],[-np.sin(theta), np.cos(theta), 0], [0, 0, 1]], np.float64)
     

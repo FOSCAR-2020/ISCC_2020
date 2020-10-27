@@ -769,7 +769,7 @@ void PurePursuitNode::run(char** argv) {
       }
     }
 
-    // MODE 26,27,28,29 : 직진 (부스터2)
+    // MODE 27,28,29 : 직진 (부스터2)
     if (pp_.mode == 27 || pp_.mode == 28 || pp_.mode == 29) {
       pp_.mission_flag = 0;
 
