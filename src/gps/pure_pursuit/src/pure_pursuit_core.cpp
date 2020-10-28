@@ -148,27 +148,14 @@ void PurePursuitNode::run(char** argv) {
 
     // MODE 0 - START
     if(pp_.mode == 0){
-      // if (diff_yaw > 0.2) {
-      //   const_lookahead_distance_ = 4;
-      //   const_velocity_ = 6;
-      // }
-      // else {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 8 + (6 * cos(8*diff_yaw));
-      // }
-
       pp_.mission_flag = 0;
       const_lookahead_distance_ = 6;
       const_velocity_ = 10;
-      // if (const_velocity_ <= 10)
-      // {
-      //   const_velocity_ += 0.1;
-      // }
     }
 
     // MODE 1 - 주차
     // 주차 구간
-    if (pp_.mode == 123) {
+    if (pp_.mode == 1) {
       if (pp_.mission_flag == 3 || pp_.mission_flag == 0) {
         const_lookahead_distance_ = 6;
         const_velocity_ = 6;
@@ -224,7 +211,7 @@ void PurePursuitNode::run(char** argv) {
       }
       // 주차 끝
       if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
-        // 5초 멈춤
+        // 10초 멈춤
         for (int i = 0; i < 120; i++)
         {
           pulishControlMsg(0, 0);
@@ -478,7 +465,7 @@ void PurePursuitNode::run(char** argv) {
       // 횡단보도 추가
       if (pp_.mode == 10) {
         const_lookahead_distance_ = 6;
-        const_velocity_ = 10;
+        const_velocity_ = 8;
 
         if (pp_.reachMissionIdx(cw_idx_2) && pp_.mission_flag == 0) {
           for (int i = 0; i < 50; i++)
@@ -566,25 +553,18 @@ void PurePursuitNode::run(char** argv) {
       //final_constant = 1.5;
 
       // 세번째 신호등 인덱스 : tf_idx_3, temp comment
-      // if(pp_.mission_flag == 4 && pp_.reachMissionIdx(tf_idx_3) && !pp_.straight_go_flag) {
-      //   pulishControlMsg(0,0);
-      //   continue;
-      // }
+      if(pp_.mission_flag == 4 && pp_.reachMissionIdx(tf_idx_3) && !pp_.straight_go_flag) {
+        pulishControlMsg(0,0);
+        continue;
+      }
     }
 
     if (pp_.mode == 13) {
       pp_.mission_flag = 0;
-      // if (diff_yaw > 0.2) {
-      //   const_lookahead_distance_ = 4;
-      //   const_velocity_ = 6;
-      // }
-      // else {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 6 + (6 * cos(8*diff_yaw));
-      // }
 
       const_lookahead_distance_ = 6;
       const_velocity_ = 10;
+      final_constant = 1.5;
     }
 
     // 횡단보도
@@ -663,32 +643,32 @@ void PurePursuitNode::run(char** argv) {
     // MODE 20 : 직진 (부스터)
     if (pp_.mode == 20) {
       pp_.mission_flag = 0;
-      const_lookahead_distance_ = 6;
-      const_velocity_ = 10;
-      final_constant = 1.5;
+      // const_lookahead_distance_ = 6;
+      // const_velocity_ = 10;
+      // final_constant = 1.5;
 
       // safe driving
-      // if (diff_yaw > 0.1 && distance_from_car > 0.1) {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 6;
-      //   final_constant = 1.75;
-      // }
-      // else if(distance_from_car > 0.1)
-      // {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 8;
-      //   final_constant = 1.5;
-      // }
-      // else if (diff_yaw > 0.1) {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 8;
-      //   final_constant = 1.5;
-      // }
-      // else {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 9 + (4 * cos(8*diff_yaw));
-      //   final_constant = 1.0;
-      // }
+      if (diff_yaw > 0.1 && distance_from_car > 0.1) {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6;
+        final_constant = 1.75;
+      }
+      else if(distance_from_car > 0.1)
+      {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 8;
+        final_constant = 1.5;
+      }
+      else if (diff_yaw > 0.1) {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 8;
+        final_constant = 1.5;
+      }
+      else {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 9 + (4 * cos(8*diff_yaw));
+        final_constant = 0.75;
+      }
     }
 
     // MODE 21 : 신호등 없는 구간
@@ -721,8 +701,8 @@ void PurePursuitNode::run(char** argv) {
       //   const_velocity_ = 6 + (6 * cos(8*diff_yaw));
       // }
 
-      const_lookahead_distance_ = 6;
-      const_velocity_ = 10;
+      const_lookahead_distance_ = 5;
+      const_velocity_ = 8;
     }
     // MODE 24 : 신호등 구간
     if(pp_.mode == 24)
@@ -773,32 +753,37 @@ void PurePursuitNode::run(char** argv) {
     if (pp_.mode == 27 || pp_.mode == 28 || pp_.mode == 29) {
       pp_.mission_flag = 0;
 
-      const_lookahead_distance_ = 6;
-      const_velocity_ = 10;
-      final_constant = 1.5;
+      // const_lookahead_distance_ = 6;
+      // const_velocity_ = 8;
+      // final_constant = 1.5;
+
+      // const_lookahead_distance_ = 4;
+      // const_velocity_ = 5;
+      // final_constant = 1.5;
+
 
       // safe driving
-      // if (diff_yaw > 0.1 && distance_from_car > 0.1) {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 6;
-      //   final_constant = 1.75;
-      // }
-      // else if(distance_from_car > 0.1)
-      // {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 8;
-      //   final_constant = 1.5;
-      // }
-      // else if (diff_yaw > 0.1) {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 8;
-      //   final_constant = 1.5;
-      // }
-      // else {
-      //   const_lookahead_distance_ = 6;
-      //   const_velocity_ = 9 + (4 * cos(8*diff_yaw));
-      //   final_constant = 1.0;
-      // }
+      if (diff_yaw > 0.1 && distance_from_car > 0.1) {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 6;
+        final_constant = 1.75;
+      }
+      else if(distance_from_car > 0.1)
+      {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 8;
+        final_constant = 1.5;
+      }
+      else if (diff_yaw > 0.1) {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 8;
+        final_constant = 1.5;
+      }
+      else {
+        const_lookahead_distance_ = 6;
+        const_velocity_ = 8 + (2 * cos(8*diff_yaw));
+        final_constant = 0.75;
+      }
     }
 
     publishPurePursuitDriveMsg(can_get_curvature, kappa);
