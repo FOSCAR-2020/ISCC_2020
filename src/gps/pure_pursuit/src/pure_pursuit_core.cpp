@@ -211,6 +211,7 @@ void PurePursuitNode::run(char** argv) {
       }
       // 주차 끝
       if(pp_.mission_flag == 1 && pp_.reachMissionIdx(end_parking_idx)){
+        /////////////////////////////////////////////////////////////////////////////////
         // 10초 멈춤
         for (int i = 0; i < 120; i++)
         {
@@ -219,6 +220,7 @@ void PurePursuitNode::run(char** argv) {
           usleep(100000);
         }
 
+        /////////////////////////////////////////////////////////////////////////////////
         // 특정 지점까지는 그냥 후진
         while (!pp_.reachMissionIdx(end_parking_backward_idx)) {
           pulishControlMsg(backward_speed, 0);
@@ -377,6 +379,7 @@ void PurePursuitNode::run(char** argv) {
         const_lookahead_distance_ = 5;
         const_velocity_ = 8;
 
+        /////////////////////////////////////////////////////////////////////////////////
         //if (pp_.reachMissionIdx(480) && pp_.mission_flag == 0) {
         if (pp_.reachMissionIdx(cw_idx_1) && pp_.mission_flag == 0) {
           for (int i = 0; i < 50; i++)
@@ -388,6 +391,7 @@ void PurePursuitNode::run(char** argv) {
 
           pp_.mission_flag = 1;
         }
+        /////////////////////////////////////////////////////////////////////////////////
 
         // temp for test
         // if(pp_.current_idx  >= 480 + 15) {
@@ -466,7 +470,7 @@ void PurePursuitNode::run(char** argv) {
       if (pp_.mode == 10) {
         const_lookahead_distance_ = 6;
         const_velocity_ = 8;
-
+        /////////////////////////////////////////////////////////////////////////////////
         if (pp_.reachMissionIdx(cw_idx_2) && pp_.mission_flag == 0) {
           for (int i = 0; i < 50; i++)
           {
@@ -477,6 +481,7 @@ void PurePursuitNode::run(char** argv) {
 
           pp_.mission_flag = 1;
         }
+        /////////////////////////////////////////////////////////////////////////////////
       }
 
       if (pp_.mode == 11) {
@@ -571,7 +576,7 @@ void PurePursuitNode::run(char** argv) {
     if (pp_.mode == 14) {
       const_lookahead_distance_ = 6;
       const_velocity_ = 8;
-
+      /////////////////////////////////////////////////////////////////////////////////
       if (pp_.reachMissionIdx(cw_idx_3) && pp_.mission_flag == 0) {
         for (int i = 0; i < 50; i++)
         {
@@ -582,6 +587,7 @@ void PurePursuitNode::run(char** argv) {
 
         pp_.mission_flag = 1;
       }
+      /////////////////////////////////////////////////////////////////////////////////
     }
 
     // 횡단 끝나고
