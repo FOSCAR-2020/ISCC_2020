@@ -2,6 +2,11 @@
 ISCC_2020_FOSCAR
 
 -----
+Youtube Link
+-----
+[![Competition Video day1](/photo/DSC_0064.NEF)](https://www.youtube.com/watch?v=1I9IFRDpORE)
+
+-----
 Team Members
 ----
 * 김선필(14) - Team Leader
